@@ -1,0 +1,17 @@
+
+# Strings
+
+Ruby has 'single quoted strings' and "double quoted strings". C# has $"" and @"" and "".
+I think I like the latter better. It's hard to tell "" and '' apart sometimes. Obvs don't have to use $ and @ though.
+
+# Operators
+
+Add a long list of available operators, and just don't define most of them.
+
+
+# Gotchas
+
+Accessing an undefined variable is a compile-time error
+
+This means mutually recursive functions will need some tweaking to work. 
+Search for `isEven()` [here](http://craftinginterpreters.com/statements-and-state.html) for more details.
