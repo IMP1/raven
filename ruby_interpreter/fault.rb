@@ -1,12 +1,14 @@
 class Fault < RuntimeError
 
     attr_reader :message
+    attr_reader :token
 
     def initialize(message)
         @message = message
     end
 
     def location
+        return @token.line
     end
 
     def type
@@ -16,33 +18,9 @@ class Fault < RuntimeError
 end
 
 class SyntaxFault < Fault
-
-    attr_reader :line
-
-    def initialize(line, message)
-        super(message)
-        @line = line
-    end
-
-    def location
-        return @line
-    end
-
 end
 
 class ParseFault < Fault
-
-    attr_reader :token
-
-    def initialize(token, message)
-        super(message)
-        @token = token
-    end
-
-    def location
-        return @token.line
-    end
-
 end
 
 class TypeFault < ParseFault
