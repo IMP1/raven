@@ -3,8 +3,21 @@ int i = 1
     int i = 2
     {
         int i = 3
-        p i
+        p i         '' => 3
     }
-    p i
+    p i             '' => 2
 }
-p i
+p i                 '' => 1
+
+
+
+int x = 0
+{
+    string x = ""
+    {
+        bool x = FALSE
+        p type(x)       '' => bool
+    }
+    p type(x)           '' => string
+}
+p type(x)               '' => int
