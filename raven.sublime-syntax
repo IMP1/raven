@@ -1,0 +1,102 @@
+%YAML 1.2
+---
+
+name: Raven
+file_extensions: [rvn]
+scope: source.raven
+variables:
+  urlchar: '[\w\-\.~:/\?#\[\]@!$&''\(\)\*\+,;=%]'
+  identifier: '[A-Za-z_][A-Za-z_0-9]*'
+  number:     '-?\d+(?:\.\d+)?'
+  base_type:  '(?:int|real|rational|bool|string|func|method)'
+
+contexts:
+
+  #----------#
+  # Comments #
+  #----------#
+  _line_comment:
+    - include: _comment_markup
+    - meta_scope: comment.line.raven
+    - match: $
+      pop: true
+  _block_comment:
+    - include: _comment_markup
+    - meta_scope: comment.block.raven
+    - match: '''\}'
+      pop: true
+    # Nested block comments
+    - match: '''\{'
+      scope: punctuation.definition.comment.raven
+      push: _block_comment
+  comments:
+    # Line Comment
+    - match: '''''(?!\{)'
+      scope: punctuation.definition.comment.raven
+      push: _line_comment
+    # Block Comment
+    - match: '''''\{'
+      scope: punctuation.definition.comment.raven
+      push: _block_comment
+
+  #----------------#
+  # Comment Markup #
+  #----------------#
+  _comment_markup_heading:
+    - meta_scope: markup.heading.raven
+    - match: '(?='''')'
+      pop: true
+    - match: '$'
+      pop: true
+  _comment_markup:
+    # TODOs
+    - match: 'TODO:?'
+      scope: markup.quote.raven
+    # Mentions
+    - match: '@.+?(?=\s)'
+      scope: markup.quote.raven
+    # Headings
+    - match: '#'
+      scope: markup.heading.raven
+      push: _comment_markup_heading
+    # Code
+    - match: '`.*?`'
+      scope: markup.raw.block.raven
+    # Checkboxes
+    - match: '\[\s\]'
+      scope: markup.deleted.raven
+    - match: '\[X\]'
+      scope: markup.inserted.raven
+    # Links
+    - match: '[a-z]+?://{{urlchar}}+[\w/]'
+      scope: markup.underline.link.note
+
+  #----------#
+  # Literals #
+  #----------#
+  _double_quoted_string:
+    - meta_scope: string.quoted.double.raven
+    - match: '\\.'
+      scope: constant.character.escape.raven
+    - match: '\{\d+\}'
+      scope: constant.other.placeholder.raven
+    - match: '"'
+      scope: punctuation.definition.string.end.raven
+      pop: true
+  literals:
+    # Strings
+    - match: '"'
+      scope: punctuation.definition.string.begin.raven
+      push: _double_quoted_string
+    # Numbers
+    - match: '\b{{number}}\b'
+      scope: constant.numeric.raven
+    # Language Constants
+    - match: '(?:TRUE|FALSE|NULL)'
+      scope: constant.language.raven
+    - match: '\${{identifier}}'
+      scope: constant.language.raven
+
+  main:
+    - include: literals
+    - include: comments
