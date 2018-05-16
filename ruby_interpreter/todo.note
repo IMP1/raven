@@ -1,3 +1,9 @@
+up to [here](http://craftinginterpreters.com/statements-and-state.html)
+
+# Tests
+
+Write some simple tests that work with existing interpreter (that should also forwards compatible).
+Write one for each type of expression and statement (that are implemented thus far).
 
 # Strings
 
@@ -15,3 +21,7 @@ Accessing an undefined variable is a compile-time error
 
 This means mutually recursive functions will need some tweaking to work. 
 Search for `isEven()` [here](http://craftinginterpreters.com/statements-and-state.html) for more details.
+
+# Sublime-Syntax
+
+Work on a Sublime-Syntax file for Raven. It can live in this project.
