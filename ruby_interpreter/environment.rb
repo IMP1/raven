@@ -2,7 +2,8 @@ require_relative 'fault'
 
 class Environment
 
-    def initialize()
+    def initialize(parent_environment=nil)
+        @parent_environment = parent_environment
         @mappings = {}
     end
 
@@ -13,21 +14,35 @@ class Environment
     def assign(token, value)
         if mapped?(token)
             @mappings[token.lexeme] = value
-        else
-            raise SyntaxFault.new(token, "Undefined variable '#{token.lexeme}'.")
+            return
         end
+
+        if !@parent_environment.nil?
+            @parent_environment.assign(token, value)
+            return
+        end
+
+        raise SyntaxFault.new(token, "Undefined variable '#{token.lexeme}'.")
     end
 
     def mapped?(token)
-        return @mappings.has_key?(token.lexeme)
+        if @mappings.has_key?(token.lexeme)
+            return true
+        end
+
+        return false
     end
 
     def [](token)
-        if mapped?(token.lexeme)
+        if mapped?(token)
             return @mappings[token.lexeme]
-        else
-            raise SyntaxFault.new(token, "Undefined variable '#{token.lexeme}'.")
         end
+
+        if !@parent_environment.nil?
+            return @parent_environment[token]
+        end
+
+        raise SyntaxFault.new(token, "Undefined variable '#{token.lexeme}'.")
     end
 
 end
