@@ -20,7 +20,7 @@ class VariableDeclarationStatement < Statement
     attr_reader :type
     attr_reader :initialiser
 
-    def initialize(name, type, initialiser=nil)
+    def initialize(name, type, initialiser)
         @name = name
         @type = type
         @initialiser = initialiser

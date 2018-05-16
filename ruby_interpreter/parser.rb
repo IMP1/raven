@@ -120,7 +120,6 @@ class Parser
             return_type = consume_token(:TYPE, "Expecting return type of function.")
         end
 
-        # Should this *have* to be a block?
         consume_token(:LEFT_BRACE, "Expecting '{' to begin function body.")
         body = block
         return FunctionDeclarationStatement.new(func_name, params, return_type, body)

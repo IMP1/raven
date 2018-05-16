@@ -1,11 +1,13 @@
 require_relative 'fault'
 require_relative 'visitor'
 require_relative 'compiler'
+require_relative 'environment'
 
 class Interpreter < Visitor
 
     def initialize(statements)
         @statements = statements
+        @environment = Environment.new
     end
 
     def interpret
@@ -31,7 +33,8 @@ class Interpreter < Visitor
     end
 
     def visit_VariableDeclarationStatement(stmt)
-
+        value = stmt.initialiser
+        @environment.define(stmt.name.lexeme, value)
     end
 
     def visit_WhileStatement(stmt)
@@ -154,7 +157,7 @@ class Interpreter < Visitor
     end
 
     def visit_VariableExpression(expr)
-
+        return @environment[expr.name]
     end
 
     def visit_CallExpression(expr)

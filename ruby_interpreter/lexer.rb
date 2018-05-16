@@ -83,7 +83,8 @@ class Lexer
     end
 
     def fault(line, message)
-        f = SyntaxFault.new(line, message)
+        t = Token.new(:FAULT, @source[@start...@current], line)
+        f = SyntaxFault.new(t, message)
         Compiler.syntax_fault(f)
         return f
     end
