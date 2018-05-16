@@ -56,7 +56,17 @@ class Compiler
             print "> "
             input = gets.chomp
             while input != ":q"
-                run(input)
+                if input.start_with?(":l")
+                    i = input.index(" ") + 1
+                    filename = input[i..-1]
+                    begin
+                        run_file(File.join(Dir::pwd, filename))
+                    rescue Errno::ENOENT => e
+                        puts "Could not find the file '#{filename}'."
+                    end
+                else
+                    run(input)
+                end
                 print "> "
                 input = gets.chomp
             end
