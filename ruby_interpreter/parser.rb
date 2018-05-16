@@ -57,8 +57,8 @@ class Parser
         return str.gsub('\\n', "\n")
     end
 
-    def synchronize
-        puts "[DEBUG] Synchronising"
+    def synchronise
+        # TODO: trace/debug that sychronisation has taken place
         advance
 
         while !eof?
@@ -96,7 +96,7 @@ class Parser
             end
             return statement
         rescue ParseFault => e
-            synchronize
+            synchronise
             return nil
         end
     end

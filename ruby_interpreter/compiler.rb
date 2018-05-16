@@ -4,9 +4,6 @@ require_relative 'interpreter'
 
 class Compiler
 
-    @@runtime_faults = []
-    @@compile_faults = []
-
     def self.syntax_fault(fault)
         @@compile_faults.push(fault)
         report(fault)
@@ -23,20 +20,24 @@ class Compiler
     end
 
     def self.report(fault)
+        # TODO: have this output to a log, instead of just printing (even if the log then just prints)
         puts("#{fault.type}: #{fault.message}")
         puts("        location: #{fault.location}")
     end
 
     def self.run(source, testing=false)
+        @@runtime_faults = []
+        @@compile_faults = []
+
         scanner = Lexer.new(source);
         tokens = scanner.scan_tokens
 
-        # puts tokens.map {|t| "<#{t.to_s}>"}.join(", ")
+        # TODO: trace/debug tokens.map {|t| "<#{t.to_s}>"}.join(", ")
 
         parser = Parser.new(tokens)
         statements = parser.parse
 
-        # puts statements.map {|s| s.to_s}
+        # TODO: trace/debug statements.map {|s| s.to_s}
 
         exit(65) if @@compile_faults.size > 0
 

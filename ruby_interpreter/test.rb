@@ -1,13 +1,14 @@
 require_relative 'compiler'
 
 def test_file(filename, root="")
-    puts "running test '#{filename[root.length+1..-1]}'..."
-
+    puts "running test '#{filename[root.length+1..-1]}':"
+    success = true
     begin
         Compiler.run_file(filename)
-    rescue SystemExit
-
+    rescue SystemExit => e
+        success = false
     end
+    puts "test #{success ? "succeeded" : "failed"}."
     # TODO: make this nicer?
 end
 
