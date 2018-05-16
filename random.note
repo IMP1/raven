@@ -1,0 +1,112 @@
+# Log severities
+
+  * FATAL
+  * ERROR
+  * WARNING
+  * INFO
+  * DEBUG
+  * TRACE
+
+# Operator Definition Syntax
+
+Should be consistent with other language features. Ideally similar to function definitions, with not too much separating the two.
+
+```schwah
+
+def operator (use lots of characters, including unused operators)
+infix
+defined on types, not in classes
+
+
+def operator (a : real) · (b : natural, int, real) real {
+    return a * b;
+}
+def operator (v : vec3) · (n : natural, int, real) vec3 {
+    return vec3(v.x * n, v.y * n, v.z * n);
+}
+def operator (a : vec3) · (b : vec3) real {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+def operator - (v : vec3) vec3 {
+    return vec3(-v.x, -v.y, -v.z);
+}
+
+op_def := def <var_ident> <param>? <op_ident> <param> <body>
+param  := ( var_ident :  <type_list> )
+
+```
+
+# Compilation Process
+
+Compiling Explanation:
+
+    Example Sentence: "I like potatoes the best of all the carbs."
+
+    Lexing = making sure each of those are words
+            I lpoea agjafa fijarhia of all the carbs.
+            (lpoea = not valid word)
+
+    Parsing = making sure it together forms a sentence
+            I all of best the carbs potatoes like the.
+            (not a cohesive idea)
+
+    Resolving = making sure it makes sense
+            I like square circles smelling funny colours inside ennui.
+            (obviously not a possible idea)
+
+    Analysing = how could it be better
+            I like nice potatoes because they're nice.
+            (could be more descriptive, used nice twice)
+
+    Interpreting = making sure it works
+            I like the smoothies that Cleopatra made.
+            (potentially not possible if talking about egyptian queen, but potentially possible if talking about modern-day person)
+
+## Components
+
+  * lexer
+  * parser
+  * analyser
+  * interpreter/compiler
+
+  * visitors
+      * evaluators (for expressions)
+      * executors  (for statements)
+      * resolvers  (for statements + expressions)
+
+## Pipeline
+
+code ->
+    lexer
+        -> token[]
+
+token[] ->
+    parser
+        -> AST
+
+AST ->
+    resolver
+        -> AST
+
+- ADD MORE STATIC ANALYSIS HERE (OR BEFORE resolver) -
+
+AST ->
+    interpreter
+        -> result
+
+# Types
+
+```
+    print(type(4));                        '' => int
+    print(type(int));                      '' => type
+    print(type(an_instance_of_SomeClass)); '' => SomeClass
+    print(type(SomeClass));                '' => class
+    print(type(class));                    '' => type
+```
+
+# Testing
+
+Write loads of tests, in schwah/whatever, like [all of these](https://github.com/munificent/craftinginterpreters/tree/master/test).
+Simple little tests that make sure the language operates how it should.
+Maybe have a util function (like assert?) to make checking the results slightly easier?

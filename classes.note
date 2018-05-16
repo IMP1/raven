@@ -1,0 +1,86 @@
+a class is an object blueprint
+a class has properties and behaviour
+
+(implementation-wise: given functions are first class, they are basically just more attributes, but not quite)
+these class-instance-functions, or 'methods', are functions that are *called on an object*. 
+this object is passed as the 'self' value (which is constant but not immutable) 
+this is the object's value at /runtime/, which means it's type is the type at runtime, 
+so potentially a childclass, rather than the class in which the method is defined.
+this object can be cast into child objects to enable polymorphism in a parent class. This is probably not great though,
+and overridden methods should probably be used instead.
+
+methods can be 'abstract' meaning they have no body. abstract methods can only exist in abstract classes (and maybe interfaces).
+abstract classes cannot be initialised.
+can fields also be abstract? meaning they don't have to be initialised in the abstract class, but they do in any concret subclasses?
+what is the use of knowing a class has a field? how does that help contracts? Constants maybe? enums maybe?
+
+[This](https://en.wikipedia.org/wiki/SOLID_(object-oriented_design)) looks like a good set of design principles.
+
+What's the point in having interfaces /and/ abstract classes? In java interfaces can't have method bodies, but why not? 
+They can't have private methods, but why not? In Java, you can't inherit from multiple abstract classes, but why not?
+Combine them into one thing, with the possibility of implemented methods, and private methods (if privacy turns out to be a thing).
+And also let classes inherit (or implement or whatever) from multiple of these things. If the diamond problem thing can be dealt with by interfaces,
+then why not by abstract classes (or whatever hybrid this turns out to be).
+
+classes also offer inheritance.
+
+class/static variables? how do they work with inheritance?
+what's the point of a static variable. something that's shared among all instances, that doesn't change, or changes for all of them.
+this actually seems unnecessary, but maybe call them (class-) shared variables (which is what they actually are). 
+with inheritance, maybe the child class is a more immediate scope, and so if they've declared a var/method with the same name, 
+then that's referred to, otherwise the parent's shared variable is referred to. I like this.
+referring to the parent class to call methods on it is useful. ruby just uses super, which means call the parent class's version of this method on self.
+java uses super.method_name, which calls the parent's method, but still on the child's instance. 
+
+syntax for inheritance? is there anything like it that this can be consistent with?
+
+classes also offer encapsulation
+
+instance and static fields have visibilty. in ruby all fields are private and methods are public. in lua all properties are public. 
+Ruby seems better in this regard, so long as making getters/setters is simple and consistent. However, methods are just fields, so this isn't possible.
+Gonna need keywords for describing visibilty. What shall the options be? Private/Public / package? internal? etc?
+/Maybe/ could have an option for a public field that isn't, like, openly public. You can get to it, but it doesn't advertise itself. 
+So it can be tested, say, but isn't part of any API/contract, and won't come up as public fields in autocomplete or whatever. Dunno. Probably dumb.
+
+classes vs prototypes
+
+prototypes mean that everything is more dynamic. every instance can have different fields + methods. 
+If they lack a field/method accessed on them, they check their 'parent object' (delegate). 
+This seems a lot like how lua works, which is great, but I suspect hard to analyse.
+
+Functions and variables can have decorations, like #pure or invariants, not sure how invariant syntax will work.
+
+syntax for method calls
+    `.` for getting class's fields. Maybe something else? `.` is used as a decimal point in numbers. Maybe `:`?
+    when calling a class's function (a method), the class is passed as an implicit parameter. 
+    is there a need/want for calling the class's method with a different 'self' object? I guess if static methods become a thing,
+    then they can have an explicit parameter representing the instance. 
+    And maybe they'd be passed an implicit self which would refer to the class the static method is being called on.
+```schwah
+    func a = SomeClass.some_method
+    a();                             ''   <- this seems fine? But methods aren't identical to functions. Maybe they're a subclass of function? With a 'self' object (and type).
+    print(type_of(a));    '' method  ''      so a method knows the object it's been 'called on' (referred to by?), even before it's been called.
+    print(is_a(a, func)); '' true
+
+    func a = ...
+    SomeClass.some_method = a;       ''   <- methods are constant so this isn't allowed, maybe? But what about adding new fields to a class? Dunno that this should be allowed. 
+    SomeClass.some_method();         ''      I've not actually really found it all that useful.
+```
+how are static methods defined? ideally the same way as other static fields. with a 'static' keyword?
+Can you use static class methods on an instance of that class? If I say NO, then constructors are nicer.
+
+constructors. given that i'd like there not to be null, but also sometimes giving a default value to a class's field can be misleading, 
+then the values should be set by the end of the constructor. 
+This gives some importance to a constructor, and elevates classes beyond just a name-value pairing with method syntactic sugar.
+The constructor becomes an initialiser for fields' values.
+
+usually the constructor is also an allocator. how much access to memory do we give the user? Not sure how power/ease balances. 
+I think simplicity/correctness is imporant, as is ease. Does memory access give the user much more power? Only in optimisation, really.
+Maybe could have explicit deletion/freeing of memory? but then harder to keep track of which variables are in scope statically. Especially if delete is in an if. 
+Maybe any instance where a varaible /could/ be deleted is an error? Would deleting mean having a deconstructor as well? What would the default value for that be?
+Would it deconstruct any references to objects it held? Even if they were referenced elsewhere?
+
+what's the name for a constructor? is it a method of the class? a static method of the class? It's passed an instance object. Which keyword should be used?
+If it's a non-static method, then can reuse self. If it's a static method, then self refers to class object, and could use `instance` keyword? or something like that.
+A static method could take an instance parameter? Which wouldn't be passed as an argument obvs, but would be created when the method is called? 
+A constructor seems to be a strange grey area between an instance method and a class method.
