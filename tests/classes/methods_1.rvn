@@ -1,0 +1,33 @@
+
+class Foo {
+    
+    
+    #bar = func (int a, bool b) int {
+        if (b) {
+            return a;
+        } else {
+            return 0;
+        }
+    }
+
+    #yolo = 4;
+
+}
+
+Foo foo = Foo();
+
+print(foo:bar(5, FALSE)); '' => 0
+print(foo:bar(2, TRUE));  '' => 2
+
+func old_bar = foo.bar
+foo:bar = func (int num, bool flag) int {
+    if (flag) {
+        return -num;
+    } else {
+        return num;
+    }
+}
+
+print(foo:bar(5, FALSE)); '' =>  5
+print(foo:bar(2, TRUE));  '' => -2
+
