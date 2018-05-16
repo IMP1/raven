@@ -1,5 +1,6 @@
 require_relative 'compiler'
 require_relative 'token'
+require_relative 'fault'
 
 class Lexer
 
@@ -8,13 +9,11 @@ class Lexer
         'if'        => :IF,
         'else'      => :ELSE,
         'with'      => :WITH,
+        'as'        => :AS,
         'while'     => :WHILE,
-        'func'      => :FUNC,
+        'func'      => :FUNCTION,
         'return'    => :RETURN,
-        # Sys functions
         'p'         => :DEBUG_PRINT,
-        'print'     => :SYS_PRINT,
-        'type'      => :SYS_TYPEOF,
     }
 
     VALUE_KEYWORDS = {
@@ -83,6 +82,12 @@ class Lexer
         return @source[@current + 1];
     end
 
+    def fault(line, message)
+        f = SyntaxFault.new(line, message)
+        Compiler.syntax_fault(f)
+        return f
+    end
+
     def scan_token
         c = advance
         case c
@@ -121,16 +126,18 @@ class Lexer
             add_token(:PERCENT)
         when '/'
             add_token(:STROKE)
-        when '·'
-            add_token(:INTERPUNCT)
-            
+        # TODO: Convenience symbols?
+        # when '·'
+        #     add_token(:INTERPUNCT)
+        # when '×'
+        #     add_token(:CROSS)
 
         when '¬'
             add_token(:NOT)
         when '&'
-            add_token(:AMPERSAND)
+            add_token(advance_if('&') ? :DOUBLE_AMPERSAND : :AMPERSAND)
         when '|'
-            add_token(:PIPE)
+            add_token(advance_if('|') ? :DOUBLE_PIPE : :PIPE)
         when '?'
             add_token(:QUESTION)
 
@@ -144,9 +151,21 @@ class Lexer
         when '!'
             add_token(advance_if('=') ? :NOT_EQUAL : :EXCLAMATION)
         when '<'
-            add_token(advance_if('=') ? :LESS_EQUAL : :LESS)
+            if advance_if('=')
+                :LESS_EQUAL
+            elsif advance_if('<')
+                :DOUBLE_LEFT
+            else
+                :LESS
+            end
         when '>'
-            add_token(advance_if('=') ? :GREATER_EQUAL : :GREATER)
+            if advance_if('=')
+                :GREATER_EQUAL
+            elsif advance_if('>')
+                :DOUBLE_RIGHT
+            else
+                :GREATER
+            end
         when '^'
             add_token(advance_if('=') ? :BEGINS_WITH : :CARET)
         when '$'
@@ -167,6 +186,12 @@ class Lexer
         when '"'
             string
 
+        # TODO: Convenience symbols?
+        # when 'π'
+        #     add_token(:REAL, Math::PI)
+        # when 'τ'
+        #     add_token(:REAL, 2 * Math::PI)
+
         when /\d/
             number
 
@@ -174,7 +199,7 @@ class Lexer
             identifier
 
         else
-            Compiler.syntax_fault(@line, "Unexpected character '#{@source[@current-1]}'.")
+            fault(@line, "Unexpected character '#{@source[@current-1]}'.")
         end
     end
 
@@ -185,7 +210,7 @@ class Lexer
         end
 
         if eof?
-            Compiler.syntax_fault(@line, "Unterminated string.")
+            fault(@line, "Unterminated string.")
             return
         end
 
@@ -203,6 +228,10 @@ class Lexer
             advance
             advance while peek =~ /\d/
             add_token(:REAL, @source[@start...@current].to_f)
+        elsif peek == '/' && peek_next =~ /\d/
+            advance
+            advance while peek =~ /\d/
+            add_token(:RATIONAL, @source[@start...@current].to_r)
         else
             add_token(:INTEGER, @source[@start...@current].to_i)
         end

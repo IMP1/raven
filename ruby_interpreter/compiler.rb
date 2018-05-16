@@ -1,40 +1,30 @@
 require_relative 'lexer'
 require_relative 'parser'
-# require_relative 'interpreter'
+require_relative 'interpreter'
 
 class Compiler
 
     @@runtime_faults = []
     @@compile_faults = []
 
-    # @@interpreter = Interpreter.new
-
-    def self.syntax_fault(line, message)
-        @@compile_faults.push({
-            line: line,
-            message: message
-        })
-        report(line, message, "Syntax")
+    def self.syntax_fault(fault)
+        @@compile_faults.push(fault)
+        report(fault)
     end
 
     def self.compile_fault(fault)
-        @@compile_faults.push({
-            line: fault.token.line,
-            message: fault.message
-        })
-        report(fault.token.line, fault.message)
+        @@compile_faults.push(fault)
+        report(fault)
     end
 
     def self.runtime_fault(fault)
-        @@runtime_faults.push({
-            line: fault.token.line,
-            message: fault.message,
-        })
-        report(fault.token.line, fault.message)
+        @@runtime_faults.push(fault)
+        report(fault)
     end
 
-    def self.report(line, message, type="", where="")
-        puts("[#{line}] #{type}Fault#{where}: #{message}")
+    def self.report(fault)
+        puts("#{fault.type}: #{fault.message}")
+        puts("        location: #{fault.location}")
     end
 
     def self.run(source)
@@ -49,9 +39,11 @@ class Compiler
         puts statements.map {|s| s.to_s}
 
         exit(65) if (@@compile_faults.size > 0)
-        exit(70) if (@@runtime_faults.size > 0)
 
-        # @@interpreter.interpret(statements)
+        interpreter = Interpreter.new(statements)
+        interpreter.interpret
+
+        exit(70) if (@@runtime_faults.size > 0)
     end
 
     def self.run_file(filename)

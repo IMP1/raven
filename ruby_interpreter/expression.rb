@@ -1,4 +1,4 @@
-require_relative 'visitors'
+require_relative 'visitor'
 
 class Expression
     include Visitable
@@ -43,9 +43,11 @@ end
 class LiteralExpression < Expression
 
     attr_reader :value
+    attr_reader :type
 
-    def initialize(value)
+    def initialize(value, type)
         @value = value
+        @type  = type
     end
 
 end
@@ -56,18 +58,6 @@ class VariableExpression < Expression
 
     def initialize(name)
         @name = name
-    end
-
-end
-
-class AssignmentExpression < Expression
-    
-    attr_reader :name
-    attr_reader :value
-
-    def initialize(name, value)
-        @name = name
-        @value = value
     end
 
 end

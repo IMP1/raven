@@ -1,4 +1,4 @@
-require_relative 'visitors'
+require_relative 'visitor'
 
 class Statement
     include Visitable
@@ -64,6 +64,20 @@ class IfStatement < Statement
 
 end
 
+class WithStatement < Statement
+
+    attr_reader :condition
+    attr_reader :then_branch
+    attr_reader :else_branch
+
+    def initialize(condition, then_branch, else_branch=nil)
+        @condition   = condition
+        @then_branch = then_branch
+        @else_branch = else_branch
+    end
+
+end
+
 class FunctionDeclarationStatement < Statement
 
     attr_reader :name
@@ -90,6 +104,17 @@ class ReturnStatement < Statement
     def initialize(token, value)
         @token = token
         @value = value
+    end
+
+end
+
+# TODO: remove this when printing is implemented as a gloabl language function.
+class PrintInspectStatement < Statement
+
+    attr_reader :expression
+
+    def initialize(expression)
+        @expression = expression
     end
 
 end

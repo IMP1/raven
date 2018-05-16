@@ -88,7 +88,7 @@ class Parser
 
     def declaration
         begin
-            if match_token(:FUNC)
+            if match_token(:FUNCTION)
                 return function_declaration
             end
             if check(:TYPE)
@@ -142,6 +142,9 @@ class Parser
         if match_token(:IF)
             return if_statement
         end
+        if match_token(:WITH)
+            return with_statement
+        end
         if match_token(:WHILE)
             return while_statement
         end
@@ -177,6 +180,21 @@ class Parser
         end
 
         return IfStatement.new(condition, then_branch, else_branch)
+    end
+
+    def with_statement
+        consume_token(:LEFT_PAREN, "Expecting '(' before with statement condition.")
+        condition = expression
+        consume_token(:RIGHT_PAREN, "Expecting ')' after with statement condition.")
+
+        then_branch = statement
+        else_branch = nil
+
+        if match_token(:ELSE)
+            else_branch = statement
+        end
+
+        return WithStatement.new(condition, then_branch, else_branch)
     end
 
     def while_statement
@@ -256,7 +274,7 @@ class Parser
         while match_token(:MINUS, :PLUS, :PIPE, :PERCENT)
             operator = previous
             right = multiplication
-            expr = BinaryExpression.new(expr, operator, right);
+            expr = BinaryExpression.new(expr, operator, right)
         end
         return expr;
     end
@@ -266,7 +284,7 @@ class Parser
         while match_token(:STROKE, :ASTERISK, :AMPERSAND, :INTERPUNCT)
             operator = previous
             right = exponent
-            expr = BinaryExpression.new(expr, operator, right);
+            expr = BinaryExpression.new(expr, operator, right)
         end
         return expr;
     end
@@ -276,7 +294,7 @@ class Parser
         while match_token(:CARET)
             operator = previous
             right = unary
-            expr = BinaryExpression.new(expr, operator, right);
+            expr = BinaryExpression.new(expr, operator, right)
         end
         return expr;
     end
@@ -318,10 +336,10 @@ class Parser
 
     def primary
         if match_token(:STRING)
-            return LiteralExpression.new(escape_string(previous.literal))
+            return LiteralExpression.new(escape_string(previous.literal), :STRING)
         end
-        if match_token(:BOOLEAN, :INTEGER, :REAL)
-            return LiteralExpression.new(previous.literal)
+        if match_token(:BOOLEAN, :INTEGER, :REAL, :RATIONAL)
+            return LiteralExpression.new(previous.literal, previous.type)
         end
 
         if match_token(:IDENTIFIER)
@@ -334,7 +352,7 @@ class Parser
             return GroupingExpression.new(expr)
         end
 
-        raise fault(peek, "Expecting an expression.")
+        raise fault(peek, "Expecting an expression. Got '#{peek.lexeme}'.")
     end
 
 end
