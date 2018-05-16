@@ -28,6 +28,16 @@ class Interpreter < Visitor
         stmt.accept(self)
     end
 
+    def execute_block(statements, env)
+        previous = @environment
+        begin
+            @environment = env
+            statements.each { |stmt| execute(stmt) }
+        rescue RuntimeFault => f
+            @environment = previous
+        end
+    end
+
     def visit_ExpressionStatement(stmt)
         evaluate(stmt.expression)
     end
@@ -47,7 +57,7 @@ class Interpreter < Visitor
     end
 
     def visit_BlockStatement(stmt)
-
+        execute_block(stmt.statements, Environment.new(@environment))
     end
 
     def visit_IfStatement(stmt)
