@@ -27,23 +27,23 @@ class Compiler
         puts("        location: #{fault.location}")
     end
 
-    def self.run(source)
+    def self.run(source, testing=false)
         scanner = Lexer.new(source);
         tokens = scanner.scan_tokens
 
-        puts tokens.map {|t| "<#{t.to_s}>"}.join(", ")
+        # puts tokens.map {|t| "<#{t.to_s}>"}.join(", ")
 
         parser = Parser.new(tokens)
         statements = parser.parse
 
-        puts statements.map {|s| s.to_s}
+        # puts statements.map {|s| s.to_s}
 
-        exit(65) if (@@compile_faults.size > 0)
+        exit(65) if @@compile_faults.size > 0
 
         interpreter = Interpreter.new(statements)
         interpreter.interpret
 
-        exit(70) if (@@runtime_faults.size > 0)
+        exit(70) if @@runtime_faults.size > 0
     end
 
     def self.run_file(filename)

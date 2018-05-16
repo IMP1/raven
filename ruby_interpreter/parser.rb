@@ -239,7 +239,7 @@ class Parser
 
             if expr.is_a?(VariableExpression)
                 token_name = expr.name;
-                return AssignmentExpression.new(token_name, value);
+                return AssignmentStatement.new(token_name, value);
             end
 
             fault(equals, "Invalid assignment target.");

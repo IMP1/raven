@@ -13,8 +13,8 @@ class Interpreter < Visitor
     def interpret
         begin
             @statements.each do |stmt|
-                p evaluate(stmt)
-            end 
+                evaluate(stmt)
+            end
         rescue RuntimeFault => f
             Compiler.runtime_fault(f)
         end
@@ -34,7 +34,12 @@ class Interpreter < Visitor
 
     def visit_VariableDeclarationStatement(stmt)
         value = stmt.initialiser
-        @environment.define(stmt.name.lexeme, value)
+        @environment.define(stmt.name, value)
+    end
+
+    def visit_AssignmentStatement(stmt)
+        value = evaluate(stmt.expression)
+        @environment.assign(stmt.name, value)
     end
 
     def visit_WhileStatement(stmt)

@@ -10,6 +10,14 @@ class Environment
         @mappings[token.lexeme] = value
     end
 
+    def assign(token, value)
+        if mapped?(token)
+            @mappings[token.lexeme] = value
+        else
+            raise SyntaxFault.new(token, "Undefined variable '#{token.lexeme}'.")
+        end
+    end
+
     def mapped?(token)
         return @mappings.has_key?(token.lexeme)
     end

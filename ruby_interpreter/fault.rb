@@ -3,7 +3,8 @@ class Fault < RuntimeError
     attr_reader :message
     attr_reader :token
 
-    def initialize(message)
+    def initialize(token, message)
+        @token = token
         @message = message
     end
 

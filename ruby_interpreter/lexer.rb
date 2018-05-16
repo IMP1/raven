@@ -177,11 +177,11 @@ class Lexer
         when '\''
             if advance_if('\'')
                 # A comment goes until the end of the line.
-                while peek() != '\n' && !eof?
-                    advance();
+                while peek != "\n" && !eof?
+                    advance
                 end
             else
-                add_token(:APOSTROPHE);
+                add_token(:APOSTROPHE)
             end
 
         when '"'
