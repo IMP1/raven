@@ -74,20 +74,26 @@ contexts:
   #----------#
   # Literals #
   #----------#
-  _double_quoted_string:
+  _string:
     - meta_scope: string.quoted.double.raven
     - match: '\\.'
       scope: constant.character.escape.raven
-    - match: '\{\d+\}'
-      scope: constant.other.placeholder.raven
-    - match: '"'
+    - match: '(?!<\\)"'
       scope: punctuation.definition.string.end.raven
       pop: true
+  _special_string:
+    - meta_scope: string.quoted.double.raven
+    - include: _string
+    - match: '\{\d+\}'
+      scope: constant.other.placeholder.raven
   literals:
     # Strings
+    - match: '\$"'
+      scope: punctuation.definition.string.begin.raven
+      push: _special_string
     - match: '"'
       scope: punctuation.definition.string.begin.raven
-      push: _double_quoted_string
+      push: _string
     # Numbers
     - match: '\b{{number}}\b'
       scope: constant.numeric.raven
