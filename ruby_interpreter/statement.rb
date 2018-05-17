@@ -31,13 +31,12 @@ end
 class AssignmentStatement < Statement
 
     attr_reader :name
-    attr_reader :value
+    attr_reader :expression
 
-    def initialize(name, value)
+    def initialize(name, expression)
         @name = name
-        @value = value
+        @expression = expression
     end
-
 
 end
 
@@ -124,9 +123,24 @@ end
 # TODO: remove this when printing is implemented as a gloabl language function.
 class PrintInspectStatement < Statement
 
+    attr_reader :token
     attr_reader :expression
 
-    def initialize(expression)
+    def initialize(token, expression)
+        @token = token
+        @expression = expression
+    end
+
+end
+
+# TODO: remove this when the language is working as intended.
+class TestAssertStatement < Statement
+
+    attr_reader :token
+    attr_reader :expression
+
+    def initialize(token, expression)
+        @token = token
         @expression = expression
     end
 
