@@ -8,6 +8,9 @@ class Environment
     end
 
     def define(token, value)
+        if mapped?(token)
+            raise SyntaxFault.new(token, "Duplicate variable '#{token.lexeme}'.")
+        end
         @mappings[token.lexeme] = value
     end
 
