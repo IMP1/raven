@@ -52,6 +52,20 @@ class LiteralExpression < Expression
 
 end
 
+class ShortCircuitExpression < Expression
+
+    attr_reader :left
+    attr_reader :operator
+    attr_reader :right
+
+    def intitialize(left, operator, right)
+        @left = left
+        @operator = operator
+        @right = right
+    end
+
+end
+
 class VariableExpression < Expression
 
     attr_reader :name
