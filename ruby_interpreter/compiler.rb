@@ -33,7 +33,7 @@ class Compiler
         puts("        line: #{fault.location}")
     end
 
-    def self.run(source, testing=false)
+    def self.run(source, verbose=false)
         @@runtime_faults = []
         @@compile_faults = []
 
@@ -41,13 +41,17 @@ class Compiler
         tokens = scanner.scan_tokens
 
         # TODO: trace/debug 
-        # puts tokens.map {|t| "\t<#{t.to_s}>"}.join("\n")
+        if verbose
+            puts tokens.map {|t| "\t<#{t.to_s}>"}.join("\n")
+        end
 
         parser = Parser.new(tokens)
         statements = parser.parse
 
         # TODO: trace/debug 
-        # puts statements.map {|s| s.to_s}
+        if verbose
+            puts statements.map {|s| s.inspect}
+        end
 
         exit(65) if @@compile_faults.size > 0
 
@@ -57,8 +61,8 @@ class Compiler
         exit(70) if @@runtime_faults.size > 0
     end
 
-    def self.run_file(filename)
-        run(File.open(filename, 'r').read);
+    def self.run_file(filename, verbose=false)
+        run(File.open(filename, 'r').read, verbose);
     end
 
     def self.run_repl

@@ -4,7 +4,7 @@ def test_file(filename, root="")
     puts "running test '#{filename[root.length+1..-1]}'"
     success = true
     begin
-        Compiler.run_file(filename)
+        Compiler.run_file(filename, $verbose)
     rescue SystemExit
         success = false
     end
@@ -30,7 +30,10 @@ def test_folder(dirname, root=nil)
     return successes, failures
 end
 
-if ARGV.length == 1 && (ARGV[0] == "--all" || ARGV[0] == "-a")
+$verbose   = ARGV.delete("--verbose") || ARGV.delete("-v")
+all_tests = ARGV.delete("--all") || ARGV.delete("-a")
+
+if all_tests
     s, f = test_folder(File.join(Dir.home, 'prog', 'raven', 'tests'))
     puts "Ran #{s + f} tests"
     puts "    #{s} succeeded"
