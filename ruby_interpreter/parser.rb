@@ -150,6 +150,9 @@ class Parser
         if match_token(:DEBUG_PRINT)
             return debug_print_statement
         end
+        if match_token(:DEBUG_TEST)
+            return debug_test_statement
+        end
         if match_token(:LEFT_BRACE)
             return BlockStatement.new(block)
         end
@@ -218,7 +221,12 @@ class Parser
 
     def debug_print_statement
         value = expression
-        return PrintInspectStatement.new(value)
+        return PrintInspectStatement.new(previous, value)
+    end
+
+    def debug_test_statement
+        value = expression
+        return TestAssertStatement.new(previous, value)
     end
 
     def expression_statement
@@ -231,7 +239,7 @@ class Parser
     end
 
     def assignment
-        expr = equality
+        expr = or_shortcircuit
 
         if (match_token(:ASSIGNMENT))
             equals = previous
@@ -243,6 +251,30 @@ class Parser
             end
 
             fault(equals, "Invalid assignment target.");
+        end
+
+        return expr
+    end
+
+    def or_shortcircuit
+        expr = and_shortcircuit
+
+        while match_token(:DOUBLE_PIPE)
+            op = previous
+            right = and_shortcircuit
+            expr = ShortCircuitExpression.new(expr, op, right)
+        end
+
+        return expr
+    end
+
+    def and_shortcircuit
+        expr = equality
+
+        while match_token(:DOUBLE_AMPERSAND)
+            op = previous
+            right = equality
+            expr = ShortCircuitExpression.new(expr, op, right)
         end
 
         return expr
@@ -280,7 +312,7 @@ class Parser
 
     def multiplication
         expr = exponent
-        while match_token(:STROKE, :ASTERISK, :AMPERSAND, :INTERPUNCT)
+        while match_token(:STROKE, :ASTERISK, :AMPERSAND, :INTERPUNCT, :DOUBLE_STROKE)
             operator = previous
             right = exponent
             expr = BinaryExpression.new(expr, operator, right)
@@ -340,6 +372,9 @@ class Parser
         if match_token(:BOOLEAN, :INTEGER, :REAL, :RATIONAL)
             return LiteralExpression.new(previous.literal, previous.type)
         end
+        if match_token(:TYPE)
+            return LiteralExpression.new(previous.literal, previous.type)
+        end            
 
         if match_token(:IDENTIFIER)
             return VariableExpression.new(previous)
