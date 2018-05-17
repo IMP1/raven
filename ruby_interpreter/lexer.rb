@@ -14,6 +14,7 @@ class Lexer
         'func'      => :FUNCTION,
         'return'    => :RETURN,
         'p'         => :DEBUG_PRINT,
+        'test'      => :DEBUG_TEST,
     }
 
     VALUE_KEYWORDS = {
@@ -126,7 +127,7 @@ class Lexer
         when '%'
             add_token(:PERCENT)
         when '/'
-            add_token(:STROKE)
+            add_token(advance_if('/') ? :DOUBLE_STROKE : :STROKE)
         # TODO: Convenience symbols?
         # when '·'
         #     add_token(:INTERPUNCT)
