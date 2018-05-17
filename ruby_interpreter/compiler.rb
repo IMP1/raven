@@ -19,10 +19,18 @@ class Compiler
         report(fault)
     end
 
+    def self.compile_faults
+        return @@compile_faults
+    end
+
+    def self.runtime_faults
+        return @@runtime_faults
+    end
+
     def self.report(fault)
         # TODO: have this output to a log, instead of just printing (even if the log then just prints)
         puts("#{fault.type}: #{fault.message}")
-        puts("        location: #{fault.location}")
+        puts("        line: #{fault.location}")
     end
 
     def self.run(source, testing=false)
@@ -32,12 +40,14 @@ class Compiler
         scanner = Lexer.new(source);
         tokens = scanner.scan_tokens
 
-        # TODO: trace/debug tokens.map {|t| "<#{t.to_s}>"}.join(", ")
+        # TODO: trace/debug 
+        # puts tokens.map {|t| "\t<#{t.to_s}>"}.join("\n")
 
         parser = Parser.new(tokens)
         statements = parser.parse
 
-        # TODO: trace/debug statements.map {|s| s.to_s}
+        # TODO: trace/debug 
+        # puts statements.map {|s| s.to_s}
 
         exit(65) if @@compile_faults.size > 0
 
