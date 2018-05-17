@@ -29,3 +29,6 @@ end
 
 class RuntimeFault < Fault
 end
+
+class TestFailure < RuntimeFault
+end
