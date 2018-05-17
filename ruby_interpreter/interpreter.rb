@@ -93,8 +93,12 @@ class Interpreter < Visitor
 
     def visit_FunctionDeclarationStatement(stmt)
         puts "INTERPRETING A FUNCTION DECLARATION"
-        # p stmt
-        func = stmt.body
+        func = lambda do |interpreter, args|
+            decl = stmt
+            env = Environment.new(GLOBAL_ENV)
+            decl.parameter_names.each_with_index { |p, i| env.define(p, a[i]) }
+            interpreter.execute_block(decl.body, env)
+        end
         @environment.define(stmt.name, func)
     end
 
@@ -215,23 +219,19 @@ class Interpreter < Visitor
     end
 
     def visit_CallExpression(expr)
-        puts "INTERPRETING A FUNCTION CALL"
-        p expr
         func = evaluate(expr.callee)
         args = expr.arguments.map { |a| evaluate(a) }
         # GET TYPES OF ARGS
 
-        p func
-
-        if args.size != func.arity
-            Compiler.runtime_fault(ArgumentFault.new(func.token, "Expected #{func.arity} args but got #{args.size}."))
+        if args.size != expr.arguments.size
+            Compiler.runtime_fault(ArgumentFault.new(expr.token, "Expected #{func.arity} args but got #{args.size}."))
         end
 
         if !func.is_a?(Proc)
-            Compiler.runtime_fault(SyntaxFault.new(func.token, "This object is not callable."))
+            Compiler.runtime_fault(SyntaxFault.new(expr.token, "This object is not callable."))
         end
 
-        func.call(*args)
+        func.call(self, args)
     end
 
 end
