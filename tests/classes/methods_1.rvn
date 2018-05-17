@@ -2,15 +2,15 @@
 class Foo {
     
     
-    #bar = func (int a, bool b) int {
-        if (b) {
-            return a;
-        } else {
-            return 0;
-        }
-    }
+''    #bar = func (int a, bool b) int {
+''        if (b) {
+''            return a;
+''        } else {
+''            return 0;
+''        }
+''    }
 
-    #yolo = 4;
+''    #yolo = 4;
 
 }
 

@@ -1,0 +1,15 @@
+def make_point(int x, int y) {
+    def closure(string method) int {
+        if (method == "x") return x
+        if (method == "y") return y
+        print("unknown method '" + method + "'\n")
+        return 0
+    }
+    return closure
+}
+
+any point = make_point(2, 3)
+test point("x") == 2
+test point("y") == 3
+point("z")
+

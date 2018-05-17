@@ -1,0 +1,9 @@
+bool condition = 2 < 1
+
+if (condition) {
+    test FALSE
+} else if (3 == 2 + 1) {
+    test TRUE
+} else {
+    test FALSE
+}

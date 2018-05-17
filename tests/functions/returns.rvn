@@ -1,0 +1,8 @@
+def dice_roll int {
+    return 4
+}
+
+int result = dice_roll()
+print(result)
+
+test result == 4
