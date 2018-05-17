@@ -35,14 +35,11 @@ The latter seems nicer.
 
 Currently (because I don't have semi colons - which i don't mind adding), there's no way to tell the following apart
 ```
-    return foo
+    return foo()
 ```
 ```
     return
-    foo
+    foo()
 ```
-I would rather not use newlines as a significant semantic feature. So currently I have this:
-`return(foo)`
-but it's not a function is it. And if it is, the return without any values should also have parentheses.
-
-Maybe I could just check for a close brace, and if not then it's the return value. There's no need to have anything after a return, is there?
+I would rather not use newlines as a significant semantic feature. So anything after a return (that isn't a `}`) is part of the return expression.
+And it's an error to have anything else there (that /isn't/ an expression).
