@@ -12,7 +12,7 @@ class Lexer
         'as'        => :AS,
         'while'     => :WHILE,
         'for'       => :FOR,
-        'func'      => :FUNCTION,
+        'def'       => :FUNCTION,
         'return'    => :RETURN,
         'p'         => :DEBUG_PRINT,
         'test'      => :DEBUG_TEST,
@@ -20,12 +20,13 @@ class Lexer
 
     VALUE_KEYWORDS = {
         # Types
-        'int'      => [:TYPE, :INTEGER],
-        'real'     => [:TYPE, :REAL],
-        'string'   => [:TYPE, :STRING],
-        'bool'     => [:TYPE, :BOOLEAN],
-        'rational' => [:TYPE, :RATIONAL],
-        'func'     => [:TYPE, :FUNCTION],
+        'int'      => [:TYPE, :int],
+        'real'     => [:TYPE, :real],
+        'string'   => [:TYPE, :string],
+        'bool'     => [:TYPE, :bool],
+        'rational' => [:TYPE, :rational],
+        'func'     => [:TYPE, :func],
+        'type'     => [:TYPE, :type],
         # Values
         'TRUE'   => [:BOOLEAN, true],
         'FALSE'  => [:BOOLEAN, false],
