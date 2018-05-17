@@ -3,12 +3,11 @@ int i = 1
     int i = 2
     {
         int i = 3
-        p i         '' => 3
+        test i == 3
     }
-    p i             '' => 2
+    test i == 2
 }
-p i                 '' => 1
-
+test i == 1
 
 
 int x = 0
@@ -16,8 +15,8 @@ int x = 0
     string x = ""
     {
         bool x = FALSE
-        p type(x)       '' => bool
+        ''test type(x) == bool
     }
-    p type(x)           '' => string
+    ''test type(x) == string
 }
-p type(x)               '' => int
+''test type(x) == int
