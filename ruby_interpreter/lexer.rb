@@ -30,6 +30,8 @@ class Lexer
         # Values
         'TRUE'   => [:BOOLEAN, true],
         'FALSE'  => [:BOOLEAN, false],
+        'true'   => [:BOOLEAN, true],
+        'false'  => [:BOOLEAN, false],
     }
 
     def initialize(source)
