@@ -31,6 +31,10 @@ Work on a Sublime-Syntax file for Raven. It can live in this project.
 `func foo = {}` or just `func foo {}`. The former is more consistent with other variable declarations. 
 The latter seems nicer.
 
+I think anonymous functions should be a thing (and hopefully at some point with => notation). And so declarating a function should be like any other variable.
+However, it would be nice to have a nicer syntax. And maybe `def name {}` could be it. And it could also apply to other vars. `def id 12`. It sets a constant, maybe?
+Constants would be I think on the environment to handle.
+
 # Return
 
 Currently (because I don't have semi colons - which i don't mind adding), there's no way to tell the following apart
