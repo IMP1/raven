@@ -2,12 +2,15 @@ require_relative 'fault'
 require_relative 'visitor'
 require_relative 'compiler'
 require_relative 'environment'
+require_relative 'global_env'
 
 class Interpreter < Visitor
+    
+    GLOBAL_ENV = GlobalEnvironment.new
 
     def initialize(statements)
         @statements = statements
-        @environment = Environment.new
+        @environment = GLOBAL_ENV
     end
 
     def interpret
@@ -38,9 +41,13 @@ class Interpreter < Visitor
         expr.accept(self)
     end
 
-    def truthy?(expr)
-        return false if expr == false
+    def truthy?(val)
+        return false if val == false
         return true
+    end
+
+    def type_of(val)
+        return Object
     end
 
     #--------------------------
@@ -205,7 +212,19 @@ class Interpreter < Visitor
     end
 
     def visit_CallExpression(expr)
+        func = evaluate(expr.callee)
+        args = expr.arguments.map { |a| evaluate(a) }
+        # GET TYPES OF ARGS
 
+        if args.size != func.arity
+            Compiler.runtime_fault(ArgumentFault.new(func.token, "Expected #{func.arity} args but got #{args.size}."))
+        end
+
+        if !func.is_a?(Proc) # TODO CHANGE TO WHATEVR FUNC OBJ I HAVE (BLOCK/PROC)
+            Compiler.runtime_fault(SyntaxFault.new(func.token, "This object is not callable."))
+        end
+
+        func.call(*args)
     end
 
 end
