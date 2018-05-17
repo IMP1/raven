@@ -5,6 +5,13 @@ require_relative 'environment'
 require_relative 'global_env'
 
 class Interpreter < Visitor
+
+    class Return < RuntimeError
+        attr_reader :value
+        def initialize(value)
+            @value = value
+        end
+    end
     
     GLOBAL_ENV = GlobalEnvironment.new
 
@@ -92,18 +99,23 @@ class Interpreter < Visitor
     end
 
     def visit_FunctionDeclarationStatement(stmt)
-        puts "INTERPRETING A FUNCTION DECLARATION"
         func = lambda do |interpreter, args|
+            closure = @environment
             decl = stmt
-            env = Environment.new(GLOBAL_ENV)
-            decl.parameter_names.each_with_index { |p, i| env.define(p, a[i]) }
-            interpreter.execute_block(decl.body, env)
+            env = Environment.new(closure)
+            decl.parameter_names.each_with_index { |p, i| env.define(p, args[i]) }
+            begin
+                interpreter.execute_block(decl.body, env)
+            rescue Return => r
+                return r.value
+            end
         end
         @environment.define(stmt.name, func)
     end
 
     def visit_ReturnStatement(stmt)
-
+        value = !stmt.value.nil? ? evaluate(stmt.value) : nil
+        raise Return.new(value)
     end
 
     def visit_PrintInspectStatement(stmt)
