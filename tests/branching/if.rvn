@@ -1,0 +1,13 @@
+bool correct = FALSE
+
+if (TRUE) {
+    correct = TRUE
+}
+
+if (FALSE) {
+    p "wrong"
+    p "wrong"
+    correct = FALSE
+}
+
+test correct
