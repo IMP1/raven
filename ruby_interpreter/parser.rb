@@ -178,8 +178,8 @@ class Parser
             initialiser = nil
         else
             initialiser = variable_declaration
+            consume_token(:SEMICOLON, "Expect ';' after for loop initialiser.");
         end
-        consume_token(:SEMICOLON, "Expect ';' after for loop initialiser.");
 
         if !check(:SEMICOLON)
             condition = expression
