@@ -138,6 +138,9 @@ class Parser
         if match_token(:RETURN)
             return return_statement
         end
+        if match_token(:FOR)
+            return for_statement
+        end
         if match_token(:IF)
             return if_statement
         end
@@ -167,6 +170,42 @@ class Parser
             consume_token(:RIGHT_PAREN, "Expecting ')' after return value.")
         end
         return ReturnStatement.new(keyword, value)
+    end
+
+    def for_statement
+        consume_token(:LEFT_PAREN, "Expecting '(' before for loop condition.")
+        if match_token(:SEMICOLON)
+            initialiser = nil
+        else
+            initialiser = variable_declaration
+        end
+        consume_token(:SEMICOLON, "Expect ';' after for loop initialiser.");
+
+        if !check(:SEMICOLON)
+            condition = expression
+        else
+            condition = LiteralExpression.new(true, :BOOLEAN)
+        end
+        consume_token(:SEMICOLON, "Expect ';' after for loop condition.");
+
+        if !check(:RIGHT_PAREN)
+            increment = statement
+        else
+            increment = nil
+        end
+        consume_token(:RIGHT_PAREN, "Expecting ')' after for loop condition.")
+
+        body = statement
+
+        if !increment.nil?
+            body = BlockStatement.new([body, increment])
+        end
+        body = WhileStatement.new(condition, body)
+        if !initialiser.nil?
+            body = BlockStatement.new([initialiser, body])
+        end
+
+        return body
     end
 
     def if_statement
