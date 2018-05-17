@@ -30,5 +30,8 @@ end
 class RuntimeFault < Fault
 end
 
+class ArgumentFault < RuntimeFault
+end
+
 class TestFailure < RuntimeFault
 end
