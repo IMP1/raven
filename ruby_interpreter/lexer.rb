@@ -11,6 +11,7 @@ class Lexer
         'with'      => :WITH,
         'as'        => :AS,
         'while'     => :WHILE,
+        'for'       => :FOR,
         'func'      => :FUNCTION,
         'return'    => :RETURN,
         'p'         => :DEBUG_PRINT,
@@ -154,19 +155,19 @@ class Lexer
             add_token(advance_if('=') ? :NOT_EQUAL : :EXCLAMATION)
         when '<'
             if advance_if('=')
-                :LESS_EQUAL
+                add_token(:LESS_EQUAL)
             elsif advance_if('<')
-                :DOUBLE_LEFT
+                add_token(:DOUBLE_LEFT)
             else
-                :LESS
+                add_token(:LESS)
             end
         when '>'
             if advance_if('=')
-                :GREATER_EQUAL
+                add_token(:GREATER_EQUAL)
             elsif advance_if('>')
-                :DOUBLE_RIGHT
+                add_token(:DOUBLE_RIGHT)
             else
-                :GREATER
+                add_token(:GREATER)
             end
         when '^'
             add_token(advance_if('=') ? :BEGINS_WITH : :CARET)
