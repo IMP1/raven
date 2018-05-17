@@ -27,6 +27,7 @@ class Lexer
         'rational' => [:TYPE, :rational],
         'func'     => [:TYPE, :func],
         'type'     => [:TYPE, :type],
+        'any'      => [:TYPE, :any],
         # Values
         'TRUE'   => [:BOOLEAN, true],
         'FALSE'  => [:BOOLEAN, false],
