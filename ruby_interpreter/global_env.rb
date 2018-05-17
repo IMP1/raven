@@ -2,11 +2,10 @@ require_relative 'environment'
 
 class GlobalEnvironment < Environment
 
-    def initialize(parent_environment=nil)
-        @parent_environment = parent_environment
-        @mappings = {}
-        @mappings['print'] = lambda { |i| print(i) }
-        @mappings['typeof']  = lambda { |i| return type_of(i) }
+    def initialize
+        super
+        @mappings['print']  = lambda { |interpreter, args| print(args[0]) }
+        @mappings['typeof'] = lambda { |interpreter, args| return type_of(args[0]) }
     end
 
     def type_of(value)
