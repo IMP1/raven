@@ -103,6 +103,7 @@ class Parser
 
     def function_declaration
         func_name = consume_token(:IDENTIFIER, "Expecting function name.")
+        # consume_token(:ASSIGNMENT, "Expecting '=' after function name.")
         params = []
         if match_token(:LEFT_PAREN)
             if !check(:RIGHT_PAREN)
@@ -165,9 +166,8 @@ class Parser
     def return_statement
         keyword = previous
         value = nil
-        if match_token(:LEFT_PAREN)
+        if !check(:RIGHT_BRACE)
             value = expression
-            consume_token(:RIGHT_PAREN, "Expecting ')' after return value.")
         end
         return ReturnStatement.new(keyword, value)
     end
@@ -351,7 +351,7 @@ class Parser
 
     def multiplication
         expr = exponent
-        while match_token(:STROKE, :ASTERISK, :AMPERSAND, :INTERPUNCT, :DOUBLE_STROKE)
+        while match_token(:STROKE, :ASTERISK, :AMPERSAND, :DOUBLE_STROKE)
             operator = previous
             right = exponent
             expr = BinaryExpression.new(expr, operator, right)
