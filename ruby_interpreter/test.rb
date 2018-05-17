@@ -40,4 +40,6 @@ if all_tests
     puts "    #{f} failed"
 elsif ARGV.length > 0
     ARGV.each { |fn| test_file(fn) }
+else
+    puts "You've not specified any tests to run. To run them all, pass the --all flag."
 end
