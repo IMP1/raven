@@ -13,7 +13,7 @@ class Token
     end
 
     def to_s
-        return @type.to_s + " " + @lexeme + " " + (@literal.nil? ? "" : @literal.to_s)
+        return @type.to_s + " '" + @lexeme + "' " + (@literal.nil? ? "" : @literal.to_s)
     end
 
 end
