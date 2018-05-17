@@ -92,7 +92,10 @@ class Interpreter < Visitor
     end
 
     def visit_FunctionDeclarationStatement(stmt)
-
+        puts "INTERPRETING A FUNCTION DECLARATION"
+        # p stmt
+        func = stmt.body
+        @environment.define(stmt.name, func)
     end
 
     def visit_ReturnStatement(stmt)
@@ -212,15 +215,19 @@ class Interpreter < Visitor
     end
 
     def visit_CallExpression(expr)
+        puts "INTERPRETING A FUNCTION CALL"
+        p expr
         func = evaluate(expr.callee)
         args = expr.arguments.map { |a| evaluate(a) }
         # GET TYPES OF ARGS
+
+        p func
 
         if args.size != func.arity
             Compiler.runtime_fault(ArgumentFault.new(func.token, "Expected #{func.arity} args but got #{args.size}."))
         end
 
-        if !func.is_a?(Proc) # TODO CHANGE TO WHATEVR FUNC OBJ I HAVE (BLOCK/PROC)
+        if !func.is_a?(Proc)
             Compiler.runtime_fault(SyntaxFault.new(func.token, "This object is not callable."))
         end
 
