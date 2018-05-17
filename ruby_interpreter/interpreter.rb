@@ -20,13 +20,22 @@ class Interpreter < Visitor
         end
     end
 
-    #--------------------------
-    # Statements
-    #--------------------------
-
     def execute(stmt)
         stmt.accept(self)
     end
+
+    def evaluate(expr)
+        expr.accept(self)
+    end
+
+    def truthy?(expr)
+        return false if expr == false
+        return true
+    end
+
+    #--------------------------
+    # Statements
+    #--------------------------
 
     def execute_block(statements, env)
         previous = @environment
@@ -43,7 +52,7 @@ class Interpreter < Visitor
     end
 
     def visit_VariableDeclarationStatement(stmt)
-        value = stmt.initialiser
+        value = evaluate(stmt.initialiser)
         @environment.define(stmt.name, value)
     end
 
@@ -53,7 +62,9 @@ class Interpreter < Visitor
     end
 
     def visit_WhileStatement(stmt)
-
+        while truthy?(evaluate(stmt.condition))
+            execute(stmt.body)
+        end
     end
 
     def visit_BlockStatement(stmt)
@@ -61,7 +72,12 @@ class Interpreter < Visitor
     end
 
     def visit_IfStatement(stmt)
-
+        cond = evaluate(stmt.condition)
+        if truthy?(cond)
+            execute(stmt.then_branch)
+        elsif !stmt.else_branch.nil?
+            execute(stmt.else_branch)
+        end
     end
 
     def visit_WithStatement(stmt)
@@ -80,18 +96,16 @@ class Interpreter < Visitor
         p evaluate(stmt.expression)
     end
 
+    def visit_TestAssertStatement(stmt)
+        assertion = evaluate(stmt.expression)
+        if !truthy?(assertion)
+            Compiler.runtime_fault(TestFailure.new(stmt.token, "Assertion Failed."))
+        end
+    end
+
     #--------------------------
     # Expressions
     #--------------------------
-
-    def evaluate(expr)
-        expr.accept(self)
-    end
-
-    def truthy?(expr)
-        # TODO: if expr is boolean and false, then return false
-        return true
-    end
 
     def visit_BinaryExpression(expr)
         left = evaluate(expr.left)
@@ -106,7 +120,9 @@ class Interpreter < Visitor
         when :ASTERISK
             return left * right
         when :STROKE
-            return left / right
+            return left.to_r / right
+        when :DOUBLE_STROKE
+            return (left / right).to_i
         when :CARET
             return left ** right
 
@@ -169,6 +185,19 @@ class Interpreter < Visitor
 
     def visit_LiteralExpression(expr)
         return expr.value
+    end
+
+    def visit_ShortCircuitExpression(expr)
+        left = evaluate(expr.left)
+
+        if truthy?(left) && expr.operator == :DOUBLE_PIPE
+            return left
+        end
+        if !truthy?(left) && expr.operator == :DOUBLE_AMPERSAND
+            return left
+        end
+
+        return evaluate(expr.right)
     end
 
     def visit_VariableExpression(expr)
