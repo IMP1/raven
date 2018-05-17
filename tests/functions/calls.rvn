@@ -1,0 +1,18 @@
+print(int)
+print("\n")
+
+print("hello")
+print("\n")
+
+print(typeof(3))
+print("\n")
+
+print(typeof(int))
+print("\n")
+
+print(typeof(typeof(int)))
+print("\n")
+
+test(int == int)
+test(typeof(3) == int)
+test(typeof(int) == type)
