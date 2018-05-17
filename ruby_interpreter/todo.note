@@ -1,4 +1,4 @@
-up to [here](http://craftinginterpreters.com/statements-and-state.html)
+up to [here](http://craftinginterpreters.com/functions.html)
 
 # Tests
 
@@ -25,3 +25,24 @@ Search for `isEven()` [here](http://craftinginterpreters.com/statements-and-stat
 # Sublime-Syntax
 
 Work on a Sublime-Syntax file for Raven. It can live in this project.
+
+# Function declarations
+
+`func foo = {}` or just `func foo {}`. The former is more consistent with other variable declarations. 
+The latter seems nicer.
+
+# Return
+
+Currently (because I don't have semi colons - which i don't mind adding), there's no way to tell the following apart
+```
+    return foo
+```
+```
+    return
+    foo
+```
+I would rather not use newlines as a significant semantic feature. So currently I have this:
+`return(foo)`
+but it's not a function is it. And if it is, the return without any values should also have parentheses.
+
+Maybe I could just check for a close brace, and if not then it's the return value. There's no need to have anything after a return, is there?
