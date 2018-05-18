@@ -7,12 +7,13 @@ class Lexer
     KEYWORDS = {
         # Control keywords
         'if'        => :IF,
+        'defer'     => :DEFER,
         'else'      => :ELSE,
         'with'      => :WITH,
         'as'        => :AS,
         'while'     => :WHILE,
         'for'       => :FOR,
-        'def'       => :FUNCTION,
+        'def'       => :DEFINITION,
         'return'    => :RETURN,
         'p'         => :DEBUG_PRINT,
         'test'      => :DEBUG_TEST,

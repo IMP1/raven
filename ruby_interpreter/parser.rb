@@ -88,7 +88,8 @@ class Parser
 
     def declaration
         begin
-            if match_token(:FUNCTION)
+            if match_token(:DEFINITION)
+                # TODO: Have this a more generic constant definition?
                 return function_declaration
             end
             if check(:TYPE)
@@ -139,6 +140,9 @@ class Parser
         if match_token(:RETURN)
             return return_statement
         end
+        if match_token(:DEFER)
+            return defer_statement
+        end
         if match_token(:FOR)
             return for_statement
         end
@@ -170,6 +174,12 @@ class Parser
             value = expression
         end
         return ReturnStatement.new(keyword, value)
+    end
+
+    def defer_statement
+        keyword = previous
+        deferred = statement
+        return DeferStatement.new(keyword, deferred)
     end
 
     def for_statement
