@@ -9,7 +9,7 @@ class Environment
 
     def define(token, value)
         if mapped?(token)
-            raise SyntaxFault.new(token, "Duplicate variable '#{token.lexeme}'.")
+            Compiler.runtime_fault(SyntaxFault.new(token, "Duplicate variable '#{token.lexeme}'."))
         end
         @mappings[token.lexeme] = value
     end
@@ -25,7 +25,7 @@ class Environment
             return
         end
 
-        raise SyntaxFault.new(token, "Undefined variable '#{token.lexeme}'.")
+        Compiler.runtime_fault(SyntaxFault.new(token, "Undefined variable '#{token.lexeme}'."))
     end
 
     def mapped?(token)
@@ -45,7 +45,7 @@ class Environment
             return @parent_environment[token]
         end
 
-        raise SyntaxFault.new(token, "Undefined variable '#{token.lexeme}'.")
+        Compiler.runtime_fault(SyntaxFault.new(token, "Undefined variable '#{token.lexeme}'."))
     end
 
 end
