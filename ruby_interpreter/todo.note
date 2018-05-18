@@ -1,19 +1,26 @@
 up to [here](http://craftinginterpreters.com/functions.html)
 
-# Tests
+# Future Plans
 
-Write some simple tests that work with existing interpreter (that should also forwards compatible).
-Write one for each type of expression and statement (that are implemented thus far).
+*Strings*:
+    Ruby has 'single quoted strings' and "double quoted strings". C# has $"" and @"" and "".
+    I think I like the latter better. It's hard to tell "" and '' apart sometimes. Obvs don't have to use $ and @ though.
 
-# Strings
+*Operators*:
+    Add a long list of available operators, and just don't define most of them.
 
-Ruby has 'single quoted strings' and "double quoted strings". C# has $"" and @"" and "".
-I think I like the latter better. It's hard to tell "" and '' apart sometimes. Obvs don't have to use $ and @ though.
+*Sublime-Syntax*:
+    Make a syntax file for Raven. It can live in this project.
 
-# Operators
+*Function declarations*:
 
-Add a long list of available operators, and just don't define most of them.
+    `func foo = {}` or just `func foo {}`. The former is more consistent with other variable declarations. 
+    The latter seems nicer.
 
+    I think anonymous functions should be a thing (and hopefully at some point with => notation). 
+    And so declarating a function should be like any other variable.
+    However, it would be nice to have a nicer syntax. And maybe `def name {}` could be it. And it could also apply to other vars. 
+    `def id 12`. It sets a constant, maybe? Constants would be I think on the environment to handle.
 
 # Gotchas
 
@@ -22,28 +29,3 @@ Accessing an undefined variable is a compile-time error
 This means mutually recursive functions will need some tweaking to work. 
 Search for `isEven()` [here](http://craftinginterpreters.com/statements-and-state.html) for more details.
 
-# Sublime-Syntax
-
-Work on a Sublime-Syntax file for Raven. It can live in this project.
-
-# Function declarations
-
-`func foo = {}` or just `func foo {}`. The former is more consistent with other variable declarations. 
-The latter seems nicer.
-
-I think anonymous functions should be a thing (and hopefully at some point with => notation). And so declarating a function should be like any other variable.
-However, it would be nice to have a nicer syntax. And maybe `def name {}` could be it. And it could also apply to other vars. `def id 12`. It sets a constant, maybe?
-Constants would be I think on the environment to handle.
-
-# Return
-
-Currently (because I don't have semi colons - which i don't mind adding), there's no way to tell the following apart
-```
-    return foo()
-```
-```
-    return
-    foo()
-```
-I would rather not use newlines as a significant semantic feature. So anything after a return (that isn't a `}`) is part of the return expression.
-And it's an error to have anything else there (that /isn't/ an expression).
