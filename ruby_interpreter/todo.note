@@ -22,6 +22,11 @@ up to [here](http://craftinginterpreters.com/functions.html)
     However, it would be nice to have a nicer syntax. And maybe `def name {}` could be it. And it could also apply to other vars. 
     `def id 12`. It sets a constant, maybe? Constants would be I think on the environment to handle.
 
+*Defer*
+
+    Read up on how Go handles defer statements. They are different. This should mean I need to think carefully about how defer will work.
+    What are the edge cases? How do I want defer to handle them?
+
 # Gotchas
 
 Accessing an undefined variable is a compile-time error
