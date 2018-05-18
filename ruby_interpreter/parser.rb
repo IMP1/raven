@@ -380,7 +380,7 @@ class Parser
     end
 
     def unary
-        if match_token(:NOT, :MINUS)
+        if match_token(:NOT, :MINUS, :EXCLAMATION)
             operator = previous
             right = unary
             return UnaryExpression.new(operator, right)

@@ -1,18 +1,19 @@
 
 def foo (bool readable) {
-    print("open file")
-    defer print("close file")
+    print("open file\n")
+    defer print("close file\n")
 
-    print("try to open reader")
+    print("try to open reader\n")
     if (!readable) {
-        print("failed to open reader")
+        print("failed to open reader\n")
         return
     }
-    print("opened reader")
-    defer print("close reader")
+    print("opened reader\n")
+    defer print("close reader\n")
 
-    print("reading file.... doo be doo")
+    print("reading file.... doo be doo\n")
 }
 
 foo(TRUE)
+print("\n\n")
 foo(FALSE)
