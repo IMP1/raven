@@ -3,6 +3,13 @@ def dice_roll int {
 }
 
 int result = dice_roll()
-print(result)
 
 test result == 4
+
+
+def double(int n) int {
+    return n * 2
+}
+
+test double(2) == 4
+test double(8) == 16
