@@ -3,11 +3,15 @@ def foo (bool readable) {
     print("open file")
     defer print("close file")
 
-    print("open reader")
+    print("try to open reader")
     if (!readable) {
+        print("failed to open reader")
         return
     }
+    print("opened reader")
     defer print("close reader")
+
+    print("reading file.... doo be doo")
 }
 
 foo(TRUE)
