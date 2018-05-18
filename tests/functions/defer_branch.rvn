@@ -1,0 +1,14 @@
+
+def foo (bool readable) {
+    print("open file")
+    defer print("close file")
+
+    print("open reader")
+    if (!readable) {
+        return
+    }
+    defer print("close reader")
+}
+
+foo(TRUE)
+foo(FALSE)
