@@ -76,6 +76,18 @@ class IfStatement < Statement
 
 end
 
+class DeferStatement < Statement
+
+    attr_reader :token
+    attr_reader :statement
+
+    def initialize(token, statement)
+        @token = token
+        @statement = statement
+    end
+
+end
+
 class WithStatement < Statement
 
     attr_reader :condition

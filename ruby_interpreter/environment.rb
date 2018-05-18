@@ -5,6 +5,7 @@ class Environment
     def initialize(parent_environment=nil)
         @parent_environment = parent_environment
         @mappings = {}
+        @deffered_statements = []
     end
 
     def define(token, value)
@@ -46,6 +47,14 @@ class Environment
         end
 
         Compiler.runtime_fault(SyntaxFault.new(token, "Undefined variable '#{token.lexeme}'."))
+    end
+
+    def defer(statement)
+        @deffered_statements.push(statement)
+    end
+
+    def deferred_stack
+        return @deffered_statements
     end
 
 end

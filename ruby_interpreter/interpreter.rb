@@ -18,6 +18,7 @@ class Interpreter < Visitor
     def initialize(statements)
         @statements = statements
         @environment = GLOBAL_ENV
+        @function_environment = nil
     end
 
     def interpret
@@ -35,13 +36,32 @@ class Interpreter < Visitor
     end
 
     def execute_block(statements, env)
-        previous = @environment
+        previous_env = @environment
         begin
             @environment = env
             statements.each { |stmt| execute(stmt) }
         rescue RuntimeFault => f
+            puts "RuntimeFault in block."
+            p f
         end
-        @environment = previous
+        @environment = previous_env
+    end
+
+    def execute_function(statements, env)
+        # TODO: handle defer statements here. Or /in/ here somewhere.
+        return_value = nil
+        previous_func_env = @function_environment
+        begin
+            @function_environment = @environment
+            execute_block(statements, env)
+        rescue Return => r
+            return_value = r.value
+        end
+        @function_environment.deferred_stack.reverse.each do |stmt|
+            execute(stmt.statement)
+        end
+        @function_environment = @previous_func_env
+        return return_value
     end
 
     def evaluate(expr)
@@ -51,10 +71,6 @@ class Interpreter < Visitor
     def truthy?(val)
         return false if val == false
         return true
-    end
-
-    def type_of(val)
-        return Object
     end
 
     #--------------------------
@@ -94,6 +110,14 @@ class Interpreter < Visitor
         end
     end
 
+    def visit_DeferStatement(stmt)
+        if @function_environment.nil?
+            Compiler.runtime_fault(ScopeFault.new(stmt.token, "Can only defer within functions."))
+            return
+        end
+        @function_environment.defer(stmt)
+    end
+
     def visit_WithStatement(stmt)
 
     end
@@ -104,11 +128,7 @@ class Interpreter < Visitor
             decl = stmt
             env = Environment.new(closure)
             decl.parameter_names.each_with_index { |p, i| env.define(p, args[i]) }
-            begin
-                interpreter.execute_block(decl.body, env)
-            rescue Return => r
-                return r.value
-            end
+            return interpreter.execute_function(decl.body, env)
         end
         @environment.define(stmt.name, func)
     end
