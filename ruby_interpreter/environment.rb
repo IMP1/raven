@@ -53,8 +53,9 @@ class Environment
         @deffered_statements.push(statement)
     end
 
-    def deferred_stack
-        return @deffered_statements
+    def pop_deferred
+        @deffered_statements.reverse.each { |stmt| yield stmt } 
+        @deffered_statements.clear
     end
 
 end

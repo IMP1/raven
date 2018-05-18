@@ -11,3 +11,28 @@ def foo {
 test i == 0
 foo()
 test i == 3
+
+
+def bar {
+    print("hi, ")
+    defer {
+        print("this is ")
+        print("the end\n")
+    }
+    print("how are you?\n")
+}
+
+bar()
+
+
+int x = 0
+
+def hrm {
+    print(x)
+    print("\n")
+    x = 12
+    defer print(x) '' should print 12 if lexically scoped.
+    x = 3
+}
+
+hrm()

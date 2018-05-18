@@ -57,7 +57,7 @@ class Interpreter < Visitor
         rescue Return => r
             return_value = r.value
         end
-        @function_environment.deferred_stack.reverse.each do |stmt|
+        @function_environment.pop_deferred do |stmt|
             execute(stmt.statement)
         end
         @function_environment = @previous_func_env
