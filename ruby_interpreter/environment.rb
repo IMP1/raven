@@ -49,12 +49,12 @@ class Environment
         Compiler.runtime_fault(SyntaxFault.new(token, "Undefined variable '#{token.lexeme}'."))
     end
 
-    def defer(statement)
-        @deffered_statements.push(statement)
+    def defer(stmt, env)
+        @deffered_statements.push({statement: stmt, environment: env})
     end
 
     def pop_deferred
-        @deffered_statements.reverse.each { |stmt| yield stmt } 
+        @deffered_statements.reverse.each { |stmt| yield stmt[:statement], stmt[:environment] } 
         @deffered_statements.clear
     end
 

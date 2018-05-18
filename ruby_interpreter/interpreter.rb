@@ -57,10 +57,13 @@ class Interpreter < Visitor
         rescue Return => r
             return_value = r.value
         end
-        @function_environment.pop_deferred do |stmt|
+        previous_env = @environment
+        @function_environment.pop_deferred do |stmt, env|
+            @environment = env
             execute(stmt.statement)
         end
-        @function_environment = @previous_func_env
+        @environment = previous_env
+        @function_environment = previous_func_env
         return return_value
     end
 
@@ -115,20 +118,20 @@ class Interpreter < Visitor
             Compiler.runtime_fault(ScopeFault.new(stmt.token, "Can only defer within functions."))
             return
         end
-        @function_environment.defer(stmt)
+        closure = @environment
+        @function_environment.defer(stmt, Environment.new(closure))
     end
 
     def visit_WithStatement(stmt)
-
+        
     end
 
     def visit_FunctionDeclarationStatement(stmt)
         func = lambda do |interpreter, args|
             closure = @environment
-            decl = stmt
             env = Environment.new(closure)
-            decl.parameter_names.each_with_index { |p, i| env.define(p, args[i]) }
-            return interpreter.execute_function(decl.body, env)
+            stmt.parameter_names.each_with_index { |param, i| env.define(param, args[i]) }
+            return interpreter.execute_function(stmt.body, env)
         end
         @environment.define(stmt.name, func)
     end

@@ -25,14 +25,24 @@ def bar {
 bar()
 
 
-int x = 0
+int result = 0
+
+def set_result (string msg, int n) { 
+    print(msg)
+    print(": n = ")
+    print(n)
+    print("\n")
+    result = n 
+}
 
 def hrm {
-    print(x)
-    print("\n")
+    int x = 0
     x = 12
-    defer print(x) '' should print 12 if lexically scoped.
+    defer set_result("defer", x)    '' should set to 12 if lexically scoped.
     x = 3
+    set_result("end of func", x)    '' will set to 3 if dynamically scoped.
 }
 
 hrm()
+
+test result == 12
