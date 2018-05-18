@@ -1,0 +1,5 @@
+function greet = {
+    print("hi\n")
+}
+
+greet()
