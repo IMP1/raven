@@ -24,7 +24,8 @@ up to [here](http://craftinginterpreters.com/functions.html)
 
 *Defer*
 
-    Read up on how Go handles defer statements. They are different. This should mean I need to think carefully about how defer will work.
+    Read up on [how Go handles defer statements](https://blog.golang.org/defer-panic-and-recover). They are different. 
+    This should mean I need to think carefully about how defer will work.
     What are the edge cases? How do I want defer to handle them?
     They're currently not lexically scoped. Which is a shame. They should be.
 
