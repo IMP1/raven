@@ -1,3 +1,4 @@
+require_relative 'log'
 require_relative 'lexer'
 require_relative 'parser'
 require_relative 'interpreter'
@@ -29,11 +30,12 @@ class Compiler
 
     def self.report(fault)
         # TODO: have this output to a log, instead of just printing (even if the log then just prints)
-        puts("#{fault.type}: #{fault.message}")
-        puts("        line: #{fault.location}")
+        @@log.error("#{fault.type}: #{fault.message}")
+        @@log.error("        line: #{fault.location}")
     end
 
-    def self.run(source, verbose=false)
+    def self.run(source, log=nil)
+        @@log = log || Log.new("Compiler")
         @@runtime_faults = []
         @@compile_faults = []
 
@@ -41,17 +43,13 @@ class Compiler
         tokens = scanner.scan_tokens
 
         # TODO: trace/debug 
-        if verbose
-            puts tokens.map {|t| "\t<#{t.to_s}>"}.join("\n")
-        end
+        @@log.trace(tokens.map {|t| "\t<#{t.to_s}>"}.join("\n"))
 
         parser = Parser.new(tokens)
         statements = parser.parse
 
         # TODO: trace/debug 
-        if verbose
-            puts statements.map {|s| s.inspect}
-        end
+        @@log.trace(statements.map {|s| s.inspect}.join("\n"))
 
         exit(65) if @@compile_faults.size > 0
 
@@ -61,8 +59,8 @@ class Compiler
         exit(70) if @@runtime_faults.size > 0
     end
 
-    def self.run_file(filename, verbose=false)
-        run(File.open(filename, 'r').read, verbose);
+    def self.run_file(filename, log=nil)
+        run(File.open(filename, 'r').read, log);
     end
 
     def self.run_repl
