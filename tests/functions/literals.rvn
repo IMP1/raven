@@ -1,0 +1,38 @@
+proc greet = {
+    print("hi\n")
+}
+
+greet()
+
+func loaded_die = int { 
+    return 6
+}
+
+print(loaded_die())
+
+proc bool_print = (bool x) {
+    if (x)
+        print("yes")
+    else
+        print("no")
+}
+
+bool_print(TRUE)
+
+func double = (int x) int {
+    return x * 2
+}
+
+print(double(4))
+
+
+
+def do_twice (func f) {
+    f()
+    f()
+}
+
+
+def map (int[] list, func f) {
+    
+}
