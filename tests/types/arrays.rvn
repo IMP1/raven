@@ -1,0 +1,9 @@
+int[] a = [1, 2]
+print(a)
+print("\n")
+    
+string[] b = ["hi", "there", "you"]
+print(b)
+print("\n")
+print(typeof(b))
+print("\n")

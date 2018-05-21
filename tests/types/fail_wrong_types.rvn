@@ -1,0 +1,8 @@
+int a = "a string"
+test type(a) == int
+
+int b = 1.2
+test type(a) == int
+
+string c = 12
+test type(c) = string
