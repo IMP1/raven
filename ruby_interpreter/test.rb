@@ -1,3 +1,4 @@
+require_relative 'log'
 require_relative 'compiler'
 
 def test_file(filename, root="")
@@ -5,55 +6,89 @@ def test_file(filename, root="")
         puts "Couldn't find file '#{filename}'."
         return nil
     end
-    puts "running test '#{filename[root.length+1..-1]}'"
+    local_name = filename[root.length..-1]
+    puts "running test '#{local_name}'"
     success = true
     begin
-        Compiler.run_file(filename, $verbose)
+        Compiler.run_file(filename, $log)
     rescue SystemExit
         success = false
     end
     puts "test #{success ? "succeeded" : "failed"}"
     puts
-    return success
-    # TODO: make this nicer?
+    return {
+        test: local_name,
+        success: success,
+    }
 end
 
 def test_folder(dirname, root=nil)
-    successes = 0
-    failures = 0
+    results = []
     puts "running all tests in '#{dirname}'"
+    puts
     Dir[File.join(dirname, '*')].each do |f|
         if File.directory?(f)
-            s, f = test_folder(File.join(f), root || dirname)
-            successes += s
-            failures += f
+            results += test_folder(File.join(f), root || dirname)
         elsif File.file?(f)
-            test_file(File.join(f), root) ? successes += 1 : failures += 1
+            results.push(test_file(File.join(f), root || ""))
         end
     end
-    return successes, failures
+    return results
 end
 
-$verbose   = ARGV.delete("--verbose") || ARGV.delete("-v")
+def print_results(results)
+    $stdout = STDOUT
+    s = results.select{ |r| r[:success] }
+    f = results.select{ |r| !r[:success] }
+
+    l_title = "#{s.size} succeeded"
+    longest_named_test = s.max_by { |t| t[:test].length }
+    max_test_name_length = longest_named_test.nil? ? 0 : longest_named_test[:test].length
+    max_column_size = [max_test_name_length, l_title.length].max + 4
+
+    print "    "
+    print l_title.ljust(max_column_size)
+    print "              "
+    print "#{f.size} failed"
+    print "\n"
+
+    [s.size, f.size].max.times do |i|
+        print "    "
+        print (i < s.size ? "  * " + s[i][:test] : " ").ljust(max_column_size)
+        print "              "
+        print i < f.size ?  "  * " + f[i][:test] : ""
+        print "\n"
+    end
+end
+
+verbose  = ARGV.delete("--verbose") || ARGV.delete("-v")
+silent   = ARGV.delete("--silent") || ARGV.delete("-s")
 all_tests = ARGV.delete("--all") || ARGV.delete("-a")
 
+$log = Log.new("Test")
+
+if verbose
+    $log.set_level(Log::TRACE)
+end
+if silent
+    $log.set_output(File.new("/dev/null", 'w'))
+end
 
 if all_tests
-    s, f = test_folder(File.join(*__dir__.split('/')[0...-1], 'tests'))
-    puts "Ran #{s + f} tests"
-    puts "    #{s} succeeded"
-    puts "    #{f} failed"
+    results = test_folder(File.join(*__dir__.split('/')[0...-1], 'tests'))
+    print_results(results)
 elsif ARGV.length > 0
-    successes, failures = 0, 0
+    results = []
     ARGV.each do |fn| 
-        result = test_file(fn)
-        if !result.nil?
-            result ? successes += 1 : failures += 1
+        if File.directory?(fn)
+            results += test_folder(fn)
+        elsif File.file?(fn)
+            results.push(test_file(fn))
+        else
+            puts "Invalid command 'fn'."
         end
     end
-    puts "Ran #{successes + failures} tests"
-    puts "    #{successes} succeeded"
-    puts "    #{failures} failed"
+    print_results(results)
 else
     puts "You've not specified any tests to run. To run them all, pass the --all flag."
 end
