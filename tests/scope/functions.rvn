@@ -1,5 +1,13 @@
+def bar (int x) {
+    {
+        int x = 3
+    }
+}
+
+bar(4)
+
 def foo (int x) {
-    int x = 3
+    '' int x = 3 '' running this will fail as 'x' is already defined in this scope (by the function parameters)
 }
 
 foo(4)

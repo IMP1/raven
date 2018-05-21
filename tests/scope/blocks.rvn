@@ -15,8 +15,8 @@ int x = 0
     string x = ""
     {
         bool x = FALSE
-        ''test type(x) == bool
+        test typeof(x) == bool
     }
-    ''test type(x) == string
+    test typeof(x) == string
 }
-''test type(x) == int
+test typeof(x) == int
