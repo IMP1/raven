@@ -45,4 +45,4 @@ def hrm {
 
 hrm()
 
-test result == 12
+test result == 3

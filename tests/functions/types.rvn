@@ -1,0 +1,15 @@
+test typeof(2)      == int
+test typeof(2.1)    == real
+test typeof("sup")  == string
+test typeof(FALSE)  == bool
+test typeof(3/2)    == rational
+test typeof(3 / 2)  == rational
+test typeof(int)    == type
+test typeof(typeof) == func
+
+print(typeof(2))
+print("\n")
+print(int)
+print("\n")
+
+print(int[])
