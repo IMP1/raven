@@ -7,3 +7,17 @@ if (condition) {
 } else {
     test FALSE
 }
+
+
+if (FALSE)
+    test FALSE
+else
+    test TRUE
+
+if (FALSE) {
+    print("lol")
+    test FALSE
+    print("never should happen")
+}
+else
+    test TRUE
