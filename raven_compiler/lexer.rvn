@@ -36,10 +36,10 @@ class Scanner {
         "type"     => [Token.Type.TYPE, type],
         "any"      => [Token.Type.TYPE, any],
         '' Values
-        "TRUE"   => [Token.Type.BOOLEAN, TRUE],
-        "FALSE"  => [Token.Type.BOOLEAN, FALSE],
-        "true"   => [Token.Type.BOOLEAN, TRUE],
-        "false"  => [Token.Type.BOOLEAN, FALSE],
+        "TRUE"     => [Token.Type.BOOLEAN, TRUE],
+        "FALSE"    => [Token.Type.BOOLEAN, FALSE],
+        "true"     => [Token.Type.BOOLEAN, TRUE],
+        "false"    => [Token.Type.BOOLEAN, FALSE],
     ]
 
 
@@ -50,7 +50,7 @@ class Scanner {
     int line
     List<Token> tokens
 
-    def _constructor_(string: source) {
+    def _constructor_(string source) {
         this.source = source
         start       = 0
         current     = 0

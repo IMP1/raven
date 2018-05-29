@@ -1,7 +1,22 @@
 int a = 10
 
-int[] b = []
+int[] b = [2, 4]
 
+print(a)
+print("\n")
 print(typeof(a))
+print("\n")
 print(typeof(b))
+print("\n")
 print(b)
+print("\n")
+
+any c = 4
+
+print(typeof(c))
+print("\n")
+
+int[] d = []
+
+print(typeof(d))
+print("\n")

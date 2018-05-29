@@ -74,7 +74,7 @@ class Token {
     }
 
     def to_string string {
-        return token_type.name + " '" + lexeme + "' (" + tostring(literal) + ")")
+        return token_type.name + " '" + lexeme + "' (" + tostring(value) + ")")
     }
 
 }
