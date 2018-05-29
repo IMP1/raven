@@ -75,6 +75,20 @@ class Interpreter < Visitor
         return true
     end
 
+    def equals(left, right)
+        # if left.is_a?(Array) && left.all? { |t| t.is_a?(Symbol) }
+        #     return type_match(left, right)
+        # end
+        # if right.is_a?(Array) && right.all? { |t| t.is_a?(Symbol) }
+        #     return type_match(left, right)
+        # end
+        return left == right
+    end
+
+    def type_match(t1, t2)
+        
+    end
+
     #--------------------------
     # Statements
     #--------------------------
@@ -207,7 +221,7 @@ class Interpreter < Visitor
             return left & right
 
         when :EQUAL
-            return left == right
+            return equals(left, right)
         when :NOT_EQUAL
             return left != right
         end
