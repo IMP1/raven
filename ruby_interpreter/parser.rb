@@ -32,6 +32,10 @@ class Parser
         return previous
     end
 
+    def revert
+        @current -= 1
+    end
+    
     def check(type)
         return false if eof?
         return peek.type == type
@@ -424,14 +428,6 @@ class Parser
     end
 
     def primary
-
-        # primitives = {
-        #     BOOLEAN:  Raven_Boolean, 
-        #     INTEGER:  Raven_Integer, 
-        #     REAL:     Raven_Real,
-        #     RATIONAL: Raven_Rational,
-        # }
-
         if match_token(:STRING)
             return LiteralExpression.new(escape_string(previous.literal), :STRING)
         end
@@ -454,32 +450,39 @@ class Parser
             if match_token(:LEFT_BRACE)
                 return subroutine_body([], var_type)
             else
-                return LiteralExpression.new(var_token, var_type)
+                return LiteralExpression.new([var_token], var_type)
             end
         end
 
         # Function Literals
         if match_token(:LEFT_PAREN)
-            if check(:TYPE) && check_next(:IDENTIFIER)
-                params = []
-                type = consume_token(:TYPE, "Expecting parameter type.")
-                var_name = consume_token(:IDENTIFIER, "Expecting parameter name.")
-                params.push({name: var_name, type: type})
-                while !check(:RIGHT_PAREN) && !eof?
-                    break if !check(:COMMA)
-                    consume_token(:COMMA, "Expecting ',' in parameter list.")
-                    type = consume_token(:TYPE, "Expecting parameter type.")
+            if check(:TYPE)
+                type = variable_type
+                if check(:IDENTIFIER)
+                    params = []
                     var_name = consume_token(:IDENTIFIER, "Expecting parameter name.")
                     params.push({name: var_name, type: type})
+                    while !check(:RIGHT_PAREN) && !eof?
+                        break if !check(:COMMA)
+                        consume_token(:COMMA, "Expecting ',' in parameter list.")
+                        type = variable_type
+                        var_name = consume_token(:IDENTIFIER, "Expecting parameter name.")
+                        params.push({name: var_name, type: type})
+                    end
+                    consume_token(:RIGHT_PAREN, "Expecting ')' after parameter list.")
+                    return_type = nil
+                    if match_token(:TYPE)
+                        return_type = previous
+                    end
+                    consume_token(:LEFT_BRACE, "Expecting '{' before function body.")
+                    body = block
+                    return FunctionExpression.new(params, return_type, body)
+                else
+                    revert
+                    expr = expression
+                    consume_token(:RIGHT_PAREN, "Expecting ')' after expression.")
+                    return GroupingExpression.new(expr)
                 end
-                consume_token(:RIGHT_PAREN, "Expecting ')' after parameter list.")
-                return_type = nil
-                if match_token(:TYPE)
-                    return_type = previous
-                end
-                consume_token(:LEFT_BRACE, "Expecting '{' before function body.")
-                body = block
-                return FunctionExpression.new(params, return_type, body)
             end
             expr = expression
             consume_token(:RIGHT_PAREN, "Expecting ')' after expression.")
