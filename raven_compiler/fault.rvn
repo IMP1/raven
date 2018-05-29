@@ -1,0 +1,41 @@
+import "token"
+
+class Fault {
+
+    string message
+    Token token
+
+    def _constructor_(Token token, string message) {
+        this.message = message
+        this.token = token
+    }
+
+}
+
+class SyntaxFault (Fault) {
+
+}
+
+class ParseFault (Fault) {
+
+}
+
+class TypeFault (ParseFault) {
+
+}
+
+class RuntimeFault (Fault) {
+
+}
+
+class ArgumentFault (RuntimeFault) {
+
+}
+
+class ScopeFault (RuntimeFault) {
+
+}
+
+class TestFailure (RuntimeFault) {
+
+}

@@ -1,0 +1,82 @@
+
+class Token {
+    
+    enum Type [
+        TYPE,
+        BOOLEAN,
+        INTEGER,
+        REAL,
+        RATIONAL,
+
+        LEFT_PAREN,
+        RIGHT_PAREN,
+        LEFT_SQUARE,
+        RIGHT_SQUARE,
+        LEFT_BRACE,
+        RIGHT_BRACE,
+
+        COMMA,
+        DOT,
+        COLON,
+
+        SEMICOLON,
+        BACKSLASH,
+
+        MINUS,
+        PLUS,
+        ASTERISK,
+        PERCENT,
+        STROKE,
+        DOUBLE_STROKE,
+
+        NOT,
+        DOUBLE_AMPERSAND,
+        AMPERSAND,
+        DOUBLE_PIPE,
+        PIPE,
+
+        QUESTION,
+        ASSIGNMENT,
+        EQUAL,
+        NOT_EQUAL,
+        EXCLAMATION
+        LESS_EQUAL,
+        LESS,
+        GREATER_EQUAL,
+        GREATER,
+
+        DOUBLE_LEFT,
+        DOUBLE_RIGHT,
+
+        BEGINS_WITH,
+        ENDS_WITH,
+        CONTAINS,
+
+        CARET,
+        DOLLAR,
+        TILDE,
+        APOSTROPHE,
+
+        IDENTIFIER,
+    ]
+
+    Type   token_type
+    string lexeme
+    int    line
+    any    value
+
+
+    def _constructor_(Type t, string lexeme, int line, any value) {
+        this.token_type   = t
+        this.lexeme = lexeme
+        this.line   = line
+        this.value  = value
+    }
+
+    def to_string string {
+        return token_type.name + " '" + lexeme + "' (" + tostring(literal) + ")")
+    }
+
+}
+
+
