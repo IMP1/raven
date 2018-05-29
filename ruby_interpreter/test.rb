@@ -1,5 +1,6 @@
 require_relative 'log'
 require_relative 'compiler'
+require_relative 'console_style'
 
 def test_file(filename, root="")
     if !File.file?(filename)
@@ -54,10 +55,20 @@ def print_results(results)
 
     [s.size, f.size].max.times do |i|
         print "    "
-        print (i < s.size ? "  * " + s[i][:test] : " ").ljust(max_column_size)
+        print (i < s.size ? "  * " + result_colour(s[i]) + s[i][:test] : " ").ljust(max_column_size + (i < s.size ? 5 : 0))
         print "              "
-        print i < f.size ?  "  * " + f[i][:test] : ""
+        print ConsoleStyle::RESET
+        print i < f.size ?  "  * " + result_colour(f[i]) + f[i][:test] : ""
         print "\n"
+        print ConsoleStyle::RESET
+    end
+end
+
+def result_colour(result)
+    if result[:success] ^ result[:test].split("/").last.start_with?("fail")
+        return ConsoleStyle::FG_GREEN
+    else
+        return ConsoleStyle::FG_RED
     end
 end
 
