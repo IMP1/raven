@@ -3,14 +3,70 @@
 
 name: Raven
 file_extensions: [rvn]
+# first_line_match: "#!/.*?$" # ??? Is this for detecting raven files?
 scope: source.raven
 variables:
   urlchar: '[\w\-\.~:/\?#\[\]@!$&''\(\)\*\+,;=%]'
   identifier: '[A-Za-z_][A-Za-z_0-9]*'
-  number:     '-?\d+(?:\.\d+)?'
-  base_type:  '(?:int|real|rational|bool|string|func|method)'
+  number:     '-?\d+(?:[\.\/]\d+)?'
+  base_type:  '(?:int|real|rational|bool|string|func|type|any)'
+  any_type:   '(?:{{base_type}}|{{identifier}})'
 
 contexts:
+
+  main:
+    - include: keywords
+    - include: literals
+    - include: definitions
+    - include: comments
+    - include: operators
+
+  definitions:
+    - match: '(def)\s+({{identifier}})'
+      captures:
+        1: keyword.control.raven
+        2: entity.name.raven
+    - match: '(class)\s+({{identifier}})'
+      captures:
+        1: storage.type.raven
+        2: entity.name.class.raven
+    - match: '({{any_type}})\s+({{identifier}})'
+      captures:
+        1: storage.type.raven
+        2: variable.readwrite.raven
+    - match: '\('
+      scope: punctuation.section.group.begin.raven
+      push: parameter_list
+        
+
+  keywords:
+    - match: '(?:return|if|with|while|for|defer|case|when)'
+      scope: keyword.control.raven
+    - match: '\b(?:print|typeof|tostring)\b'
+      scope: support.function.raven
+    - match: '\b(?:this)\b'
+      scope: variable.language.raven
+    - match: '\b(?:abstract)\b'
+      scope: storage.modifier.raven
+
+  operators:
+    - match: '(?:\||\|\||&|&&|<=|<|>=|>|==|!=|\^=|\$=|~=)'
+      scope: keyword.operator.logical.raven
+    - match: '(?:\+|\-|\*|\/|\^)'
+      scope: keyword.operator.arithmetic.raven
+    - match: '='
+      scope: keyword.operator.assignment.raven
+
+  # This is a separate scope with different syntax rules
+  parameter_list:
+    - meta_scope: meta.group.raven
+    - match: '\)'
+      pop: true
+    - match: '(<!")({{any_type}})\s+({{identifier}})'
+      captures:
+        1: storage.type.raven
+        2: variable.parameter.raven
+    - include: main
 
   #----------#
   # Comments #
@@ -69,7 +125,7 @@ contexts:
       scope: markup.inserted.raven
     # Links
     - match: '[a-z]+?://{{urlchar}}+[\w/]'
-      scope: markup.underline.link.note
+      scope: markup.underline.link.raven
 
   #----------#
   # Literals #
@@ -97,12 +153,9 @@ contexts:
     # Numbers
     - match: '\b{{number}}\b'
       scope: constant.numeric.raven
+    # Built-in Types
+    - match: '\b{{base_type}}\b'
+      scope: storage.type.raven
     # Language Constants
     - match: '(?:TRUE|FALSE|NULL)'
       scope: constant.language.raven
-    - match: '\${{identifier}}'
-      scope: constant.language.raven
-
-  main:
-    - include: literals
-    - include: comments

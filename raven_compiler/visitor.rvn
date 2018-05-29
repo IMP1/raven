@@ -8,8 +8,10 @@ class Visitable {
 
 abstract class Visitor {
 
-    def visit (Visitable subject) {
+    abstract func<(Visitable subject)> visit
+
+    '' def visit (Visitable subject) {
         '' Override this with more specific parameter types.
-    }
+    '' }
 
 }
