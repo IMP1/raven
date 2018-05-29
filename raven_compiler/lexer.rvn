@@ -1,0 +1,302 @@
+'' https://medium.freecodecamp.org/the-programming-language-pipeline-91d3f449c919
+'' https://compilers.iecc.com/crenshaw/
+
+'' Basic Lexer
+
+import "fault"
+import "token"
+import "compiler"
+
+class Scanner {
+
+    '' Hash<String, Token.Type> KEYWORDS = [
+    def KEYWORDS [
+        "if"        => :IF,
+        "defer"     => :DEFER,
+        "else"      => :ELSE,
+        "with"      => :WITH,
+        "as"        => :AS,
+        "while"     => :WHILE,
+        "for"       => :FOR,
+        "def"       => :DEFINITION,
+        "return"    => :RETURN,
+        "p"         => :DEBUG_PRINT,
+        "test"      => :DEBUG_TEST,
+    ]
+
+    '' Hash<String, Tuple<Token.Type, any>> VALUE_KEYWORDS = [
+    def VALUE_KEYWORDS [
+        '' Types
+        "int"      => [Token.Type.TYPE, int],
+        "real"     => [Token.Type.TYPE, real],
+        "string"   => [Token.Type.TYPE, string],
+        "bool"     => [Token.Type.TYPE, bool],
+        "rational" => [Token.Type.TYPE, rational],
+        "func"     => [Token.Type.TYPE, func],
+        "type"     => [Token.Type.TYPE, type],
+        "any"      => [Token.Type.TYPE, any],
+        '' Values
+        "TRUE"   => [Token.Type.BOOLEAN, TRUE],
+        "FALSE"  => [Token.Type.BOOLEAN, FALSE],
+        "true"   => [Token.Type.BOOLEAN, TRUE],
+        "false"  => [Token.Type.BOOLEAN, FALSE],
+    ]
+
+
+    string source
+    bool is_finished
+    int start
+    int current
+    int line
+    List<Token> tokens
+
+    def _constructor_(string: source) {
+        this.source = source
+        start       = 0
+        current     = 0
+        line        = 1
+        is_finished = (source.length == 0)
+        tokens      = List<Token>.new()
+    }
+
+    def eof bool {
+        return current >= source.length
+    }
+
+    def scan {
+        while (!eof()) {
+            start = current
+            scan_token()
+        }
+        tokens.add(Token.new(Token.Type.EOF, "", line))
+        is_finished = TRUE
+    }
+
+    def advance string {
+        current = current + 1
+        return source[current + 1] '' TODO: Decide on whether indexing will be overloadable. Maybe defined as a binary operator (type on, type of index).
+    }
+
+    def add_token(Token.Type token_type, string? literal_value) {
+        lexeme = @source[@start...@current]
+        tokens.add(Token.new(token_type, lexeme, line, literal_value))
+    }
+
+    def advance_if(string expected) bool {
+        if (eof()) return FALSE 
+        if (source[current] != expected) return FALSE 
+
+        @current += 1
+        return TRUE
+    }
+
+    def peek string? {
+        if (eof()) return NULL 
+        return source[current]
+    }
+
+    def peek_next string? {
+        if (eof()) return NULL
+        if (current + 1 >= source.length) return NULL
+        return source[current + 1]
+    }
+        
+    def fault(int line, string message) Fault {
+        Token t = Token.new(Token.Type.FAULT, @source[@start...@current], line)
+        Fault f = SyntaxFault.new(t, message)
+        Compiler.syntax_fault(f)
+        return f
+    }
+
+
+    def scan_token {
+        String c = advance
+        case (c)
+        when (" ", "\r", "\t")
+            '' do nothing
+        when ("\n")
+            line = line + 1
+        when  ("(")
+            add_token(Token.Type.LEFT_PAREN, "(")
+        when ("(")
+            add_token(Token.Type.RIGHT_PAREN, ")")
+        when ("{")
+            add_token(Token.Type.LEFT_BRACE, "{")
+        when ("}")
+            add_token(Token.Type.RIGHT_BRACE, "}")
+        when ("[")
+            add_token(Token.Type.LEFT_SQUARE, "[")
+        when ("]")
+            add_token(Token.Type.RIGHT_SQUARE, "]")
+
+        when (",")
+            add_token(Token.Type.COMMA, ",")
+        when (".")
+            add_token(Token.Type.DOT, ".")
+        when (":")
+            add_token(Token.Type.COLON, ":")
+
+        when (";")
+            add_token(Token.Type.SEMICOLON, ";")
+        when ("\\")
+            add_token(Token.Type.BACKSLASH, "\\")
+
+        when ("-")
+            add_token(Token.Type.MINUS, "-")
+        when ("+")
+            add_token(Token.Type.PLUS, "+")
+        when ("*")
+            add_token(Token.Type.ASTERISK, "*")
+        when ("%")
+            add_token(Token.Type.PERCENT, "%")
+
+        when ("/")
+            if (advance_if("/"))
+                add_token(Token.Type.DOUBLE_STROKE, "//")
+            else
+                add_token(Token.Type.STROKE, "/")
+
+        when ("¬")
+            add_token(Token.Type.NOT, "¬")
+        when ("&")
+            if (advance_if("&"))
+                add_token(Token.Type.DOUBLE_AMPERSAND)
+            else
+                add_token(Token.Type.AMPERSAND)
+        when ("|")
+            if (advance_if("|"))
+                add_token(Token.Type.DOUBLE_PIPE)
+            else
+                add_token(Token.Type.PIPE)
+        when ("?")
+            add_token(Token.Type.QUESTION)
+
+        when ("=")
+            if (advance_if("="))
+                add_token(Token.Type.EQUAL)
+            else
+                add_token(Token.Type.ASSIGNMENT)
+        when ("!")
+            if (advance_if("="))
+                add_token(Token.Type.NOT_EQUAL)
+            else
+                add_token(Token.Type.EXCLAMATION)
+        when ("<")
+            if (advance_if("="))
+                add_token(Token.Type.LESS_EQUAL)
+            else if (advance_if("<"))
+                add_token(Token.Type.DOUBLE_LEFT)
+            else
+                add_token(Token.Type.LESS)
+            end
+        when (">")
+            if (advance_if("="))
+                add_token(Token.Type.GREATER_EQUAL)
+            else if (advance_if(">"))
+                add_token(Token.Type.DOUBLE_RIGHT)
+            else
+                add_token(Token.Type.GREATER)
+            end
+        when ("^")
+            if (advance_if("="))
+                add_token(Token.Type.BEGINS_WITH)
+            else
+                add_token(Token.Type.CARET)
+        when ("$")
+            if (advance_if("="))
+                add_token(Token.Type.ENDS_WITH)
+            else
+                add_token(Token.Type.DOLLAR)
+        when ("~")
+            if (advance_if("="))
+                add_token(Token.Type.CONTAINS)
+            else
+                add_token(Token.Type.TILDE)
+        when ("'")
+            if (advance_if("'")) {
+                while (!eof() && peek() != "\n")
+                    advance
+            } else { add_token(Token.Type.APOSTROPHE) }
+
+        when ("\"")
+            scan_string()
+
+        when "π"
+            add_token(Token.Type.REAL, π)
+        when "τ"
+            add_token(Token.Type.REAL, τ)
+
+        else {
+            if (c.match(/\d/)) 
+                scan_number()
+            else if (c.match(/[a-zA-Z_]/))
+                scan_identifier()
+            else 
+                fault(line, "Unexpected character '" + source[current-1] + "'.")
+        }
+    }
+
+    def sacn_string {
+        while (!eof() && peek() != "\"") {
+            if (peek() == "\n") line = line + 1
+            advance()
+        }
+
+        if (eof()) {
+            fault(line, "Unterminated string.")
+            return
+        }
+        
+        advance() '' The closing ".
+
+        '' Trim the surrounding quotes.
+        value = source[start + 1 ... current - 1]
+        add_token(Token.Type.STRING, value)
+    }
+
+    def scan_number {
+        while (peek().match(/\d/)) advance()
+
+        if (peek() == '.' && peek_next().match(/\d/))
+            advance()
+            while (peek.match(/\d/)) advance()
+            add_token(Token.Type.REAL, source[start ... current]) '' TODO: convert string to real
+        else if (peek() == '/' && peek_next() =~ /\d/)
+            advance()
+            while (peek().match(/\d/)) advance()
+            add_token(Token.Type.RATIONAL, source[start ... current]) '' TODO: convert string to rational
+        else
+            add_token(Token.Type.INTEGER, source[start ... current]) '' TODO: convert string to integer
+        end
+    }
+
+    def scan_identifier {
+        while (peek().match(/\w/)) advance()
+
+        '' See if the identifier is a reserved word.
+        string text = source[start ... current]
+
+        with (Tuple<Token.Type, any> value = VALUE_KEYWORDS[text]) {
+            add_token(value[0], value[1])
+            return
+        }
+
+        if (text == "TRUE") {
+            add_token(Token.Type.BOOLEAN, TRUE)
+            return
+        } else if (text == "FALSE") {
+            add_token(Token.Type.BOOLEAN, FALSE)
+            return
+        }
+
+        Token.Type token_type = Token.Type.IDENTIFIER
+        with (value = KEYWORDS[text]) {
+            token_type = value
+        }
+
+        add_token(token_type, text)
+    }
+
+}
+
+

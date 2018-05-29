@@ -1,0 +1,17 @@
+class Visitable {
+
+    def accept (Visitor visitor) {
+        visitor.visit(this)
+    }
+}
+
+
+abstract class Visitor {
+
+    abstract func<(Visitable subject)> visit
+
+    '' def visit (Visitable subject) {
+        '' Override this with more specific parameter types.
+    '' }
+
+}
