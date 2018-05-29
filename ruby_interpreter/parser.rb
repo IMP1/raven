@@ -128,12 +128,31 @@ class Parser
     end
 
     def variable_declaration
-        var_type = consume_token(:TYPE, "Expecting variable type.")
+        puts "PARSING VAR DECL"
+        var_type = variable_type
+        puts "TYPE = #{var_type}"
         var_name = consume_token(:IDENTIFIER, "Expect variable name.")
 
         consume_token(:ASSIGNMENT, "Expecting an initial value for '#{var_name.lexeme}'.")
         initial_value = expression
         return VariableDeclarationStatement.new(var_name, var_type, initial_value);
+    end
+
+    def variable_type
+        base_type = consume_token(:TYPE, "Expecting variable type.")
+        loop do
+            if match_token(:LEFT_SQUARE)
+                puts "ARRAY!"
+                consume_token(:RIGHT_SQUARE, "Expecting ']' after '['.")
+                # TODO: add array to type list
+            elsif match_token(:QUESTION)
+                puts "OPTIONAL!"
+                # TODO: add optional to type list
+            else
+                break
+            end
+        end
+        return base_type
     end
 
     def statement
@@ -424,6 +443,15 @@ class Parser
         if match_token(:TYPE)
             return LiteralExpression.new(previous.literal, previous.type)
         end            
+        if match_token(:LEFT_SQUARE)
+            array = []
+            while !eof? && !check(:RIGHT_SQUARE)
+                array.push(expression)
+                break if !match_token(:COMMA)
+            end
+            consume_token(:RIGHT_SQUARE, "Expecting ']' after array literal.")
+            return ArrayExpression.new(array, previous.type)
+        end
 
         if match_token(:IDENTIFIER)
             return VariableExpression.new(previous)

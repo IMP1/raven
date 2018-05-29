@@ -232,6 +232,10 @@ class Interpreter < Visitor
         return evaluate(expr.expression)
     end
 
+    def visit_ArrayExpression(expr)
+        return expr.elements.map { |e| evaluate(e) }
+    end
+
     def visit_LiteralExpression(expr)
         return expr.value
     end

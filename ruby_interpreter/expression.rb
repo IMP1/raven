@@ -61,6 +61,17 @@ class LiteralExpression < Expression
 
 end
 
+class ArrayExpression < Expression
+
+    attr_reader :elements
+
+    def initialize(elements, type)
+        super(type)
+        @elements = elements
+    end
+
+end
+
 class ShortCircuitExpression < Expression
 
     attr_reader :left
