@@ -1,4 +1,4 @@
-proc greet = {
+func greet = {
     print("hi\n")
 }
 
@@ -9,12 +9,14 @@ func loaded_die = int {
 }
 
 print(loaded_die())
+print("\n")
 
-proc bool_print = (bool x) {
+func bool_print = (bool x) {
     if (x)
         print("yes")
     else
         print("no")
+    print("\n")
 }
 
 bool_print(TRUE)
@@ -24,6 +26,7 @@ func double = (int x) int {
 }
 
 print(double(4))
+print("\n")
 
 
 

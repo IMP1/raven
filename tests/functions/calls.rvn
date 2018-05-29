@@ -10,6 +10,9 @@ print("\n")
 print(typeof(int))
 print("\n")
 
+print(typeof(FALSE))
+print("\n")
+
 print(typeof(typeof(int)))
 print("\n")
 
