@@ -2,6 +2,7 @@ require_relative 'expression'
 require_relative 'statement'
 require_relative 'compiler'
 require_relative 'fault'
+require_relative 'types'
 
 class Parser
 
@@ -18,6 +19,10 @@ class Parser
         return @tokens[@current]
     end
 
+    def peek_next
+        return @tokens[@current + 1]
+    end
+
     def previous
         return @tokens[@current - 1]
     end
@@ -30,6 +35,12 @@ class Parser
     def check(type)
         return false if eof?
         return peek.type == type
+    end
+
+    def check_next(type)
+        return false if eof?
+        return false if peek_next.type == :EOF
+        return peek_next.type == type
     end
 
     def match_token(*types)
@@ -56,6 +67,7 @@ class Parser
     def escape_string(str)
         return str.gsub('\\n', "\n")
     end
+
 
     def synchronise
         # TODO: trace/debug that sychronisation has taken place
@@ -89,11 +101,10 @@ class Parser
     def declaration
         begin
             if match_token(:DEFINITION)
-                # TODO: Have this a more generic constant definition?
-                return function_declaration
+                return variable_definiton
             end
             if check(:TYPE)
-                return variable_declaration
+                return variable_initialisation
             end
             return statement
         rescue ParseFault => e
@@ -102,57 +113,36 @@ class Parser
         end
     end
 
-    def function_declaration
-        func_name = consume_token(:IDENTIFIER, "Expecting function name.")
-        # consume_token(:ASSIGNMENT, "Expecting '=' after function name.")
-        params = []
-        if match_token(:LEFT_PAREN)
-            if !check(:RIGHT_PAREN)
-                loop do
-                    param_type = consume_token(:TYPE, "Expecting type for function parameter.")
-                    param_name = consume_token(:IDENTIFIER, "Expecting name for function parameter.")
-                    params.push({type: param_type, name: param_name})
-                    break if !match_token(:COMMA)
-                end
-            end
-            consume_token(:RIGHT_PAREN, "Expecting ')' after parameter list.")
-        end
-        return_type = nil
-        if check(:TYPE)
-            return_type = consume_token(:TYPE, "Expecting return type of function.")
-        end
-
-        consume_token(:LEFT_BRACE, "Expecting '{' to begin function body.")
-        body = block
-        return FunctionDeclarationStatement.new(func_name, params, return_type, body)
+    def variable_definiton
+        var_name = consume_token(:IDENTIFIER, "Expecting object name.")
+        value = expression
+        var_type = value.type
+        return VariableDeclarationStatement.new(var_name, var_type, value)
     end
 
-    def variable_declaration
-        puts "PARSING VAR DECL"
+    def variable_initialisation
         var_type = variable_type
-        puts "TYPE = #{var_type}"
         var_name = consume_token(:IDENTIFIER, "Expect variable name.")
-
         consume_token(:ASSIGNMENT, "Expecting an initial value for '#{var_name.lexeme}'.")
         initial_value = expression
         return VariableDeclarationStatement.new(var_name, var_type, initial_value);
     end
 
     def variable_type
-        base_type = consume_token(:TYPE, "Expecting variable type.")
+        var_type = [consume_token(:TYPE, "Expecting variable type.").literal]
         loop do
             if match_token(:LEFT_SQUARE)
-                puts "ARRAY!"
                 consume_token(:RIGHT_SQUARE, "Expecting ']' after '['.")
-                # TODO: add array to type list
+                var_type = [:array, *var_type]
             elsif match_token(:QUESTION)
-                puts "OPTIONAL!"
-                # TODO: add optional to type list
+                var_type = [:optional, *var_type]
+            elsif match_token(:LESS)
+
             else
                 break
             end
         end
-        return base_type
+        return var_type
     end
 
     def statement
@@ -206,14 +196,14 @@ class Parser
         if match_token(:SEMICOLON)
             initialiser = nil
         else
-            initialiser = variable_declaration
+            initialiser = variable_initialisation
             consume_token(:SEMICOLON, "Expect ';' after for loop initialiser.");
         end
 
         if !check(:SEMICOLON)
             condition = expression
         else
-            condition = LiteralExpression.new(true, :BOOLEAN)
+            condition = LiteralExpression.new(true, :boolean)
         end
         consume_token(:SEMICOLON, "Expect ';' after for loop condition.");
 
@@ -434,15 +424,20 @@ class Parser
     end
 
     def primary
+
+        # primitives = {
+        #     BOOLEAN:  Raven_Boolean, 
+        #     INTEGER:  Raven_Integer, 
+        #     REAL:     Raven_Real,
+        #     RATIONAL: Raven_Rational,
+        # }
+
         if match_token(:STRING)
             return LiteralExpression.new(escape_string(previous.literal), :STRING)
         end
         if match_token(:BOOLEAN, :INTEGER, :REAL, :RATIONAL)
             return LiteralExpression.new(previous.literal, previous.type)
-        end
-        if match_token(:TYPE)
-            return LiteralExpression.new(previous.literal, previous.type)
-        end            
+        end        
         if match_token(:LEFT_SQUARE)
             array = []
             while !eof? && !check(:RIGHT_SQUARE)
@@ -453,17 +448,58 @@ class Parser
             return ArrayExpression.new(array, previous.type)
         end
 
-        if match_token(:IDENTIFIER)
-            return VariableExpression.new(previous)
+        if check(:TYPE)
+            var_token = peek.literal
+            var_type = variable_type
+            if match_token(:LEFT_BRACE)
+                return subroutine_body([], var_type)
+            else
+                return LiteralExpression.new(var_token, var_type)
+            end
         end
 
+        # Function Literals
         if match_token(:LEFT_PAREN)
+            if check(:TYPE) && check_next(:IDENTIFIER)
+                params = []
+                type = consume_token(:TYPE, "Expecting parameter type.")
+                var_name = consume_token(:IDENTIFIER, "Expecting parameter name.")
+                params.push({name: var_name, type: type})
+                while !check(:RIGHT_PAREN) && !eof?
+                    break if !check(:COMMA)
+                    consume_token(:COMMA, "Expecting ',' in parameter list.")
+                    type = consume_token(:TYPE, "Expecting parameter type.")
+                    var_name = consume_token(:IDENTIFIER, "Expecting parameter name.")
+                    params.push({name: var_name, type: type})
+                end
+                consume_token(:RIGHT_PAREN, "Expecting ')' after parameter list.")
+                return_type = nil
+                if match_token(:TYPE)
+                    return_type = previous
+                end
+                consume_token(:LEFT_BRACE, "Expecting '{' before function body.")
+                body = block
+                return FunctionExpression.new(params, return_type, body)
+            end
             expr = expression
             consume_token(:RIGHT_PAREN, "Expecting ')' after expression.")
             return GroupingExpression.new(expr)
         end
 
+        if match_token(:LEFT_BRACE)
+            return subroutine_body([], nil)
+        end        
+
+        if match_token(:IDENTIFIER)
+            return VariableExpression.new(previous)
+        end
+
         raise fault(peek, "Expecting an expression. Got '#{peek.lexeme}'.")
+    end
+
+    def subroutine_body(params, return_type)
+        body = block
+        return FunctionExpression.new(params, return_type, body)
     end
 
 end

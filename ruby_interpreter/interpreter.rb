@@ -244,7 +244,7 @@ class Interpreter < Visitor
             closure = @environment
             env = Environment.new(closure)
             expr.parameter_names.each_with_index { |param, i| env.define(param, args[i]) }
-            return interpreter.execute_subroutine(expr.body, env)
+            return interpreter.execute_function(expr.body, env)
         end
         return func
     end
