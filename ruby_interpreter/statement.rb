@@ -102,24 +102,6 @@ class WithStatement < Statement
 
 end
 
-class FunctionDeclarationStatement < Statement
-
-    attr_reader :name
-    attr_reader :parameter_names
-    attr_reader :parameter_types
-    attr_reader :return_type
-    attr_reader :body
-
-    def initialize(name, parameters, return_type, body)
-        @name = name
-        @parameter_names = parameters.map {|param| param[:name] }
-        @parameter_types = parameters.map {|param| param[:type] }
-        @return_type = return_type
-        @body = body
-    end
-
-end
-
 class ReturnStatement < Statement
 
     attr_reader :token
