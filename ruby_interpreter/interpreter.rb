@@ -17,7 +17,7 @@ class Interpreter < Visitor
 
     def initialize(statements)
         @statements = statements
-        @environment = GLOBAL_ENV
+        @environment = Environment.new(GLOBAL_ENV)
         @function_environment = nil
     end
 
@@ -48,7 +48,6 @@ class Interpreter < Visitor
     end
 
     def execute_function(statements, env)
-        # TODO: handle defer statements here. Or /in/ here somewhere.
         return_value = nil
         previous_func_env = @function_environment
         begin
@@ -71,8 +70,8 @@ class Interpreter < Visitor
         expr.accept(self)
     end
 
-    def truthy?(val)
-        return false if val == false
+    def truthy?(value)
+        return false if value == false
         return true
     end
 
@@ -126,15 +125,15 @@ class Interpreter < Visitor
         
     end
 
-    def visit_FunctionDeclarationStatement(stmt)
-        func = lambda do |interpreter, args|
-            closure = @environment
-            env = Environment.new(closure)
-            stmt.parameter_names.each_with_index { |param, i| env.define(param, args[i]) }
-            return interpreter.execute_function(stmt.body, env)
-        end
-        @environment.define(stmt.name, func)
-    end
+    # def visit_FunctionDeclarationStatement(stmt)
+    #     func = lambda do |interpreter, args|
+    #         closure = @environment
+    #         env = Environment.new(closure)
+    #         stmt.parameter_names.each_with_index { |param, i| env.define(param, args[i]) }
+    #         return interpreter.execute_function(stmt.body, env)
+    #     end
+    #     @environment.define(stmt.name, func)
+    # end
 
     def visit_ReturnStatement(stmt)
         value = !stmt.value.nil? ? evaluate(stmt.value) : nil
@@ -238,6 +237,16 @@ class Interpreter < Visitor
 
     def visit_LiteralExpression(expr)
         return expr.value
+    end
+
+    def visit_FunctionExpression(expr)
+        func = lambda do |interpreter, args|
+            closure = @environment
+            env = Environment.new(closure)
+            expr.parameter_names.each_with_index { |param, i| env.define(param, args[i]) }
+            return interpreter.execute_subroutine(expr.body, env)
+        end
+        return func
     end
 
     def visit_ShortCircuitExpression(expr)
