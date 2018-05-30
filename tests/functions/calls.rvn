@@ -18,4 +18,5 @@ print("\n")
 
 test(int == int)
 test(typeof(3) == int)
+test(int == typeof(3))
 test(typeof(int) == type)
