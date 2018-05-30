@@ -12,4 +12,28 @@ module SystemFunctions
         return type_list.reverse.inject("") { |memo, t| t.to_s + (memo.empty? ? "" : "<#{memo}>") }
     end
 
+    def self.type_of(obj)
+        return [:int]      if obj.is_a?(Integer)
+        return [:real]     if obj.is_a?(Float)
+        return [:string]   if obj.is_a?(String)
+        return [:bool]     if (obj == true || obj == false)
+        return [:rational] if obj.is_a?(Rational)
+        return [:func]     if obj.is_a?(Proc)
+        if obj.is_a?(Array)
+            return array_type(obj)
+        end
+        PUTS "COULD NOT DETECT TYPE OF OBJECT!!"
+        return [:any]
+    end
+
+    def self.array_type(array)
+        return [:type] if array.all? { |value| value.is_a?(Symbol) }
+        return [:array, :int]      if array.all? { |value| value.is_a?(Integer) }
+        return [:array, :real]     if array.all? { |value| value.is_a?(Float) }
+        return [:array, :string]   if array.all? { |value| value.is_a?(String) }
+        return [:array, :bool]     if array.all? { |value| (value == true || value == false) }
+        return [:array, :rational] if array.all? { |value| value.is_a?(Rational) }
+        return [:array, :func]     if array.all? { |value| value.is_a?(Proc) }
+    end
+
 end
