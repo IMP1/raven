@@ -2,6 +2,7 @@ require_relative 'log'
 require_relative 'lexer'
 require_relative 'parser'
 require_relative 'interpreter'
+require_relative 'type_checker'
 
 class Compiler
 
@@ -47,6 +48,9 @@ class Compiler
         statements = parser.parse
 
         @@log.trace(statements.map {|s| s.inspect}.join("\n"))
+
+        checker = TypeChecker.new(statements)
+        checker.check
 
         exit(65) if @@compile_faults.size > 0
 

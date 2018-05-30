@@ -6,6 +6,13 @@ require_relative 'global_env'
 
 class TypeChecker < Visitor
 
+    class Return < RuntimeError
+        attr_reader :value
+        def initialize(value)
+            @value = value
+        end
+    end
+
     GLOBAL_ENV = GlobalEnvironment.new
 
     def initialize(statements)
@@ -19,8 +26,8 @@ class TypeChecker < Visitor
             @statements.each do |stmt|
                 check_stmt(stmt)
             end
-        rescue RuntimeFault => f
-            Compiler.runtime_fault(f)
+        rescue RuntimeError => r
+            p r
         end
     end
 
@@ -42,8 +49,7 @@ class TypeChecker < Visitor
             @function_environment = @environment
             execute_block(statements, env)
         rescue Return => r
-            # TODO: check return value type against function return type
-            return_value = r.value
+            return r.type
         end
         previous_env = @environment
         @function_environment.pop_deferred do |stmt, env|
@@ -52,7 +58,7 @@ class TypeChecker < Visitor
         end
         @environment = previous_env
         @function_environment = previous_func_env
-        return return_value
+        return nil
     end
 
     def get_expression_type(expr)
@@ -60,13 +66,20 @@ class TypeChecker < Visitor
     end
 
     def assert_type(token, obj_type, *types)
-        if !types.any? { |t| is_type?(obj_type, t) }
-            p token
-            Compiler.runtime_fault(TypeFault.new(token, "Invalid type for #{token.lexeme}. Was expecting one of #{types.join(', ')}. Got #{obj_type}"))
+        if obj_type.nil?
+            puts "obj_type is nil"
+            puts caller 
+            return
         end
+        puts "Checking that #{token.lexeme.inspect} #{obj_type.inspect} is one of #{types.inspect}"
+        if types.all? { |t| !is_type?(obj_type.flatten, t) }
+            Compiler.runtime_fault(TypeFault.new(token, "Invalid type for #{token.lexeme}. Was expecting one of {#{types.join(', ')}}. Got '#{obj_type}'"))
+        end
+        puts "It is!"
     end
 
     def is_type?(obj_type, type)
+        return true if type == [:any]
         return obj_type == type
     end
 
@@ -80,7 +93,7 @@ class TypeChecker < Visitor
 
     def visit_VariableDeclarationStatement(stmt)
         assert_type(stmt.token, get_expression_type(stmt.initialiser), stmt.type)
-        @environment.define(stmt.name, value, stmt.type)
+        @environment.define(stmt.name, nil, stmt.type)
     end
 
     def visit_AssignmentStatement(stmt)
@@ -137,24 +150,32 @@ class TypeChecker < Visitor
         when :MINUS, :PLUS, :ASTERISK, :STROKE, :DOUBLE_STROKE, :CARET
             assert_type(expr.token, left, [:int], [:real], [:rational])
             assert_type(expr.token, right, [:int], [:real], [:rational])
+            return left
 
         when :LESS_EQUAL, :LESS, :GREATER_EQUAL, :GREATER
             assert_type(expr.token, left, right)
+            return [:bool]
 
         when :DOUBLE_AMPERSAND, :DOUBLE_PIPE
             assert_type(expr.token, left, [:bool])
             assert_type(expr.token, right, [:bool])
+            return left
 
         when :AMPERSAND, :PIPE, :TILDE, :DOUBLE_LEFT, :DOUBLE_RIGHT
             assert_type(expr.token, left, [:int]) # TODO: Bitwise operators operate on integers, right?
+            return left
 
         when :BEGINS_WITH, :ENDS_WITH, :CONTAINS
             assert_type(expr.token, left, [:string])
             assert_type(expr.token, right, [:string])
+            return left
 
         when :EQUAL, :NOT_EQUAL
+            return [:bool]
             # These can be any type.
         end
+
+        raise "WHAT KIND OF BINARY EXPRESSION IS THIS?"
     end
 
     def visit_UnaryExpression(expr)
@@ -164,13 +185,17 @@ class TypeChecker < Visitor
 
         case expr.operator.type
         when :MINUS
-            assert_type(expr.token, left, [:int], [:real], [:rational])
+            assert_type(expr.token, right, [:int], [:real], [:rational])
+            return right
         when :NOT
-            assert_type(expr.token, left, [:int]) # TODO: Bitwise operators operate on integers, right?
+            assert_type(expr.token, right, [:int]) # TODO: Bitwise operators operate on integers, right?
+            return right
         when :EXCLAMATION
-            assert_type(expr.token, left, [:bool])
+            assert_type(expr.token, right, [:bool])
+            return right
         end
 
+        raise "WHAT KIND OF UNARY EXPRESSION IS THIS?"
     end
 
     def visit_GroupingExpression(expr)
@@ -178,11 +203,32 @@ class TypeChecker < Visitor
     end
 
     def visit_ArrayExpression(expr)
-        return expr.elements.map { |e| get_expression_type(e) }
+        if expr.elements.any? {|e| get_expression_type(e) != get_expression_type(expr.elements[0]) }
+            Compiler.compile_fault(TypeFault.new(expr.token, "This array contains elements with differing types."))
+            return [:array]
+        end
+        if expr.elements.empty?
+            return [:array]
+        end
+        return [:array, get_expression_type(expr.elements.first)]
     end
 
     def visit_LiteralExpression(expr)
-        return expr.type
+        case expr.type
+        when :RATIONAL_LITERAL
+            return [:rational]
+        when :INTEGER_LITERAL
+            return [:int]
+        when :REAL_LITERAL
+            return [:real]
+        when :BOOLEAN_LITERAL
+            return [:bool]
+        when :STRING_LITERAL
+            return [:string]
+        when :TYPE_LITERAL
+            return [:type]
+        end
+        raise "WHAT KIND OF LITERAL IS THIS?"
     end
 
     def visit_FunctionExpression(expr)
@@ -194,41 +240,22 @@ class TypeChecker < Visitor
             expr.parameter_names.each_with_index { |param, i| env.define(param, args[i]) }
             return interpreter.execute_function(expr.body, env)
         end
-        return func
     end
 
     def visit_ShortCircuitExpression(expr)
-        left = get_expression_type(expr.left)
-
-        if truthy?(left) && expr.operator == :DOUBLE_PIPE
-            return left
-        end
-        if !truthy?(left) && expr.operator == :DOUBLE_AMPERSAND
-            return left
-        end
-
-        return get_expression_type(expr.right)
+        return get_expression_type(expr.left)
     end
 
     def visit_VariableExpression(expr)
         # TODO: return variable's type.
-        return @environment[expr.name]
+        return @environment.type(expr.name)
     end
 
     def visit_CallExpression(expr)
         # TODO: check arg types, and then return function return-type.
-        func = evaluate(expr.callee)
-        args = expr.arguments.map { |a| evaluate(a) }
-
-        if args.size != expr.arguments.size
-            Compiler.runtime_fault(ArgumentFault.new(expr.token, "Expected #{func.arity} args but got #{args.size}."))
-        end
-
-        if !func.is_a?(Proc)
-            Compiler.runtime_fault(SyntaxFault.new(expr.token, "This object is not callable."))
-        end
-
-        func.call(self, args)
+        # func = evaluate(expr.callee)
+        # args = expr.arguments.map { |a| evaluate(a) }
+        return [:any]
     end
 
 end
