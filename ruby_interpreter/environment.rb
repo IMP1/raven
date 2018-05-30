@@ -5,14 +5,16 @@ class Environment
     def initialize(parent_environment=nil)
         @parent_environment = parent_environment
         @mappings = {}
+        @types = {}
         @deffered_statements = []
     end
 
-    def define(token, value)
+    def define(token, value, type)
         if mapped?(token)
             Compiler.runtime_fault(SyntaxFault.new(token, "Duplicate variable '#{token.lexeme}'."))
         end
         @mappings[token.lexeme] = value
+        @types[token.lexeme] = type
     end
 
     def assign(token, value)
@@ -37,15 +39,23 @@ class Environment
         return false
     end
 
+    def type(token)
+        if mapped?(token)
+            return @types[token.lexeme]
+        end
+        if !@parent_environment.nil?
+            return @parent_environment.type(token)
+        end
+        Compiler.runtime_fault(SyntaxFault.new(token, "Undefined variable '#{token.lexeme}'."))
+    end
+
     def [](token)
         if mapped?(token)
             return @mappings[token.lexeme]
         end
-
         if !@parent_environment.nil?
             return @parent_environment[token]
         end
-
         Compiler.runtime_fault(SyntaxFault.new(token, "Undefined variable '#{token.lexeme}'."))
     end
 
