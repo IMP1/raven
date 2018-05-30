@@ -114,19 +114,6 @@ class ReturnStatement < Statement
 
 end
 
-# TODO: remove this when printing is implemented as a gloabl language function.
-class PrintInspectStatement < Statement
-
-    attr_reader :token
-    attr_reader :expression
-
-    def initialize(token, expression)
-        @token = token
-        @expression = expression
-    end
-
-end
-
 # TODO: remove this when the language is working as intended.
 class TestAssertStatement < Statement
 
