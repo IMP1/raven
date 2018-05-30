@@ -179,7 +179,7 @@ class Parser
             return debug_test_statement
         end
         if match_token(:LEFT_BRACE)
-            return BlockStatement.new(block)
+            return BlockStatement.new(previous, block)
         end
         return expression_statement
     end
@@ -200,6 +200,7 @@ class Parser
     end
 
     def for_statement
+        for_token = previous
         consume_token(:LEFT_PAREN, "Expecting '(' before for loop condition.")
         if match_token(:SEMICOLON)
             initialiser = nil
@@ -211,7 +212,7 @@ class Parser
         if !check(:SEMICOLON)
             condition = expression
         else
-            condition = LiteralExpression.new(true, :boolean)
+            condition = LiteralExpression.new(previous, true, :bool)
         end
         consume_token(:SEMICOLON, "Expect ';' after for loop condition.");
 
@@ -225,18 +226,18 @@ class Parser
         body = statement
 
         if !increment.nil?
-            body = BlockStatement.new([body, increment])
+            body = BlockStatement.new(for_token, [body, increment])
         end
-        body = WhileStatement.new(condition, body)
+        body = WhileStatement.new(for_token, condition, body)
         if !initialiser.nil?
-            body = BlockStatement.new([initialiser, body])
+            body = BlockStatement.new(for_token, [initialiser, body])
         end
 
         return body
     end
 
     def if_statement
-        consume_token(:LEFT_PAREN, "Expecting '(' before if statement condition.")
+        token = consume_token(:LEFT_PAREN, "Expecting '(' before if statement condition.")
         condition = expression
         consume_token(:RIGHT_PAREN, "Expecting ')' after if statement condition.")
 
@@ -247,7 +248,7 @@ class Parser
             else_branch = statement
         end
 
-        return IfStatement.new(condition, then_branch, else_branch)
+        return IfStatement.new(token, condition, then_branch, else_branch)
     end
 
     def with_statement
@@ -292,7 +293,7 @@ class Parser
 
     def expression_statement
         expr = expression
-        return ExpressionStatement.new(expr)
+        return ExpressionStatement.new(previous, expr)
     end
 
     def expression
@@ -428,10 +429,10 @@ class Parser
 
     def primary
         if match_token(:STRING)
-            return LiteralExpression.new(escape_string(previous.literal), :STRING)
+            return LiteralExpression.new(previous, escape_string(previous.literal), :STRING)
         end
         if match_token(:BOOLEAN, :INTEGER, :REAL, :RATIONAL)
-            return LiteralExpression.new(previous.literal, previous.type)
+            return LiteralExpression.new(previous, previous.literal, previous.type)
         end        
         if match_token(:LEFT_SQUARE)
             array = []
@@ -440,16 +441,16 @@ class Parser
                 break if !match_token(:COMMA)
             end
             consume_token(:RIGHT_SQUARE, "Expecting ']' after array literal.")
-            return ArrayExpression.new(array, previous.type)
+            return ArrayExpression.new(previous, array, previous.type)
         end
 
         if check(:TYPE)
             var_token = peek.literal
             var_type = variable_type
             if match_token(:LEFT_BRACE)
-                return subroutine_body([], var_type)
+                return subroutine_body(previous, [], var_type)
             else
-                return LiteralExpression.new(var_type, :TYPE)
+                return LiteralExpression.new(var_token, var_type, :TYPE)
             end
         end
 
@@ -473,23 +474,25 @@ class Parser
                     if match_token(:TYPE)
                         return_type = previous
                     end
-                    consume_token(:LEFT_BRACE, "Expecting '{' before function body.")
+                    func_token = consume_token(:LEFT_BRACE, "Expecting '{' before function body.")
                     body = block
-                    return FunctionExpression.new(params, return_type, body)
+                    return FunctionExpression.new(func_token, params, return_type, body)
                 else
                     revert
+                    group_token = previous
                     expr = expression
                     consume_token(:RIGHT_PAREN, "Expecting ')' after expression.")
-                    return GroupingExpression.new(expr)
+                    return GroupingExpression.new(group_token, expr)
                 end
             end
+            group_token = previous
             expr = expression
             consume_token(:RIGHT_PAREN, "Expecting ')' after expression.")
-            return GroupingExpression.new(expr)
+            return GroupingExpression.new(group_token, expr)
         end
 
         if match_token(:LEFT_BRACE)
-            return subroutine_body([], nil)
+            return subroutine_body(previous, [], nil)
         end        
 
         if match_token(:IDENTIFIER)
@@ -499,9 +502,9 @@ class Parser
         raise fault(peek, "Expecting an expression. Got '#{peek.lexeme}'.")
     end
 
-    def subroutine_body(params, return_type)
+    def subroutine_body(token, params, return_type)
         body = block
-        return FunctionExpression.new(params, return_type, body)
+        return FunctionExpression.new(token, params, return_type, body)
     end
 
 end

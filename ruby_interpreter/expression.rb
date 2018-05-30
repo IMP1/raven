@@ -4,9 +4,11 @@ class Expression
     include Visitable
 
     attr_reader :type
+    attr_reader :token
 
-    def initialize(type)
-        @type = type
+    def initialize(token, type)
+        @token = token
+        @type  = type
     end
 
 end
@@ -18,7 +20,7 @@ class BinaryExpression < Expression
     attr_reader :right
 
     def initialize(left, operator, right)
-        super(left.type)
+        super(operator, left.type)
         @left = left
         @operator = operator
         @right = right
@@ -32,7 +34,7 @@ class UnaryExpression < Expression
     attr_reader :right
 
     def initialize(operator, right)
-        super(right.type)
+        super(operator, right.type)
         @operator = operator
         @right = right
     end
@@ -43,8 +45,8 @@ class GroupingExpression < Expression
 
     attr_reader :expression
 
-    def initialize(expr)
-        super(expr.type)
+    def initialize(token, expr)
+        super(token, expr.type)
         @expression = expr
     end
 
@@ -54,8 +56,8 @@ class LiteralExpression < Expression
 
     attr_reader :value
 
-    def initialize(value, type)
-        super(type)
+    def initialize(token, value, type)
+        super(token, type)
         @value = value
     end
 
@@ -65,8 +67,8 @@ class ArrayExpression < Expression
 
     attr_reader :elements
 
-    def initialize(elements, type)
-        super(type)
+    def initialize(token, elements, type)
+        super(token, type)
         @elements = elements
     end
 
@@ -79,7 +81,7 @@ class ShortCircuitExpression < Expression
     attr_reader :right
 
     def intitialize(left, operator, right)
-        super(left.type)
+        super(operator, left.type)
         @left = left
         @operator = operator
         @right = right
@@ -92,7 +94,7 @@ class VariableExpression < Expression
     attr_reader :name
 
     def initialize(name)
-        super(nil)
+        super(name, nil)
         @name = name
     end
 
@@ -105,7 +107,8 @@ class FunctionExpression < Expression
     attr_reader :return_type
     attr_reader :body
 
-    def initialize(parameters, return_type, body)
+    def initialize(token, parameters, return_type, body)
+        super(token, nil)
         @parameter_names = parameters.map {|param| param[:name] }
         @parameter_types = parameters.map {|param| param[:type] }
         @return_type = return_type
@@ -121,7 +124,7 @@ class CallExpression < Expression
     attr_reader :arguments
 
     def initialize(callee, token, arguments)
-        super(nil)
+        super(token, nil)
         @callee = callee
         @token = token
         @arguments = arguments

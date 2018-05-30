@@ -2,13 +2,20 @@ require_relative 'visitor'
 
 class Statement
     include Visitable
+
+    attr_reader :token
+
+    def initialize(token)
+        @token = token
+    end
 end
 
 class ExpressionStatement < Statement
 
     attr_reader :expression
 
-    def initialize(expression)
+    def initialize(token, expression)
+        super(token)
         @expression = expression
     end
 
@@ -21,6 +28,7 @@ class VariableDeclarationStatement < Statement
     attr_reader :initialiser
 
     def initialize(name, type, initialiser)
+        super(name)
         @name = name
         @type = type
         @initialiser = initialiser
@@ -34,6 +42,7 @@ class AssignmentStatement < Statement
     attr_reader :expression
 
     def initialize(name, expression)
+        super(name)
         @name = name
         @expression = expression
     end
@@ -45,7 +54,8 @@ class WhileStatement < Statement
     attr_reader :condition
     attr_reader :body
 
-    def initialize(condition, body)
+    def initialize(token, condition, body)
+        super(token)
         @condition = condition
         @body = body
     end
@@ -56,7 +66,8 @@ class BlockStatement < Statement
 
     attr_reader :statements
 
-    def initialize(statements)
+    def initialize(token, statements)
+        super(token)
         @statements = statements
     end
 
@@ -64,11 +75,13 @@ end
 
 class IfStatement < Statement
 
+    attr_reader :token
     attr_reader :condition
     attr_reader :then_branch
     attr_reader :else_branch
 
-    def initialize(condition, then_branch, else_branch=nil)
+    def initialize(token, condition, then_branch, else_branch=nil)
+        super(token)
         @condition   = condition
         @then_branch = then_branch
         @else_branch = else_branch
@@ -82,7 +95,7 @@ class DeferStatement < Statement
     attr_reader :statement
 
     def initialize(token, statement)
-        @token = token
+        super(token)
         @statement = statement
     end
 
@@ -94,7 +107,8 @@ class WithStatement < Statement
     attr_reader :then_branch
     attr_reader :else_branch
 
-    def initialize(condition, then_branch, else_branch=nil)
+    def initialize(token, condition, then_branch, else_branch=nil)
+        super(token)
         @condition   = condition
         @then_branch = then_branch
         @else_branch = else_branch
@@ -108,7 +122,7 @@ class ReturnStatement < Statement
     attr_reader :value
 
     def initialize(token, value)
-        @token = token
+        super(token)
         @value = value
     end
 
@@ -121,7 +135,7 @@ class TestAssertStatement < Statement
     attr_reader :expression
 
     def initialize(token, expression)
-        @token = token
+        super(token)
         @expression = expression
     end
 
