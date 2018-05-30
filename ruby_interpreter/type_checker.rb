@@ -42,6 +42,7 @@ class TypeChecker < Visitor
             @function_environment = @environment
             execute_block(statements, env)
         rescue Return => r
+            # TODO: check return value type against function return type
             return_value = r.value
         end
         previous_env = @environment
@@ -58,14 +59,15 @@ class TypeChecker < Visitor
         expr.accept(self)
     end
 
-    def assert_type(obj, *types)
-        if !types.any? { |t| is_type?(obj, t) }
-
+    def assert_type(token, obj_type, *types)
+        if !types.any? { |t| is_type?(obj_type, t) }
+            p token
+            Compiler.runtime_fault(TypeFault.new(token, "Invalid type for #{token.lexeme}. Was expecting one of #{types.join(', ')}. Got #{obj_type}"))
         end
     end
 
-    def is_type?(obj, type)
-
+    def is_type?(obj_type, type)
+        return obj_type == type
     end
 
     #--------------------------
@@ -77,15 +79,12 @@ class TypeChecker < Visitor
     end
 
     def visit_VariableDeclarationStatement(stmt)
-        # TODO: change to care only about /types/
-        value = evaluate(stmt.initialiser)
-        @environment.define(stmt.name, value)
+        assert_type(stmt.token, get_expression_type(stmt.initialiser), stmt.type)
+        @environment.define(stmt.name, value, stmt.type)
     end
 
     def visit_AssignmentStatement(stmt)
-        # TODO: check type
-        value = evaluate(stmt.expression)
-        @environment.assign(stmt.name, value)
+        assert_type(stmt.token, get_expression_type(stmt.expression), @environment.type(stmt.name))
     end
 
     def visit_WhileStatement(stmt)
@@ -98,7 +97,7 @@ class TypeChecker < Visitor
     end
 
     def visit_IfStatement(stmt)
-        get_expression_type(stmt.condition)
+        assert_type(stmt.token, get_expression_type(stmt.condition), [:bool])
         check_stmt(stmt.then_branch)
         if !stmt.else_branch.nil?
             check_stmt(stmt.else_branch)
@@ -106,12 +105,7 @@ class TypeChecker < Visitor
     end
 
     def visit_DeferStatement(stmt)
-        if @function_environment.nil?
-            Compiler.runtime_fault(ScopeFault.new(stmt.token, "Can only defer within functions."))
-            return
-        end
-        closure = @environment
-        @function_environment.defer(stmt, Environment.new(closure))
+        check_stmt(stmt.statement)
     end
 
     def visit_WithStatement(stmt)
@@ -119,15 +113,12 @@ class TypeChecker < Visitor
     end
 
     def visit_ReturnStatement(stmt)
-        value = !stmt.value.nil? ? evaluate(stmt.value) : nil
-        raise Return.new(value)
+        type = !stmt.value.nil? ? get_expression_type(stmt.value) : nil
+        raise Return.new(type)
     end
 
     def visit_TestAssertStatement(stmt)
-        assertion = evaluate(stmt.expression)
-        if !truthy?(assertion)
-            Compiler.runtime_fault(TestFailure.new(stmt.token, "Assertion Failed."))
-        end
+        assert_type(stmt.token, get_expression_type(stmt.expression), [:bool])
     end
 
     #--------------------------
@@ -137,74 +128,47 @@ class TypeChecker < Visitor
     def visit_BinaryExpression(expr)
         left = get_expression_type(expr.left)
         right = get_expression_type(expr.right)
+
+        assert_type(expr.token, left, right)
         
         # TODO: ensure operator is defined on type
-        # TODO: check type compatability, don't return the result.
+
         case expr.operator.type
-        when :MINUS
-            return left - right
-        when :PLUS
-            return left + right
-        when :ASTERISK
-            return left * right
-        when :STROKE
-            return left.to_r / right
-        when :DOUBLE_STROKE
-            return (left / right).to_i
-        when :CARET
-            return left ** right
+        when :MINUS, :PLUS, :ASTERISK, :STROKE, :DOUBLE_STROKE, :CARET
+            assert_type(expr.token, left, [:int], [:real], [:rational])
+            assert_type(expr.token, right, [:int], [:real], [:rational])
 
-        when :LESS_EQUAL
-            return left <= right
-        when :LESS
-            return left < right
-        when :GREATER_EQUAL
-            return left >= right
-        when :GREATER
-            return left > right
+        when :LESS_EQUAL, :LESS, :GREATER_EQUAL, :GREATER
+            assert_type(expr.token, left, right)
 
-        when :DOUBLE_AMPERSAND
-            return left && right
-        when :DOUBLE_PIPE
-            return left || right
+        when :DOUBLE_AMPERSAND, :DOUBLE_PIPE
+            assert_type(expr.token, left, [:bool])
+            assert_type(expr.token, right, [:bool])
 
-        when :AMPERSAND
-            return left & right
-        when :PIPE
-            return left | right
-        when :TILDE
-            return left ^ right
-        when :DOUBLE_LEFT
-            return left << right
-        when :DOUBLE_RIGHT
-            return left >> right
+        when :AMPERSAND, :PIPE, :TILDE, :DOUBLE_LEFT, :DOUBLE_RIGHT
+            assert_type(expr.token, left, [:int]) # TODO: Bitwise operators operate on integers, right?
 
-        when :BEGINS_WITH
-            return left & right
-        when :ENDS_WITH
-            return left | right
-        when :CONTAINS
-            return left & right
+        when :BEGINS_WITH, :ENDS_WITH, :CONTAINS
+            assert_type(expr.token, left, [:string])
+            assert_type(expr.token, right, [:string])
 
-        when :EQUAL
-            return equals(left, right)
-        when :NOT_EQUAL
-            return left != right
+        when :EQUAL, :NOT_EQUAL
+            # These can be any type.
         end
     end
 
     def visit_UnaryExpression(expr)
         right = get_expression_type(expr.right)
+
         # TODO: ensure operator is defined on type
-        # TODO: check type compatability, don't return the result.
 
         case expr.operator.type
         when :MINUS
-            return -right # TODO: ensure operator is defined on type
+            assert_type(expr.token, left, [:int], [:real], [:rational])
         when :NOT
-            return ~right # TODO: ensure operator is defined on type
+            assert_type(expr.token, left, [:int]) # TODO: Bitwise operators operate on integers, right?
         when :EXCLAMATION
-            return !truthy?(right)
+            assert_type(expr.token, left, [:bool])
         end
 
     end
@@ -218,11 +182,11 @@ class TypeChecker < Visitor
     end
 
     def visit_LiteralExpression(expr)
-        # TODO: return /type/ not value
-        return expr.value
+        return expr.type
     end
 
     def visit_FunctionExpression(expr)
+        return [:func]
         # TODO: return function signiture? Is that its type? Yeah, I guess.
         func = lambda do |interpreter, args|
             closure = @environment
