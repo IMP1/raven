@@ -136,7 +136,7 @@ class Interpreter < Visitor
     end
 
     def visit_WithStatement(stmt)
-        
+        # TODO: with statements
     end
 
     # def visit_FunctionDeclarationStatement(stmt)
@@ -152,10 +152,6 @@ class Interpreter < Visitor
     def visit_ReturnStatement(stmt)
         value = !stmt.value.nil? ? evaluate(stmt.value) : nil
         raise Return.new(value)
-    end
-
-    def visit_PrintInspectStatement(stmt)
-        p evaluate(stmt.expression)
     end
 
     def visit_TestAssertStatement(stmt)
