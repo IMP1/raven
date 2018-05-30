@@ -450,7 +450,7 @@ class Parser
             if match_token(:LEFT_BRACE)
                 return subroutine_body([], var_type)
             else
-                return LiteralExpression.new([var_token], var_type)
+                return LiteralExpression.new(var_type, :TYPE)
             end
         end
 
