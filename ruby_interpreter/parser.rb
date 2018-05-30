@@ -97,6 +97,13 @@ class Parser
         return statements
     end
 
+    def infer_type(expression)
+        if expression.is_a?(FunctionExpression)
+            return [:func]
+        end
+        return expression.type
+    end
+
 
     #--------------------------------------------------------------------------#
     # Grammar Functions
@@ -120,7 +127,7 @@ class Parser
     def variable_definiton
         var_name = consume_token(:IDENTIFIER, "Expecting object name.")
         value = expression
-        var_type = value.type
+        var_type = infer_type(value)
         return VariableDeclarationStatement.new(var_name, var_type, value)
     end
 
