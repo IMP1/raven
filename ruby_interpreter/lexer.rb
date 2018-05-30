@@ -257,14 +257,6 @@ class Lexer
             return
         end
 
-        if text == "TRUE"
-            add_token(:BOOLEAN, true)
-            return
-        elsif text == "FALSE"
-            add_token(:BOOLEAN, false)
-            return
-        end
-
         # See if the identifier is a type.
         type = :IDENTIFIER
         type = KEYWORDS[text] if KEYWORDS.has_key?(text)
