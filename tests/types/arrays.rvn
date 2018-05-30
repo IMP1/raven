@@ -7,3 +7,15 @@ print(b)
 print("\n")
 print(typeof(b))
 print("\n")
+
+
+int[] x = [1, 2]
+int[] y = [2, 1]
+
+
+test (typeof(x) == typeof(y))
+
+print(int[])
+print("\n")
+
+test (int != int[])
