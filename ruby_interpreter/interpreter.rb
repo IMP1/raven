@@ -94,6 +94,12 @@ class Interpreter < Visitor
     #--------------------------
 
     def visit_ExpressionStatement(stmt)
+        # TODO: what /is/ this?
+        # puts "ExpressionStatement:"
+        # p stmt
+        # puts
+        # p stmt.expression
+        # puts
         evaluate(stmt.expression)
     end
 
