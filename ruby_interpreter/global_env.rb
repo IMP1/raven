@@ -29,6 +29,8 @@ class GlobalEnvironment < Environment
         if obj.is_a?(Array)
             return array_type(obj)
         end
+        PUTS "COULD NOT DETECT TYPE OF OBJECT!!"
+        return [:any]
     end
 
     def array_type(array)
