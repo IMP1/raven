@@ -1,6 +1,10 @@
 module SystemFunctions
 
-    # TODO: have formatting options?
+    def self.print(obj)
+        Kernel.print(to_string(obj))
+        # TODO: add a io module and make this call out to io.write(io.stdout, message)
+    end
+
     def self.to_string(obj)
         if obj.is_a?(Array) && obj.all? { |t| t.is_a?(Symbol) }
             return type_to_string(obj)

@@ -168,9 +168,6 @@ class Parser
         if match_token(:WHILE)
             return while_statement
         end
-        if match_token(:DEBUG_PRINT)
-            return debug_print_statement
-        end
         if match_token(:DEBUG_TEST)
             return debug_test_statement
         end
@@ -279,11 +276,6 @@ class Parser
 
         consume_token(:RIGHT_BRACE, "Expect '}' after block.")
         return statements
-    end
-
-    def debug_print_statement
-        value = expression
-        return PrintInspectStatement.new(previous, value)
     end
 
     def debug_test_statement

@@ -15,7 +15,6 @@ class Lexer
         'for'       => :FOR,
         'def'       => :DEFINITION,
         'return'    => :RETURN,
-        'p'         => :DEBUG_PRINT,
         'test'      => :DEBUG_TEST,
     }
 
