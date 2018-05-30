@@ -1,0 +1,36 @@
+def a {
+
+}
+
+def b (int x) {
+
+}
+
+def c (int x, int j) {
+
+}
+
+def d string {
+    return ""
+}
+
+def e rational {
+    return 1/2
+}
+
+def f (int x) int {
+    return x
+}
+
+print(typeof(a))
+print("\n")
+print(typeof(b))
+print("\n")
+print(typeof(c))
+print("\n")
+print(typeof(d))
+print("\n")
+print(typeof(e))
+print("\n")
+print(typeof(f))
+print("\n")

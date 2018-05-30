@@ -18,12 +18,19 @@ module SystemFunctions
         return [:string]   if obj.is_a?(String)
         return [:bool]     if (obj == true || obj == false)
         return [:rational] if obj.is_a?(Rational)
-        return [:func]     if obj.is_a?(Proc)
+        if obj.is_a?(Proc)
+            return func_type(obj)
+        end
         if obj.is_a?(Array)
             return array_type(obj)
         end
         PUTS "COULD NOT DETECT TYPE OF OBJECT!!"
         return [:any]
+    end
+
+    def self.func_type(func)
+        # TODO: include return type and parameter types
+        return [:func]
     end
 
     def self.array_type(array)
