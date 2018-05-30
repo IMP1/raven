@@ -92,7 +92,8 @@ class Parser
     def parse
         statements = []
         while !eof?
-            statements.push(declaration)
+            stmt = declaration
+            statements.push(stmt) if !stmt.nil?
         end
         return statements
     end
@@ -114,7 +115,7 @@ class Parser
             if match_token(:DEFINITION)
                 return variable_definiton
             end
-            if check(:TYPE)
+            if check(:TYPE_LITERAL)
                 return variable_initialisation
             end
             return statement
@@ -140,7 +141,7 @@ class Parser
     end
 
     def variable_type
-        var_type = [consume_token(:TYPE, "Expecting variable type.").literal]
+        var_type = [consume_token(:TYPE_LITERAL, "Expecting variable type.").literal]
         loop do
             if match_token(:LEFT_SQUARE)
                 consume_token(:RIGHT_SQUARE, "Expecting ']' after '['.")
@@ -428,10 +429,10 @@ class Parser
     end
 
     def primary
-        if match_token(:STRING)
-            return LiteralExpression.new(previous, escape_string(previous.literal), :STRING)
+        if match_token(:STRING_LITERAL)
+            return LiteralExpression.new(previous, escape_string(previous.literal), :STRING_LITERAL)
         end
-        if match_token(:BOOLEAN, :INTEGER, :REAL, :RATIONAL)
+        if match_token(:BOOLEAN_LITERAL, :INTEGER_LITERAL, :REAL_LITERAL, :RATIONAL_LITERAL)
             return LiteralExpression.new(previous, previous.literal, previous.type)
         end        
         if match_token(:LEFT_SQUARE)
@@ -444,19 +445,19 @@ class Parser
             return ArrayExpression.new(previous, array, previous.type)
         end
 
-        if check(:TYPE)
+        if check(:TYPE_LITERAL)
             var_token = peek.literal
             var_type = variable_type
             if match_token(:LEFT_BRACE)
                 return subroutine_body(previous, [], var_type)
             else
-                return LiteralExpression.new(var_token, var_type, :TYPE)
+                return LiteralExpression.new(var_token, var_type, :TYPE_LITERAL)
             end
         end
 
         # Function Literals
         if match_token(:LEFT_PAREN)
-            if check(:TYPE)
+            if check(:TYPE_LITERAL)
                 type = variable_type
                 if check(:IDENTIFIER)
                     params = []
@@ -471,7 +472,7 @@ class Parser
                     end
                     consume_token(:RIGHT_PAREN, "Expecting ')' after parameter list.")
                     return_type = nil
-                    if match_token(:TYPE)
+                    if match_token(:TYPE_LITERAL)
                         return_type = previous
                     end
                     func_token = consume_token(:LEFT_BRACE, "Expecting '{' before function body.")

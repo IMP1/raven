@@ -20,19 +20,19 @@ class Lexer
 
     VALUE_KEYWORDS = {
         # Types
-        'int'      => [:TYPE, :int],
-        'real'     => [:TYPE, :real],
-        'string'   => [:TYPE, :string],
-        'bool'     => [:TYPE, :bool],
-        'rational' => [:TYPE, :rational],
-        'func'     => [:TYPE, :func],
-        'type'     => [:TYPE, :type],
-        'any'      => [:TYPE, :any],
+        'int'      => [:TYPE_LITERAL, :int],
+        'real'     => [:TYPE_LITERAL, :real],
+        'string'   => [:TYPE_LITERAL, :string],
+        'bool'     => [:TYPE_LITERAL, :bool],
+        'rational' => [:TYPE_LITERAL, :rational],
+        'func'     => [:TYPE_LITERAL, :func],
+        'type'     => [:TYPE_LITERAL, :type],
+        'any'      => [:TYPE_LITERAL, :any],
         # Values
-        'TRUE'   => [:BOOLEAN, true],
-        'FALSE'  => [:BOOLEAN, false],
-        'true'   => [:BOOLEAN, true],
-        'false'  => [:BOOLEAN, false],
+        'TRUE'   => [:BOOLEAN_LITERAL, true],
+        'FALSE'  => [:BOOLEAN_LITERAL, false],
+        'true'   => [:BOOLEAN_LITERAL, true],
+        'false'  => [:BOOLEAN_LITERAL, false],
     }
 
     def initialize(source)
@@ -195,9 +195,9 @@ class Lexer
 
         # TODO: Convenience symbols?
         # when 'π'
-        #     add_token(:REAL, Math::PI)
+        #     add_token(:REAL_LITERAL, Math::PI)
         # when 'τ'
-        #     add_token(:REAL, 2 * Math::PI)
+        #     add_token(:REAL_LITERAL, 2 * Math::PI)
 
         when /\d/
             number
@@ -225,7 +225,7 @@ class Lexer
         advance();
         # Trim the surrounding quotes.
         value = @source[@start + 1...@current - 1]
-        add_token(:STRING, value);
+        add_token(:STRING_LITERAL, value);
     end
 
     def number
@@ -234,13 +234,13 @@ class Lexer
         if peek == '.' && peek_next =~ /\d/
             advance
             advance while peek =~ /\d/
-            add_token(:REAL, @source[@start...@current].to_f)
+            add_token(:REAL_LITERAL, @source[@start...@current].to_f)
         elsif peek == '/' && peek_next =~ /\d/
             advance
             advance while peek =~ /\d/
-            add_token(:RATIONAL, @source[@start...@current].to_r)
+            add_token(:RATIONAL_LITERAL, @source[@start...@current].to_r)
         else
-            add_token(:INTEGER, @source[@start...@current].to_i)
+            add_token(:INTEGER_LITERAL, @source[@start...@current].to_i)
         end
     end
 
