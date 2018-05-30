@@ -29,7 +29,6 @@ class Compiler
     end
 
     def self.report(fault)
-        # TODO: have this output to a log, instead of just printing (even if the log then just prints)
         @@log.error("#{fault.type}: #{fault.message}")
         @@log.error("        line: #{fault.location}")
     end
@@ -42,13 +41,11 @@ class Compiler
         scanner = Lexer.new(source);
         tokens = scanner.scan_tokens
 
-        # TODO: trace/debug 
         @@log.trace(tokens.map {|t| "\t<#{t.to_s}>"}.join("\n"))
 
         parser = Parser.new(tokens)
         statements = parser.parse
 
-        # TODO: trace/debug 
         @@log.trace(statements.map {|s| s.inspect}.join("\n"))
 
         exit(65) if @@compile_faults.size > 0
