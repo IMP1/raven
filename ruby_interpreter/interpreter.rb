@@ -105,7 +105,7 @@ class Interpreter < Visitor
 
     def visit_VariableDeclarationStatement(stmt)
         value = evaluate(stmt.initialiser)
-        @environment.define(stmt.name, value)
+        @environment.define(stmt.name, value, stmt.type)
     end
 
     def visit_AssignmentStatement(stmt)
@@ -144,16 +144,6 @@ class Interpreter < Visitor
     def visit_WithStatement(stmt)
         # TODO: with statements
     end
-
-    # def visit_FunctionDeclarationStatement(stmt)
-    #     func = lambda do |interpreter, args|
-    #         closure = @environment
-    #         env = Environment.new(closure)
-    #         stmt.parameter_names.each_with_index { |param, i| env.define(param, args[i]) }
-    #         return interpreter.execute_function(stmt.body, env)
-    #     end
-    #     @environment.define(stmt.name, func)
-    # end
 
     def visit_ReturnStatement(stmt)
         value = !stmt.value.nil? ? evaluate(stmt.value) : nil
@@ -216,11 +206,11 @@ class Interpreter < Visitor
             return left >> right
 
         when :BEGINS_WITH
-            return left & right
+            return left.start_with?(right)
         when :ENDS_WITH
-            return left | right
+            return left.end_with?(right)
         when :CONTAINS
-            return left & right
+            return left.include?(right)
 
         when :EQUAL
             return equals(left, right)
@@ -259,7 +249,7 @@ class Interpreter < Visitor
         func = lambda do |interpreter, args|
             closure = @environment
             env = Environment.new(closure)
-            expr.parameter_names.each_with_index { |param, i| env.define(param, args[i]) }
+            expr.parameter_names.each_with_index { |param, i| env.define(param, args[i], expr.parameter_types[i]) }
             return interpreter.execute_function(expr.body, env)
         end
         return func
@@ -299,3 +289,4 @@ class Interpreter < Visitor
     end
 
 end
+
