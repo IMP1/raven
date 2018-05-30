@@ -1,3 +1,5 @@
+require_relative 'compiler'
+
 module SystemFunctions
 
     def self.print(obj)
@@ -28,7 +30,9 @@ module SystemFunctions
         if obj.is_a?(Array)
             return array_type(obj)
         end
-        PUTS "COULD NOT DETECT TYPE OF OBJECT!!"
+        puts "COULD NOT DETECT TYPE OF OBJECT!!"
+        p obj
+        puts 
         return [:any]
     end
 
