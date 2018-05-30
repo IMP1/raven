@@ -1,23 +1,14 @@
 require_relative 'environment'
+require_relative 'system_functions'
 
 class GlobalEnvironment < Environment
 
     def initialize
         super
-        @mappings['print']  = lambda { |interpreter, args| print(to_string(args[0])) }
+        @mappings['print']  = lambda { |interpreter, args| print(SystemFunctions.to_string(args[0])) }
         @mappings['typeof'] = lambda { |interpreter, args| return type_of(args[0]) }
     end
 
-    def to_string(obj)
-        if obj.is_a?(Array) && obj.all? { |t| t.is_a?(Symbol) }
-            return type_to_string(obj)
-        end
-        return obj.to_s
-    end
-
-    def type_to_string(type_list)
-        return type_list.reverse.inject("") { |memo, t| t.to_s + (memo.empty? ? "" : "<#{memo}>") }
-    end
 
     def type_of(obj)
         return [:int]      if obj.is_a?(Integer)
