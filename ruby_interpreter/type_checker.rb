@@ -65,6 +65,10 @@ class TypeChecker < Visitor
         expr.accept(self)
     end
 
+    def try_coerce_type(obj_type, type)
+        return obj_type.each_with_index.map { |el, i| el.nil? ? type[i] : el }
+    end
+
     def assert_type(token, obj_type, *types)
         if obj_type.nil?
             puts "obj_type is nil"
@@ -81,7 +85,7 @@ class TypeChecker < Visitor
 
     def is_type?(obj_type, type)
         return true if type == [:any]
-        return obj_type == type
+        return try_coerce_type(obj_type, type) == type
     end
 
     #--------------------------
@@ -209,7 +213,7 @@ class TypeChecker < Visitor
             return [:array]
         end
         if expr.elements.empty?
-            return [:array]
+            return [:array, nil]
         end
         return [:array, get_expression_type(expr.elements.first)]
     end

@@ -462,8 +462,11 @@ class Parser
                 break if !match_token(:COMMA)
             end
             consume_token(:RIGHT_SQUARE, "Expecting ']' after array literal.")
-            puts "Array Literal. Type hint is #{@type_hint.inspect}"
             var_type = [:array, nil]
+            if !array.empty?
+                var_type = [:array, array.first.type]
+            end
+            puts "Array Literal. Current type is #{var_type.inspect}. Type hint is #{@type_hint.inspect}"
             if !@type_hint.nil?
                 var_type = try_coerce_type(var_type, @type_hint)
             end
