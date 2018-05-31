@@ -162,9 +162,9 @@ class Parser
         loop do
             if match_token(:LEFT_SQUARE)
                 consume_token(:RIGHT_SQUARE, "Expecting ']' after '['.")
-                var_type = [:array, [*var_type]]
+                var_type = [:array, var_type]
             elsif match_token(:QUESTION)
-                var_type = [:optional, [*var_type]]
+                var_type = [:optional, var_type]
             elsif match_token(:LESS)
                 # TODO: add function signitures
                 # TODO: add generics?
