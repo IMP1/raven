@@ -31,8 +31,10 @@ class Lexer
         # Values
         'TRUE'   => [:BOOLEAN_LITERAL, true],
         'FALSE'  => [:BOOLEAN_LITERAL, false],
+        'NULL'   => [:NULL_LITERAL,    nil],
         'true'   => [:BOOLEAN_LITERAL, true],
         'false'  => [:BOOLEAN_LITERAL, false],
+        'null'   => [:NULL_LITERAL,    nil],
     }
 
     def initialize(source)
