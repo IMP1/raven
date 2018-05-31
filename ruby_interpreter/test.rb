@@ -74,6 +74,18 @@ end
 verbose  = ARGV.delete("--verbose") || ARGV.delete("-v")
 silent   = ARGV.delete("--silent") || ARGV.delete("-s")
 all_tests = ARGV.delete("--all") || ARGV.delete("-a")
+output = $stdout
+
+if ARGV.include?("--output")
+    filename = ARGV.delete_at(ARGV.index("--output") + 1)
+    output = File.open(filename, 'w')
+    ARGV.delete("--output")
+end
+if ARGV.include?("-o")
+    filename = ARGV.delete_at(ARGV.index("-o") + 1)
+    output = File.open(filename, 'w')
+    ARGV.delete("-o")
+end
 
 $log = Log.new("Test")
 
@@ -81,8 +93,9 @@ if verbose
     $log.set_level(Log::TRACE)
 end
 if silent
-    $log.set_output(File.new("/dev/null", 'w'))
+    $log.set_level(Log::NONE)
 end
+$log.set_output(output)
 
 if all_tests
     results = test_folder(File.join(*__dir__.split('/')[0...-1], 'tests'))
