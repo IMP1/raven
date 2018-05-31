@@ -49,7 +49,8 @@ class Compiler
 
         @@log.trace(statements.map {|s| s.inspect}.join("\n"))
 
-        checker = TypeChecker.new(statements)
+        log = Log.new("TypeChecker", @@log.get_level, @@log.get_output)
+        checker = TypeChecker.new(statements, log)
         checker.check
 
         exit(65) if @@compile_faults.size > 0
