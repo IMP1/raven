@@ -12,14 +12,22 @@ class Log
         @output = output
     end
 
+    def get_output
+        return @output
+    end
+
     def set_level(level)
         @importance_level = level
     end
 
-    def initialize(source)
+    def get_level
+        return @importance_level
+    end
+
+    def initialize(source, level=INFO, output=$stdout)
         @source = source
-        @importance_level = INFO    
-        @output = $stdout
+        @importance_level = level
+        @output = output
     end
 
     def fatal(message)
