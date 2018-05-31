@@ -24,14 +24,33 @@ for (int i = 0; i < 20; i = i + 1) {
 
 
 
-'' def up_to(int n) {
-    '' def count (int a, int b) {
-        '' print(a)
-        '' if (a < b) {
-            '' count(a + 1, b)
-        '' }
-    '' }
-    '' count(1, n)
-'' }
-'' 
-'' up_to(10)
+def is_even(int n) bool {
+    if (n == 0)
+        return TRUE
+    else
+        return is_odd(n-1)
+}
+
+def is_odd(int n) bool {
+    if (n == 0)
+        return FALSE
+    else
+        return is_even(n-1)
+}
+
+test is_even(4)
+test is_odd(13)
+
+
+def up_to(int n) {
+    def count (int a, int b) {
+        print(a)
+        print("\n")
+        if (a < b) {
+            count(a + 1, b)
+        }
+    }
+    count(1, n)
+}
+
+up_to(10)
