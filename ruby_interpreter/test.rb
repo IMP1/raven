@@ -55,12 +55,11 @@ def print_results(results)
 
     [s.size, f.size].max.times do |i|
         print "    "
-        print (i < s.size ? "  * " + result_colour(s[i]) + s[i][:test] : " ").ljust(max_column_size + (i < s.size ? 5 : 0))
+        print (i < s.size ? "  * " + result_colour(s[i]) + s[i][:test] + ConsoleStyle::RESET : " ").ljust(max_column_size + (i < s.size ? 10 : 0))
         print "              "
-        print ConsoleStyle::RESET
         print i < f.size ?  "  * " + result_colour(f[i]) + f[i][:test] : ""
-        print "\n"
         print ConsoleStyle::RESET
+        print "\n"
     end
 end
 
