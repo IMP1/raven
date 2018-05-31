@@ -76,17 +76,20 @@ class Interpreter < Visitor
     end
 
     def equals(left, right)
-        # if left.is_a?(Array) && left.all? { |t| t.is_a?(Symbol) }
-        #     return type_match(left, right)
-        # end
-        # if right.is_a?(Array) && right.all? { |t| t.is_a?(Symbol) }
-        #     return type_match(left, right)
-        # end
+        if left.is_a?(Array) && left.all? { |t| t.is_a?(Symbol) }
+            return type_match(left, right)
+        end
+        if right.is_a?(Array) && right.all? { |t| t.is_a?(Symbol) }
+            return type_match(left, right)
+        end
         return left == right
     end
 
     def type_match(t1, t2)
-        
+        # TODO: add type checking
+        # func<(int, int) string>  should equal func
+        # right?
+        return t1 == t2
     end
 
     #--------------------------
