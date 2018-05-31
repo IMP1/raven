@@ -40,7 +40,7 @@ contexts:
         
 
   keywords:
-    - match: '(?:return|if|with|while|for|defer|case|when)'
+    - match: '(?:return|if|else|with|while|for|defer|case|when)'
       scope: keyword.control.raven
     - match: '\b(?:print|typeof|tostring)\b'
       scope: support.function.raven
