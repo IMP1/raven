@@ -1,8 +1,11 @@
+require_relative 'log'
 require_relative 'fault'
 require_relative 'visitor'
 require_relative 'compiler'
 require_relative 'environment'
 require_relative 'global_env'
+
+# void types (eg from functions) are empty arrays
 
 class TypeChecker < Visitor
 
@@ -15,7 +18,9 @@ class TypeChecker < Visitor
 
     GLOBAL_ENV = GlobalEnvironment.new
 
-    def initialize(statements)
+    def initialize(statements, verbose=false)
+        @log = Log.new("TypeChecker")
+        @log.set_level(Log::TRACE) if verbose
         @statements = statements
         @environment = Environment.new(GLOBAL_ENV)
         @function_environment = nil
@@ -71,21 +76,26 @@ class TypeChecker < Visitor
 
     def assert_type(token, obj_type, *types)
         if obj_type.nil?
-            puts "obj_type is nil"
-            puts caller 
+            @log.trace("obj_type is nil")
+            @log.trace(caller )
             return
         end
-        puts "Checking that #{token.lexeme.inspect} #{obj_type.inspect} is one of #{types.inspect}"
-        if types.all? { |t| !is_type?(obj_type.flatten, t) }
-            Compiler.runtime_fault(TypeFault.new(token, "Invalid type for #{token.lexeme}. Was expecting one of #{types.inspect}. Got '#{obj_type.inspect}'"))
+        @log.trace("Checking that #{token.lexeme.inspect} #{obj_type.inspect} is one of #{types.inspect}")
+        if types.all? { |t| !is_type?(obj_type, t) }
+            Compiler.runtime_fault(TypeFault.new(token, "Invalid type for #{token.lexeme}. Was expecting one of the following:\n#{types.map {|t| "\t" + t.inspect.to_s }.join("\n")}\nGot \n\t#{obj_type.inspect}"))
         else
-            puts "It is!"
+            @log.trace("It is!")
         end
     end
 
     def is_type?(obj_type, type)
+        @log.trace(type.inspect)
+        @log.trace(obj_type.inspect)
+        @log.trace(type[1].compact.inspect) if type[0] == :func
         return true if type == [:any]
-        return try_coerce_type(obj_type, type) == type
+        return true if try_coerce_type(obj_type, type) == type
+        return true if type[0] == :func && type[1].compact.empty? and obj_type[0] == :func
+        return false
     end
 
     #--------------------------
@@ -223,14 +233,7 @@ class TypeChecker < Visitor
     end
 
     def visit_FunctionExpression(expr)
-        return [:func]
-        # TODO: return function signiture? Is that its type? Yeah, I guess.
-        func = lambda do |interpreter, args|
-            closure = @environment
-            env = Environment.new(closure)
-            expr.parameter_names.each_with_index { |param, i| env.define(param, args[i]) }
-            return interpreter.execute_function(expr.body, env)
-        end
+        return [:func, [ expr.parameter_types, expr.return_type ]]
     end
 
     def visit_ShortCircuitExpression(expr)
@@ -238,15 +241,15 @@ class TypeChecker < Visitor
     end
 
     def visit_VariableExpression(expr)
-        # TODO: return variable's type.
         return @environment.type(expr.name)
     end
 
     def visit_CallExpression(expr)
-        # TODO: check arg types, and then return function return-type.
-        # func = evaluate(expr.callee)
-        # args = expr.arguments.map { |a| evaluate(a) }
-        return [:any]
+        func_sig = get_expression_type(expr.callee)
+        @log.trace("Function Call Expression. '#{expr.callee.token.lexeme}' Function signiture is #{func_sig.inspect}")
+        return_type = func_sig[1][1]
+        @log.trace("Return type #{return_type.inspect}")
+        return return_type
     end
 
 end
