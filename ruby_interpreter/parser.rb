@@ -155,16 +155,16 @@ class Parser
 
     def variable_type
         var_type = [consume_token(:TYPE_LITERAL, "Expecting variable type.").literal]
-        if var_type[0] == :func 
+        if var_type[0] == :func && !check(:LESS)
             # Add nil values for func inferrence later:
             var_type += [[nil, nil]]
         end
         loop do
             if match_token(:LEFT_SQUARE)
                 consume_token(:RIGHT_SQUARE, "Expecting ']' after '['.")
-                var_type = [:array, *var_type]
+                var_type = [:array, [*var_type]]
             elsif match_token(:QUESTION)
-                var_type = [:optional, *var_type]
+                var_type = [:optional, [*var_type]]
             elsif match_token(:LESS)
                 # TODO: add function signitures
                 # TODO: add generics?
