@@ -42,13 +42,13 @@ module SystemFunctions
     end
 
     def self.array_type(array)
-        return [:type] if array.all? { |value| value.is_a?(Symbol) }
-        return [:array, :int]      if array.all? { |value| value.is_a?(Integer) }
-        return [:array, :real]     if array.all? { |value| value.is_a?(Float) }
-        return [:array, :string]   if array.all? { |value| value.is_a?(String) }
-        return [:array, :bool]     if array.all? { |value| (value == true || value == false) }
-        return [:array, :rational] if array.all? { |value| value.is_a?(Rational) }
-        return [:array, :func]     if array.all? { |value| value.is_a?(Proc) }
+        return [:type] if array.all? { |value| value.is_a?(Symbol) || value.is_a?(Array) }
+        return [:array, [:int]]      if array.all? { |value| value.is_a?(Integer) }
+        return [:array, [:real]]     if array.all? { |value| value.is_a?(Float) }
+        return [:array, [:string]]   if array.all? { |value| value.is_a?(String) }
+        return [:array, [:bool]]     if array.all? { |value| (value == true || value == false) }
+        return [:array, [:rational]] if array.all? { |value| value.is_a?(Rational) }
+        return [:array, [:func]]     if array.all? { |value| value.is_a?(Proc) }
     end
 
 end
