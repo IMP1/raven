@@ -3,14 +3,13 @@ up to [here](http://craftinginterpreters.com/functions.html)
 # Future Plans
 
 *Strings*:
+
     Ruby has 'single quoted strings' and "double quoted strings". C# has $"" and @"" and "".
     I think I like the latter better. It's hard to tell "" and '' apart sometimes. Obvs don't have to use $ and @ though.
 
 *Operators*:
-    Add a long list of available operators, and just don't define most of them.
 
-*Sublime-Syntax*:
-    Make a syntax file for Raven. It can live in this project.
+    Add a long list of available operators, and just don't define most of them.
 
 *Function declarations*:
 
@@ -22,12 +21,17 @@ up to [here](http://craftinginterpreters.com/functions.html)
     However, it would be nice to have a nicer syntax. And maybe `def name {}` could be it. And it could also apply to other vars. 
     `def id 12`. It sets a constant, maybe? Constants would be I think on the environment to handle.
 
-*Defer*
+*Defer*:
 
     Read up on [how Go handles defer statements](https://blog.golang.org/defer-panic-and-recover). They are different. 
     This should mean I need to think carefully about how defer will work.
     What are the edge cases? How do I want defer to handle them?
     They're currently not lexically scoped. Which is a shame. They should be.
+
+*Metaprogramming*:
+
+    Use the `#` symbol and have things like class invariants. And preconditions for function paramters. 
+    And postconditions for function return values.
 
 # Gotchas
 
