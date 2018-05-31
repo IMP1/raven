@@ -74,8 +74,9 @@ class TypeChecker < Visitor
         puts "Checking that #{token.lexeme.inspect} #{obj_type.inspect} is one of #{types.inspect}"
         if types.all? { |t| !is_type?(obj_type.flatten, t) }
             Compiler.runtime_fault(TypeFault.new(token, "Invalid type for #{token.lexeme}. Was expecting one of #{types.inspect}. Got '#{obj_type.inspect}'"))
+        else
+            puts "It is!"
         end
-        puts "It is!"
     end
 
     def is_type?(obj_type, type)
