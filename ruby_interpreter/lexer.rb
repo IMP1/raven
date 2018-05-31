@@ -88,6 +88,10 @@ class Lexer
         return true
     end
 
+    def previous
+        return @source[@current - 1]
+    end
+
     def peek
         return nil if eof?
         return @source[@current]
@@ -96,7 +100,7 @@ class Lexer
     def peek_next
         return nil if eof?
         return nil if @current + 1 >= @source.length
-        return @source[@current + 1];
+        return @source[@current + 1]
     end
 
     def fault(message)
@@ -193,9 +197,21 @@ class Lexer
 
         when '\''
             if advance_if('\'')
-                # A comment goes until the end of the line.
-                while peek != "\n" && !eof?
-                    advance
+                if advance_if('{')
+                    puts "BLOCK COMMENT: line #{@line}"
+                    # TODO: handle nested block comments.
+                    while !eof? && !(previous == '\'' && peek == '\'' && peek_next == '}')
+                        c = advance
+                        newline if c == "\n"
+                    end
+                    advance # Ignore second '
+                    advance # Ignore }
+                    puts "BLOCK COMMENT END: line #{@line}"
+                else
+                    # A comment goes until the end of the line.
+                    while peek != "\n" && !eof?
+                        advance
+                    end
                 end
             else
                 add_token(:APOSTROPHE)
