@@ -46,9 +46,11 @@ class Log
         log(message, @source, TRACE)
     end
 
-    def log(message, source, importance)
+    def log(obj, source, importance)
         return if importance > @importance_level
-        @output.puts "[#{source}] #{message}"
+        prefix = "[#{source}] "
+        message = obj.to_s.gsub("\n", "\n" + (" " * prefix.length))
+        @output.puts prefix + message
     end
 
 end
