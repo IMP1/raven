@@ -73,7 +73,7 @@ class TypeChecker < Visitor
         end
         puts "Checking that #{token.lexeme.inspect} #{obj_type.inspect} is one of #{types.inspect}"
         if types.all? { |t| !is_type?(obj_type.flatten, t) }
-            Compiler.runtime_fault(TypeFault.new(token, "Invalid type for #{token.lexeme}. Was expecting one of {#{types.join(', ')}}. Got '#{obj_type}'"))
+            Compiler.runtime_fault(TypeFault.new(token, "Invalid type for #{token.lexeme}. Was expecting one of #{types.inspect}. Got '#{obj_type.inspect}'"))
         end
         puts "It is!"
     end
@@ -146,7 +146,7 @@ class TypeChecker < Visitor
         
         # TODO: ensure operator is defined on type
 
-        case expr.operator.type
+        case expr.operator.name
         when :MINUS, :PLUS, :ASTERISK, :STROKE, :DOUBLE_STROKE, :CARET
             assert_type(expr.token, left, [:int], [:real], [:rational])
             assert_type(expr.token, right, [:int], [:real], [:rational])
@@ -183,7 +183,7 @@ class TypeChecker < Visitor
 
         # TODO: ensure operator is defined on type
 
-        case expr.operator.type
+        case expr.operator.name
         when :MINUS
             assert_type(expr.token, right, [:int], [:real], [:rational])
             return right
@@ -214,21 +214,7 @@ class TypeChecker < Visitor
     end
 
     def visit_LiteralExpression(expr)
-        case expr.type
-        when :RATIONAL_LITERAL
-            return [:rational]
-        when :INTEGER_LITERAL
-            return [:int]
-        when :REAL_LITERAL
-            return [:real]
-        when :BOOLEAN_LITERAL
-            return [:bool]
-        when :STRING_LITERAL
-            return [:string]
-        when :TYPE_LITERAL
-            return [:type]
-        end
-        raise "WHAT KIND OF LITERAL IS THIS?"
+        return expr.type
     end
 
     def visit_FunctionExpression(expr)

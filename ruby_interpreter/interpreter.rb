@@ -166,7 +166,7 @@ class Interpreter < Visitor
         right = evaluate(expr.right)
         
         # TODO: ensure operator is defined on type
-        case expr.operator.type
+        case expr.operator.name
         when :MINUS
             return left - right
         when :PLUS
@@ -222,7 +222,7 @@ class Interpreter < Visitor
     def visit_UnaryExpression(expr)
         right = evaluate(expr.right)
 
-        case expr.operator.type
+        case expr.operator.name
         when :MINUS
             return -right # TODO: ensure operator is defined on type
         when :NOT

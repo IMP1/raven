@@ -12,7 +12,7 @@ class Parser
     end
 
     def eof?
-        return peek.type == :EOF
+        return peek.name == :EOF
     end
 
     def peek
@@ -38,13 +38,13 @@ class Parser
     
     def check(type)
         return false if eof?
-        return peek.type == type
+        return peek.name == type
     end
 
     def check_next(type)
         return false if eof?
-        return false if peek_next.type == :EOF
-        return peek_next.type == type
+        return false if peek_next.name == :EOF
+        return peek_next.name == type
     end
 
     def match_token(*types)
@@ -78,9 +78,9 @@ class Parser
         advance
 
         while !eof?
-            return if previous.type == :SEMICOLON
+            return if previous.name == :SEMICOLON
 
-            case peek.type
+            case peek.name
             when :CLASS, :FUN, :VAR, :FOR, :IF, :WHILE, :PRINT, :RETURN
                 return
             end
@@ -430,11 +430,25 @@ class Parser
 
     def primary
         if match_token(:STRING_LITERAL)
-            return LiteralExpression.new(previous, escape_string(previous.literal), :STRING_LITERAL)
+            return LiteralExpression.new(previous, escape_string(previous.literal), [:string])
         end
-        if match_token(:BOOLEAN_LITERAL, :INTEGER_LITERAL, :REAL_LITERAL, :RATIONAL_LITERAL)
-            return LiteralExpression.new(previous, previous.literal, previous.type)
+        if match_token(:BOOLEAN_LITERAL)
+            return LiteralExpression.new(previous, previous.literal, [:bool])
         end        
+        if match_token(:INTEGER_LITERAL, :REAL_LITERAL, :RATIONAL_LITERAL)
+            return LiteralExpression.new(previous, previous.literal, [:int])
+        end
+        if match_token(:REAL_LITERAL, :RATIONAL_LITERAL)
+            return LiteralExpression.new(previous, previous.literal, [:real])
+        end
+        if match_token(:RATIONAL_LITERAL)
+            return LiteralExpression.new(previous, previous.literal, [:rational])
+        end
+        if match_token(:NULL_LITERAL)
+            return LiteralExpression.new(previous, previous.literal, [:optional]) # TODO: should NULL have its own type? Or is it an optional type?
+        end        
+
+        # Array Literals
         if match_token(:LEFT_SQUARE)
             array = []
             while !eof? && !check(:RIGHT_SQUARE)
@@ -442,16 +456,17 @@ class Parser
                 break if !match_token(:COMMA)
             end
             consume_token(:RIGHT_SQUARE, "Expecting ']' after array literal.")
-            return ArrayExpression.new(previous, array, previous.type)
+            return ArrayExpression.new(previous, array, [:array])
         end
 
+        # Type Literals / Function Literals
         if check(:TYPE_LITERAL)
             var_token = peek.literal
             var_type = variable_type
             if match_token(:LEFT_BRACE)
                 return subroutine_body(previous, [], var_type)
             else
-                return LiteralExpression.new(var_token, var_type, :TYPE_LITERAL)
+                return LiteralExpression.new(var_token, var_type, [:type])
             end
         end
 
