@@ -31,7 +31,7 @@ class Compiler
 
     def self.report(fault)
         @@log.error("#{fault.type}: #{fault.message}")
-        @@log.error("        line: #{fault.location}")
+        @@log.error("     location: #{fault.location}")
     end
 
     def self.run(source, log=nil)

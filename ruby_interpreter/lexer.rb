@@ -44,6 +44,7 @@ class Lexer
         @start   = 0
         @current = 0
         @line    = 1
+        @column  = 1
 
         @is_finished = @source.length == 0
     end
@@ -52,23 +53,30 @@ class Lexer
         return @current >= @source.length
     end
 
+    def newline
+        @line += 1
+        @column = 1
+    end
+
     def scan_tokens
         while !eof?
             @start = @current
             scan_token
         end
-        @tokens.push(Token.new(:EOF, "", nil, @line))
+        # TODO: ADD COLUMN TO LINE AS POSITION OF TOKEN
+        @tokens.push(Token.new(:EOF, "", @line, @column))
         return @tokens
     end
 
     def advance
-        @current += 1;
+        @current += 1
+        @column += 1
         return @source[@current - 1]
     end
 
     def add_token(token_type, literal_value=nil)
         lexeme = @source[@start...@current]
-        @tokens.push(Token.new(token_type, lexeme, @line, literal_value))
+        @tokens.push(Token.new(token_type, lexeme, @line, @column, literal_value))
     end
 
     def advance_if(expected)
@@ -76,6 +84,7 @@ class Lexer
         return false if @source[@current] != expected
 
         @current += 1
+        @column += 1
         return true
     end
 
@@ -90,8 +99,8 @@ class Lexer
         return @source[@current + 1];
     end
 
-    def fault(line, message)
-        t = Token.new(:FAULT, @source[@start...@current], line)
+    def fault(message)
+        t = Token.new(:FAULT, @source[@start...@current], @line, @column)
         f = SyntaxFault.new(t, message)
         Compiler.syntax_fault(f)
         return f
@@ -153,7 +162,7 @@ class Lexer
         when ' ', "\r", "\t"
             # do nothing
         when "\n"
-            @line += 1
+            newline
 
         when '='
             add_token(advance_if('=') ? :EQUAL : :ASSIGNMENT)
@@ -208,18 +217,18 @@ class Lexer
             identifier
 
         else
-            fault(@line, "Unexpected character '#{@source[@current-1]}'.")
+            fault("Unexpected character '#{@source[@current-1]}'.")
         end
     end
 
     def string
         while !eof? && peek != '"'
-            @line += 1 if peek == '\n'
+            newline if peek == '\n'
             advance
         end
 
         if eof?
-            fault(@line, "Unterminated string.")
+            fault("Unterminated string.")
             return
         end
 

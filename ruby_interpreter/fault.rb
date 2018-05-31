@@ -9,7 +9,7 @@ class Fault < RuntimeError
     end
 
     def location
-        return @token.line
+        return [@token.line, @token.column]
     end
 
     def type
