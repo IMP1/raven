@@ -1,3 +1,4 @@
+require_relative 'log'
 require_relative 'expression'
 require_relative 'statement'
 require_relative 'compiler'
@@ -7,6 +8,7 @@ require_relative 'types'
 class Parser
 
     def initialize(tokens)
+        @log = Log.new("Parser")
         @tokens = tokens
         @current = 0
         @type_hint = nil
@@ -101,7 +103,10 @@ class Parser
 
     def infer_type(expression)
         if expression.is_a?(FunctionExpression)
-            return [:func]
+            @log.trace("Inferring type of function expresion")
+            @log.trace("FunctionExpression param types are #{expression.parameter_types.inspect}")
+            @log.trace("FunctionExpression return type is #{expression.return_type.inspect}")
+            return [ :func, [expression.parameter_types, expression.return_type] ]
         end
         return expression.type
     end
@@ -142,11 +147,18 @@ class Parser
         var_name = consume_token(:IDENTIFIER, "Expect variable name.")
         consume_token(:ASSIGNMENT, "Expecting an initial value for '#{var_name.lexeme}'.")
         initial_value = expression
+        if var_type == [:func] # Allow for function objects to be declared with just func ident = {}
+            var_type = infer_type(initial_value)
+        end
         return VariableDeclarationStatement.new(var_name, var_type, initial_value);
     end
 
     def variable_type
         var_type = [consume_token(:TYPE_LITERAL, "Expecting variable type.").literal]
+        if var_type[0] == :func 
+            # Add nil values for func inferrence later:
+            var_type += [[nil, nil]]
+        end
         loop do
             if match_token(:LEFT_SQUARE)
                 consume_token(:RIGHT_SQUARE, "Expecting ']' after '['.")
@@ -154,7 +166,8 @@ class Parser
             elsif match_token(:QUESTION)
                 var_type = [:optional, *var_type]
             elsif match_token(:LESS)
-
+                # TODO: add function signitures
+                # TODO: add generics?
             else
                 break
             end
@@ -466,22 +479,24 @@ class Parser
             if !array.empty?
                 var_type = [:array, array.first.type]
             end
-            puts "Array Literal. Current type is #{var_type.inspect}. Type hint is #{@type_hint.inspect}"
             if !@type_hint.nil?
                 var_type = try_coerce_type(var_type, @type_hint)
             end
-            puts "Array Literal coerced to #{var_type.inspect}"
             return ArrayExpression.new(previous, array, var_type)
         end
 
         # Type Literals / Function Literals
         if check(:TYPE_LITERAL)
             var_token = peek.literal
-            var_type = variable_type
+            type_value = variable_type
             if match_token(:LEFT_BRACE)
-                return subroutine_body(previous, [], var_type)
+                return subroutine_body(previous, [], type_value)
             else
-                return LiteralExpression.new(var_token, var_type, [:type])
+                if type_value == [:func]
+                    # Add nil values for func inferrence later
+                    type_value += [[nil, nil]]
+                end
+                return LiteralExpression.new(var_token, type_value, [:type])
             end
         end
 
@@ -501,9 +516,9 @@ class Parser
                         params.push({name: var_name, type: type})
                     end
                     consume_token(:RIGHT_PAREN, "Expecting ')' after parameter list.")
-                    return_type = nil
-                    if match_token(:TYPE_LITERAL)
-                        return_type = previous
+                    return_type = []
+                    if check(:TYPE_LITERAL)
+                        return_type = variable_type
                     end
                     func_token = consume_token(:LEFT_BRACE, "Expecting '{' before function body.")
                     body = block
@@ -523,7 +538,7 @@ class Parser
         end
 
         if match_token(:LEFT_BRACE)
-            return subroutine_body(previous, [], nil)
+            return subroutine_body(previous, [], [])
         end        
 
         if match_token(:IDENTIFIER)
