@@ -39,6 +39,7 @@ end
 
 def print_results(results)
     $stdout = STDOUT
+    puts
     s = results.select{ |r| r[:success] }
     f = results.select{ |r| !r[:success] }
 
@@ -94,6 +95,7 @@ if verbose
 end
 if silent
     $log.set_level(Log::NONE)
+    $stdout = File.open(File::NULL, "w")
 end
 $log.set_output(output)
 
