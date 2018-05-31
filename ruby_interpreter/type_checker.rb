@@ -5,7 +5,22 @@ require_relative 'compiler'
 require_relative 'environment'
 require_relative 'global_env'
 
+# A type is an array. This array may only contain symbols or other arrays (which have the same condition on them).
+# These nested arrays are subtypes.
+# types with subtypes (arrays, optionals, functions) are followed by an array containing the subtype info.
 # void types (eg from functions) are empty arrays
+
+# An Integer types is represented with   [:int]
+
+# An Array of Strings would be           [:array, [:string]]
+
+# A Function whcih takes a single Boolean parameter and returns an Integer would be as follows 
+#                 [:func, [ [[:bool]], [:int] ]]
+# function       ----/^
+# parameter list ----------/^_______^
+# bool param     --------------/^
+# Return value   -------------------------/^
+
 
 class TypeChecker < Visitor
 
