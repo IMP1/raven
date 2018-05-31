@@ -9,6 +9,7 @@ class Parser
     def initialize(tokens)
         @tokens = tokens
         @current = 0
+        @type_hint = nil
     end
 
     def eof?
@@ -105,12 +106,16 @@ class Parser
         return expression.type
     end
 
+    def try_coerce_type(obj_type, type)
+        return obj_type.each_with_index.map { |el, i| el.nil? ? type[i] : el }
+    end
 
     #--------------------------------------------------------------------------#
     # Grammar Functions
     #--------------------------------------------------------------------------#
 
     def declaration
+        @type_hint = nil
         begin
             if match_token(:DEFINITION)
                 return variable_definiton
@@ -154,6 +159,7 @@ class Parser
                 break
             end
         end
+        @type_hint = var_type
         return var_type
     end
 
@@ -445,7 +451,7 @@ class Parser
             return LiteralExpression.new(previous, previous.literal, [:rational])
         end
         if match_token(:NULL_LITERAL)
-            return LiteralExpression.new(previous, previous.literal, [:optional]) # TODO: should NULL have its own type? Or is it an optional type?
+            return LiteralExpression.new(previous, previous.literal, [:optional]) # TODO: should NULL have its own type? Or is it a special value for the optional type?
         end        
 
         # Array Literals
@@ -456,7 +462,13 @@ class Parser
                 break if !match_token(:COMMA)
             end
             consume_token(:RIGHT_SQUARE, "Expecting ']' after array literal.")
-            return ArrayExpression.new(previous, array, [:array])
+            puts "Array Literal. Type hint is #{@type_hint.inspect}"
+            var_type = [:array, nil]
+            if !@type_hint.nil?
+                var_type = try_coerce_type(var_type, @type_hint)
+            end
+            puts "Array Literal coerced to #{var_type.inspect}"
+            return ArrayExpression.new(previous, array, var_type)
         end
 
         # Type Literals / Function Literals
