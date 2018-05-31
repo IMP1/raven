@@ -63,7 +63,6 @@ class Lexer
             @start = @current
             scan_token
         end
-        # TODO: ADD COLUMN TO LINE AS POSITION OF TOKEN
         @tokens.push(Token.new(:EOF, "", @line, @column))
         return @tokens
     end
