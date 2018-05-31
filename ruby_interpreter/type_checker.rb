@@ -18,9 +18,8 @@ class TypeChecker < Visitor
 
     GLOBAL_ENV = GlobalEnvironment.new
 
-    def initialize(statements, verbose=false)
-        @log = Log.new("TypeChecker")
-        @log.set_level(Log::TRACE) if verbose
+    def initialize(statements, log=nil)
+        @log = log || Log.new("TypeChecker")
         @statements = statements
         @environment = Environment.new(GLOBAL_ENV)
         @function_environment = nil
@@ -31,8 +30,8 @@ class TypeChecker < Visitor
             @statements.each do |stmt|
                 check_stmt(stmt)
             end
-        rescue RuntimeError => r
-            p r
+        rescue StandardError => e
+            @log.warn(e)
         end
     end
 
@@ -187,7 +186,7 @@ class TypeChecker < Visitor
 
         when :EQUAL, :NOT_EQUAL
             return [:bool]
-            # These can be any type.
+            # Left and right here can be any type.
         end
 
         raise "WHAT KIND OF BINARY EXPRESSION IS THIS?"
@@ -246,7 +245,7 @@ class TypeChecker < Visitor
 
     def visit_CallExpression(expr)
         func_sig = get_expression_type(expr.callee)
-        @log.trace("Function Call Expression. '#{expr.callee.token.lexeme}' Function signiture is #{func_sig.inspect}")
+        @log.trace("Function Call Expression. '#{expr.callee.token.inspect}' Function signiture is #{func_sig.inspect}")
         return_type = func_sig[1][1]
         @log.trace("Return type #{return_type.inspect}")
         return return_type
