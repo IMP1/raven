@@ -37,8 +37,8 @@ module SystemFunctions
     end
 
     def self.func_type(func)
-        # TODO: include return type and parameter types
-        return [:func]
+        # TODO: return the function signiture
+        return [:func, [nil, nil]]
     end
 
     def self.array_type(array)
