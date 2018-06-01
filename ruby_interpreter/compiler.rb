@@ -19,6 +19,7 @@ class Compiler
     def self.runtime_fault(fault)
         @@runtime_faults.push(fault)
         report(fault)
+        exit(70) # TODO: should a runtime carry on if it can? Seems weird...
     end
 
     def self.compile_faults
