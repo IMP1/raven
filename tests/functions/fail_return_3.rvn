@@ -1,0 +1,5 @@
+def foo (int n) {
+    return 4
+}
+
+int a = foo(0)

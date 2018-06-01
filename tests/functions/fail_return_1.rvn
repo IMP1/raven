@@ -1,3 +1,10 @@
 def foo (int n) {
     return 4
 }
+
+''{
+# Notes
+
+  * There is no return type, so this shouldn't be able to return 4.
+
+''}

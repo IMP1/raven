@@ -1,0 +1,7 @@
+def foo (int a, string b) {
+    print("yey")
+}
+
+foo(0, "lol")
+
+foo("wrong")
