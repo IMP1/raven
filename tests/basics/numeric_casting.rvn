@@ -1,1 +1,9 @@
-real casted = 1 / 4
+real a = 1
+print(a)
+print("\n")
+
+real b = a / 2
+print(b)
+print("\n")
+
+test b == 0.5
