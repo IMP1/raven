@@ -1,0 +1,14 @@
+int? a = 5
+int? b = NULL
+
+print(a)
+print("\t")
+print(typeof(a))
+print("\n")
+
+print(b)
+print("\t")
+print(typeof(b))
+print("\n")
+
+test a != b
