@@ -125,6 +125,12 @@ class Parser
             return [:real]
         end
 
+        # Handle optionals
+        if type[0] == :optional && type[1] == obj_type
+            puts "Returning #{type.inspect}"
+            return type
+        end
+
         # Handle generics
         puts "Returning #{obj_type.each_with_index.map { |el, i| el.nil? ? type[i] : el }.inspect}"
         return obj_type.each_with_index.map { |el, i| el.nil? ? type[i] : el }
@@ -272,7 +278,8 @@ class Parser
     end
 
     def if_statement
-        token = consume_token(:LEFT_PAREN, "Expecting '(' before if statement condition.")
+        token = previous
+        consume_token(:LEFT_PAREN, "Expecting '(' before if statement condition.")
         condition = expression
         consume_token(:RIGHT_PAREN, "Expecting ')' after if statement condition.")
 
@@ -287,9 +294,10 @@ class Parser
     end
 
     def with_statement
-        consume_token(:LEFT_PAREN, "Expecting '(' before with statement condition.")
-        condition = expression
-        consume_token(:RIGHT_PAREN, "Expecting ')' after with statement condition.")
+        token = previous
+        consume_token(:LEFT_PAREN, "Expecting '(' before with statement declaration.")
+        declaration = variable_initialisation
+        consume_token(:RIGHT_PAREN, "Expecting ')' after with statement declaration.")
 
         then_branch = statement
         else_branch = nil
@@ -298,7 +306,7 @@ class Parser
             else_branch = statement
         end
 
-        return WithStatement.new(condition, then_branch, else_branch)
+        return WithStatement.new(token, declaration, then_branch, else_branch)
     end
 
     def while_statement
@@ -574,10 +582,12 @@ class Parser
             return LiteralExpression.new(token, value.to_r, type)
         when [:bool]
             return LiteralExpression.new(token, !!value, type)
-        when [:optional, nil]
-            return LiteralExpression.new(token, value, type)
         else
-            raise "What kind of literal is this?"
+            if type[0] == :optional
+                return LiteralExpression.new(token, value, type)
+            else
+                raise "What kind of literal is this?"
+            end
         end
     end
 
