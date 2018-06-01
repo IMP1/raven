@@ -1,0 +1,19 @@
+bool a = TRUE
+print(a)
+print("\n")
+print(true)
+print("\n")
+
+bool b = !a
+print(b)
+print("\n")
+print(false)
+print("\n")
+
+test b != a
+
+print(NULL)
+print("\n")
+
+test a != NULL
+test b != NULL

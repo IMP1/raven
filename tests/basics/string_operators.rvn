@@ -1,0 +1,7 @@
+test "foobar" ^= "foo"
+test "foobar" $= "bar"
+test "foobar" ~= "oba"
+test "foo" == "foo"
+test "foo" != "bar"
+test !("foo" == "bar")
+test !("foo" != "foo")

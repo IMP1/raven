@@ -1,0 +1,30 @@
+def b TRUE
+
+int outcome = 0
+
+if (TRUE)
+    if (b)
+        outcome = 1
+    else
+        outcome = 2
+
+test outcome == 1
+
+if (FALSE)
+    if (b)
+        outcome = 3
+    else
+        outcome = 4
+
+test outcome == 1
+
+'' The following is the same as the previous one, but with more misleading alignment.
+'' This indicates the 'dangling else' problem. In Raven, `else`s apply to the nearest `if`.
+
+if (FALSE)
+    if (b)
+        outcome = 5
+else
+    outcome = 6
+
+test outcome == 1
