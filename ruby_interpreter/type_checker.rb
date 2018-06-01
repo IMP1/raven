@@ -64,11 +64,10 @@ class TypeChecker < Visitor
     end
 
     def check_function(statements, env)
-        return_value = nil
         previous_func_env = @function_environment
         begin
             @function_environment = @environment
-            execute_block(statements, env)
+            check_block(statements, env)
         rescue Return => r
             return r.type
         end
@@ -159,7 +158,18 @@ class TypeChecker < Visitor
     end
 
     def visit_WithStatement(stmt)
-        # TODO: with statements
+        # TODO: check the condition specially. Somethings are still not valid, right?
+        # int? a = NULL
+        # with (string b = a) { ... } should fail right? Nahhhhh, not at compile time... ¬_¬
+        previous_env = @environment
+        @environment = Environment.new(@environment)
+        @environment.define(stmt.declaration.name, nil, stmt.declaration.type)
+        check_stmt(stmt.then_branch)
+        if !stmt.else_branch.nil?
+            check_stmt(stmt.else_branch)
+        end
+        @environment = previous_env
+        
     end
 
     def visit_ReturnStatement(stmt)
