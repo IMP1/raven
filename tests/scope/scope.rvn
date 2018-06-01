@@ -1,0 +1,15 @@
+int a = 4
+{
+    int b = a
+    print(b)
+    test b == 4
+}
+
+int x = 4
+{
+    int y = x
+    {
+        print(y)
+        test y == 4
+    }
+}

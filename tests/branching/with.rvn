@@ -1,0 +1,36 @@
+with (int i = 2) {
+    test i == 2
+}
+
+
+int? a = 3
+
+with (int x = a) {
+    print(x)
+    print("\n")
+
+    print(typeof(x))
+    print("\n")
+
+    test x == 3
+    test typeof(x) == int
+}
+
+int? b = NULL
+
+with(int x = b) {
+    test FALSE
+} else {
+    test TRUE
+}
+
+
+with (int x = "3") {
+    test FALSE
+    print("Does /this/ happen?\n")
+    print(x)
+    print("\n")
+} else {
+    test TRUE
+    print("Or not?\n")
+}
