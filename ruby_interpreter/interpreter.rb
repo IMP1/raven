@@ -75,18 +75,26 @@ class Interpreter < Visitor
         return true
     end
 
+    def is_valid?(stmt)
+        value = evaluate(stmt.initialiser)
+        return type_equality(SystemFunctions.type_of(value), stmt.type)
+        # TODO: evaluate the setup of a with_statement, but specially somehow. 
+        # Things are allowed to fail or being incorrect in a with condition. That's the point of a with statement, no?
+        return true
+    end
+
     def is_a_type?(obj)
         return obj.is_a?(Array) && obj.all? { |t| t.is_a?(Symbol) || t.is_a?(Array) || t.nil? }
     end
 
     def equals(left, right)
         if is_a_type?(left) || is_a_type?(right)
-            return type_match(left, right)
+            return type_equality(left, right)
         end
         return left == right
     end
 
-    def type_match(t1, t2)
+    def type_equality(t1, t2)
         # TODO: add type checking
         # func<(int, int) string>  should equal func
         # right?
@@ -127,15 +135,6 @@ class Interpreter < Visitor
         execute_block(stmt.statements, Environment.new(@environment))
     end
 
-    def visit_IfStatement(stmt)
-        cond = evaluate(stmt.condition)
-        if truthy?(cond)
-            execute(stmt.then_branch)
-        elsif !stmt.else_branch.nil?
-            execute(stmt.else_branch)
-        end
-    end
-
     def visit_DeferStatement(stmt)
         if @function_environment.nil?
             Compiler.runtime_fault(ScopeFault.new(stmt.token, "Can only defer within functions."))
@@ -145,8 +144,21 @@ class Interpreter < Visitor
         @function_environment.defer(stmt, Environment.new(closure))
     end
 
+    def visit_IfStatement(stmt)
+        cond = evaluate(stmt.condition)
+        if truthy?(cond)
+            execute(stmt.then_branch)
+        elsif !stmt.else_branch.nil?
+            execute(stmt.else_branch)
+        end
+    end
+
     def visit_WithStatement(stmt)
-        # TODO: with statements
+        if is_valid?(stmt.declaration)
+            execute_block([stmt.declaration, stmt.then_branch], Environment.new(@environment))
+        elsif !stmt.else_branch.nil?
+            execute(stmt.else_branch)
+        end
     end
 
     def visit_ReturnStatement(stmt)
