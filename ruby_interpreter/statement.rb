@@ -73,6 +73,18 @@ class BlockStatement < Statement
 
 end
 
+class DeferStatement < Statement
+
+    attr_reader :token
+    attr_reader :statement
+
+    def initialize(token, statement)
+        super(token)
+        @statement = statement
+    end
+
+end
+
 class IfStatement < Statement
 
     attr_reader :token
@@ -89,27 +101,15 @@ class IfStatement < Statement
 
 end
 
-class DeferStatement < Statement
-
-    attr_reader :token
-    attr_reader :statement
-
-    def initialize(token, statement)
-        super(token)
-        @statement = statement
-    end
-
-end
-
 class WithStatement < Statement
 
-    attr_reader :condition
+    attr_reader :declaration
     attr_reader :then_branch
     attr_reader :else_branch
 
-    def initialize(token, condition, then_branch, else_branch=nil)
+    def initialize(token, declaration, then_branch, else_branch=nil)
         super(token)
-        @condition   = condition
+        @declaration = declaration
         @then_branch = then_branch
         @else_branch = else_branch
     end
