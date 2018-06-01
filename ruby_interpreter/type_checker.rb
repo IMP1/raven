@@ -110,7 +110,6 @@ class TypeChecker < Visitor
         @log.trace(type[1].compact.inspect) if type[0] == :func
         # X is an optional X (eg. an int is an optional int).
         return true if type[0] == :optional && type[1] == obj_type
-        return true if obj_type[0] == :optional && obj_type[1] == type
 
         return true if type == [:any]
         return true if try_coerce_type(obj_type, type) == type
