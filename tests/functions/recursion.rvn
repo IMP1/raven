@@ -5,23 +5,26 @@ def down_from(int n) {
 
 down_from(5)
 
+print("\n\n")
 
-
-def fibonacci(int n) {
+def fibonacci(int n) int {
     if (n <= 1) {
         return n
     } else {
-        return fibonacci(n - 2) + fibonacci(n - 1)
+        int n_2 = n - 2
+        int n_1 = n - 1
+        return fibonacci(n_2) + fibonacci(n_1)
     }
 }
 
-for (int i = 0; i < 20; i = i + 1) {
+for (int i = 0; i < 10; i = i + 1) {
     print(i)
     print(" => ")
     print(fibonacci(i))
     print("\n")
 }
 
+print("\n")
 
 
 def is_even(int n) bool {
