@@ -374,7 +374,7 @@ class Parser
 
     def comparison
         expr = addition
-        while match_token(:GREATER, :GREATER_EQUAL, :LESS, :LESS_EQUAL)
+        while match_token(:GREATER, :GREATER_EQUAL, :LESS, :LESS_EQUAL, :BEGINS_WITH, :ENDS_WITH, :CONTAINS)
             operator = previous
             right = addition
             expr = BinaryExpression.new(expr, operator, right)
@@ -464,8 +464,8 @@ class Parser
             return LiteralExpression.new(previous, previous.literal, [:rational])
         end
         if match_token(:NULL_LITERAL)
-            return LiteralExpression.new(previous, previous.literal, [:optional]) # TODO: should NULL have its own type? Or is it a special value for the optional type?
-        end        
+            return LiteralExpression.new(previous, previous.literal, [:optional, nil]) # TODO: should NULL have its own type? Or is it a special value for the optional type?
+        end
 
         # Array Literals
         if match_token(:LEFT_SQUARE)
