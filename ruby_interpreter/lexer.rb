@@ -197,7 +197,6 @@ class Lexer
         when '\''
             if advance_if('\'')
                 if advance_if('{')
-                    puts "BLOCK COMMENT: line #{@line}"
                     # TODO: handle nested block comments.
                     while !eof? && !(previous == '\'' && peek == '\'' && peek_next == '}')
                         c = advance
@@ -205,7 +204,6 @@ class Lexer
                     end
                     advance # Ignore second '
                     advance # Ignore }
-                    puts "BLOCK COMMENT END: line #{@line}"
                 else
                     # A comment goes until the end of the line.
                     while peek != "\n" && !eof?
