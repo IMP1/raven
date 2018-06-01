@@ -44,6 +44,8 @@ contexts:
       scope: keyword.control.raven
     - match: '\b(?:print|typeof|tostring)\b'
       scope: support.function.raven
+    - match: '\b(?:test)\b'
+      scope: support.function.raven
     - match: '\b(?:this)\b'
       scope: variable.language.raven
     - match: '\b(?:abstract)\b'
