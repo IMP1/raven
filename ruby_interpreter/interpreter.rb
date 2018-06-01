@@ -75,11 +75,12 @@ class Interpreter < Visitor
         return true
     end
 
+    def is_a_type?(obj)
+        return obj.is_a?(Array) && obj.all? { |t| t.is_a?(Symbol) || t.is_a?(Array) || t.nil? }
+    end
+
     def equals(left, right)
-        if left.is_a?(Array) && left.all? { |t| t.is_a?(Symbol) }
-            return type_match(left, right)
-        end
-        if right.is_a?(Array) && right.all? { |t| t.is_a?(Symbol) }
+        if is_a_type?(left) || is_a_type?(right)
             return type_match(left, right)
         end
         return left == right
