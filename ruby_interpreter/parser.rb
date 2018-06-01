@@ -116,23 +116,23 @@ class Parser
     def try_coerce_type(obj_type, type)
         return obj_type if type.nil?
 
-        puts "Object type is #{obj_type.inspect}"
-        puts "Coercing to #{type.inspect}"
+        @log.trace("Object type is #{obj_type.inspect}")
+        @log.trace("Coercing to #{type.inspect}")
 
         # Handle numeric hierarchies
         if type == [:real] && obj_type == [:int]
-            puts "Returning #{[:real].inspect}"
+            @log.trace("Returning #{[:real].inspect}")
             return [:real]
         end
 
         # Handle optionals
         if type[0] == :optional && type[1] == obj_type
-            puts "Returning #{type.inspect}"
+            @log.trace("Returning #{type.inspect}")
             return type
         end
 
         # Handle generics
-        puts "Returning #{obj_type.each_with_index.map { |el, i| el.nil? ? type[i] : el }.inspect}"
+        @log.trace("Returning #{obj_type.each_with_index.map { |el, i| el.nil? ? type[i] : el }.inspect}")
         return obj_type.each_with_index.map { |el, i| el.nil? ? type[i] : el }
     end
 
