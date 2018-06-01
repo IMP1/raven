@@ -179,7 +179,21 @@ class TypeChecker < Visitor
         # TODO: ensure operator is defined on type
 
         case expr.operator.name
-        when :MINUS, :PLUS, :ASTERISK, :STROKE, :DOUBLE_STROKE, :CARET
+        when :STROKE
+            assert_type(expr.token, left, [:int], [:real], [:rational])
+            assert_type(expr.token, right, [:int], [:real], [:rational])
+            if left == [:real] || right == [:real]
+                return [:real]
+            else
+                return [:rational]
+            end
+
+        when :DOUBLE_STROKE
+            assert_type(expr.token, left, [:int], [:real], [:rational])
+            assert_type(expr.token, right, [:int], [:real], [:rational])
+            return [:int]
+
+        when :MINUS, :PLUS, :ASTERISK, :CARET
             assert_type(expr.token, left, [:int], [:real], [:rational])
             assert_type(expr.token, right, [:int], [:real], [:rational])
             return left

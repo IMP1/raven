@@ -115,12 +115,12 @@ class Parser
 
     def try_coerce_type(obj_type, type)
         return obj_type if type.nil?
+
         puts "Object type is #{obj_type.inspect}"
         puts "Coercing to #{type.inspect}"
         puts "Returning #{obj_type.each_with_index.map { |el, i| el.nil? ? type[i] : el }.inspect}"
-        # if type[0] == :optional && (type[1] == obj_type || type[1] == nil)
-        #     return [:optional, obj_type]
-        # end
+
+        # Handle Generics
         return obj_type.each_with_index.map { |el, i| el.nil? ? type[i] : el }
     end
 
