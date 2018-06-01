@@ -72,9 +72,11 @@ class Parser
     end
 
     def escape_string(str)
-        return str.gsub('\\n', "\n")
+        escaped = str
+        escaped = escaped.gsub('\\n', "\n")
+        escaped = escaped.gsub('\\t', "\t")
+        return escaped
     end
-
 
     def synchronise
         # TODO: trace/debug that sychronisation has taken place
@@ -112,6 +114,13 @@ class Parser
     end
 
     def try_coerce_type(obj_type, type)
+        return obj_type if type.nil?
+        puts "Object type is #{obj_type.inspect}"
+        puts "Coercing to #{type.inspect}"
+        puts "Type Hint is #{@type_hint.inspect}"
+        # if type[0] == :optional && (type[1] == obj_type || type[1] == nil)
+        #     return [:optional, obj_type]
+        # end
         return obj_type.each_with_index.map { |el, i| el.nil? ? type[i] : el }
     end
 
@@ -449,19 +458,24 @@ class Parser
 
     def primary
         if match_token(:STRING_LITERAL)
-            return LiteralExpression.new(previous, escape_string(previous.literal), [:string])
+            var_type = [:string]
+            return LiteralExpression.new(previous, escape_string(previous.literal), try_coerce_type(var_type, @type_hint))
         end
         if match_token(:BOOLEAN_LITERAL)
-            return LiteralExpression.new(previous, previous.literal, [:bool])
+            var_type = [:bool]
+            return LiteralExpression.new(previous, previous.literal, try_coerce_type(var_type, @type_hint))
         end        
-        if match_token(:INTEGER_LITERAL, :REAL_LITERAL, :RATIONAL_LITERAL)
-            return LiteralExpression.new(previous, previous.literal, [:int])
+        if match_token(:INTEGER_LITERAL)
+            var_type = [:int]
+            return LiteralExpression.new(previous, previous.literal, try_coerce_type(var_type, @type_hint))
         end
-        if match_token(:REAL_LITERAL, :RATIONAL_LITERAL)
-            return LiteralExpression.new(previous, previous.literal, [:real])
+        if match_token(:REAL_LITERAL)
+            var_type = [:real]
+            return LiteralExpression.new(previous, previous.literal, try_coerce_type(var_type, @type_hint))
         end
         if match_token(:RATIONAL_LITERAL)
-            return LiteralExpression.new(previous, previous.literal, [:rational])
+            var_type = [:rational]
+            return LiteralExpression.new(previous, previous.literal, try_coerce_type(var_type, @type_hint))
         end
         if match_token(:NULL_LITERAL)
             return LiteralExpression.new(previous, previous.literal, [:optional, nil]) # TODO: should NULL have its own type? Or is it a special value for the optional type?
@@ -479,10 +493,7 @@ class Parser
             if !array.empty?
                 var_type = [:array, array.first.type]
             end
-            if !@type_hint.nil?
-                var_type = try_coerce_type(var_type, @type_hint)
-            end
-            return ArrayExpression.new(previous, array, var_type)
+            return ArrayExpression.new(previous, array, try_coerce_type(var_type, @type_hint))
         end
 
         # Type Literals / Function Literals
