@@ -9,6 +9,8 @@ require_relative 'global_env'
 # These nested arrays are subtypes.
 # types with subtypes (arrays, optionals, functions) are followed by an array containing the subtype info.
 # void types (eg from functions) are empty arrays
+# A placeholder type, to be replaced with generics or type inference is referred to by nil. 
+# So a subtype is either an array, or nil. A top-level type cannot be nil.
 
 # An Integer types is represented with   [:int]
 
@@ -171,8 +173,6 @@ class TypeChecker < Visitor
         left = get_expression_type(expr.left)
         right = get_expression_type(expr.right)
 
-        assert_type(expr.token, left, right)
-        
         # TODO: ensure operator is defined on type
 
         case expr.operator.name
@@ -197,7 +197,7 @@ class TypeChecker < Visitor
         when :BEGINS_WITH, :ENDS_WITH, :CONTAINS
             assert_type(expr.token, left, [:string])
             assert_type(expr.token, right, [:string])
-            return left
+            return [:bool]
 
         when :EQUAL, :NOT_EQUAL
             return [:bool]
