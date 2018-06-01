@@ -14,12 +14,12 @@ module SystemFunctions
         if obj == true || obj == false
             return obj.to_s.upcase
         end
-        if obj.is_a?(Array) && obj.all? { |t| t.is_a?(Symbol) }
+        if obj.is_a?(Array) && obj.all? { |t| t.is_a?(Symbol) || t.is_a?(Array) || t.nil? }
             return type_to_string(obj)
         end
         return obj.to_s
     end
-
+    
     def self.type_to_string(type_list)
         return type_list.reverse.inject("") { |memo, t| t.to_s + (memo.empty? ? "" : "<#{memo}>") }
     end
@@ -35,6 +35,9 @@ module SystemFunctions
         end
         if obj.is_a?(Array)
             return array_type(obj)
+        end
+        if obj.nil?
+            return [:optional, nil]
         end
         puts "COULD NOT DETECT TYPE OF OBJECT!!"
         p obj
