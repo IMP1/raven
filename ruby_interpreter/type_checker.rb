@@ -108,6 +108,9 @@ class TypeChecker < Visitor
         @log.trace(type.inspect)
         @log.trace(obj_type.inspect)
         @log.trace(type[1].compact.inspect) if type[0] == :func
+        # Numeric hierarchies:
+        return true if type == [:real] && obj_type == [:int]
+
         # X is an optional X (eg. an int is an optional int).
         return true if type[0] == :optional && type[1] == obj_type
 
