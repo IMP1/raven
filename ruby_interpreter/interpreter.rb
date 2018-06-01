@@ -178,7 +178,8 @@ class Interpreter < Visitor
         when :ASTERISK
             return left * right
         when :STROKE
-            return left.to_r / right
+            return left.to_r / right if left.is_a?(Integer) && right.is_a?(Integer)
+            return left / right
         when :DOUBLE_STROKE
             return (left / right).to_i
         when :CARET
