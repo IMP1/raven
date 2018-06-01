@@ -8,6 +8,12 @@ module SystemFunctions
     end
 
     def self.to_string(obj)
+        if obj.nil?
+            return "NULL"
+        end
+        if obj == true || obj == false
+            return obj.to_s.upcase
+        end
         if obj.is_a?(Array) && obj.all? { |t| t.is_a?(Symbol) }
             return type_to_string(obj)
         end
