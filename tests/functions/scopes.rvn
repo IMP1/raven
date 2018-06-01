@@ -9,49 +9,16 @@ def triangle (int x) int {
     }
 }
 
-test triangle(1) == 1
-test triangle(2) == 3
-test triangle(3) == 6
-test triangle(4) == 10
-
-def square (int x) int {
-    test x == 3
-    int a = triangle(x)
-    test x == 3
-    int b = triangle(x-1)
-    return a + b
-}
-
-print(square(3))
+int x = 4
+test x == 4
+print(triangle(x))
 print("\n")
+test x == 4
 
-''{
+''{ 
+# Notes
 
-def fibonacci(int n) int {
-    print("fib(")
-    print(n)
-    print(")")
-    if (n <= 1) {
-        print(" = ")
-        print(n)
-        print("\n")
-        return 1
-    } else {
-        print(" = \n")
-        return fibonacci(n - 2) + fibonacci(n - 1)
-    }
-}
-
-for (int i = 0; i < 10; i = i + 1) {
-    print(i)
-    print(" => ")
-    int value = fibonacci(i)
-    print("=> ")
-    print(value)
-    print("\n\n")
-}
-
-print("\n")
-
+  * This doesn't happen if x is renamed, so it's most likely an environment problem. 
+    Look in assignment, and the environment methods.
 
 ''}
