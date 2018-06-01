@@ -18,4 +18,8 @@ class Token
         return @name.to_s + " '" + @lexeme + "' " + (@literal.nil? ? "" : @literal.to_s)
     end
 
+    def self.system(lexeme)
+        return Token.new(:SYSTEM_FUNCTION, lexeme, 0, 0)
+    end
+
 end

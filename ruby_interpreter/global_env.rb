@@ -6,13 +6,13 @@ class GlobalEnvironment < Environment
 
     def initialize
         super
-        define(Token.new(:SYSTEM_FUNCTION, "p", 0, 0), 
+        define(Token.system("p"), 
             lambda { |interpreter, args| p args[0] }, 
             [:func, [ [[:any]], [] ]])
-        define(Token.new(:SYSTEM_FUNCTION, "print", 0, 0), 
+        define(Token.system("print"), 
             lambda { |interpreter, args| SystemFunctions.print(args[0]) }, 
             [:func, [ [[:any]], [] ]])
-        define(Token.new(:SYSTEM_FUNCTION, "typeof", 0, 0), 
+        define(Token.system("typeof"), 
             lambda { |interpreter, args| return SystemFunctions.type_of(args[0]) }, 
             [:func, [ [[:any]], [:type] ]])
     end
