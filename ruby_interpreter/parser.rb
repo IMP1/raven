@@ -118,9 +118,15 @@ class Parser
 
         puts "Object type is #{obj_type.inspect}"
         puts "Coercing to #{type.inspect}"
-        puts "Returning #{obj_type.each_with_index.map { |el, i| el.nil? ? type[i] : el }.inspect}"
 
-        # Handle Generics
+        # Handle numeric hierarchies
+        if type == [:real] && obj_type == [:int]
+            puts "Returning #{[:real].inspect}"
+            return [:real]
+        end
+
+        # Handle generics
+        puts "Returning #{obj_type.each_with_index.map { |el, i| el.nil? ? type[i] : el }.inspect}"
         return obj_type.each_with_index.map { |el, i| el.nil? ? type[i] : el }
     end
 
@@ -458,27 +464,24 @@ class Parser
 
     def primary
         if match_token(:STRING_LITERAL)
-            var_type = [:string]
-            return LiteralExpression.new(previous, escape_string(previous.literal), try_coerce_type(var_type, @type_hint))
+            return primitive_literal(try_coerce_type([:string], @type_hint), previous.literal, previous)
         end
         if match_token(:BOOLEAN_LITERAL)
-            var_type = [:bool]
-            return LiteralExpression.new(previous, previous.literal, try_coerce_type(var_type, @type_hint))
+            return primitive_literal(try_coerce_type([:bool], @type_hint), previous.literal, previous)
         end        
         if match_token(:INTEGER_LITERAL)
-            var_type = [:int]
-            return LiteralExpression.new(previous, previous.literal, try_coerce_type(var_type, @type_hint))
+            return primitive_literal(try_coerce_type([:int], @type_hint), previous.literal, previous)
         end
         if match_token(:REAL_LITERAL)
-            var_type = [:real]
-            return LiteralExpression.new(previous, previous.literal, try_coerce_type(var_type, @type_hint))
+            return primitive_literal(try_coerce_type([:real], @type_hint), previous.literal, previous)
         end
         if match_token(:RATIONAL_LITERAL)
-            var_type = [:rational]
-            return LiteralExpression.new(previous, previous.literal, try_coerce_type(var_type, @type_hint))
+            return primitive_literal(try_coerce_type([:rational], @type_hint), previous.literal, previous)
         end
         if match_token(:NULL_LITERAL)
-            return LiteralExpression.new(previous, previous.literal, [:optional, nil]) # TODO: should NULL have its own type? Or is it a special value for the optional type?
+            # TODO: should NULL have its own type? Or is it a special value for the optional type?
+            # Should this at least be attempted to coerce?
+            return primitive_literal([:optional, nil], previous.literal, previous)
         end
 
         # Array Literals
@@ -557,6 +560,25 @@ class Parser
         end
 
         raise fault(peek, "Expecting an expression. Got '#{peek.lexeme}'.")
+    end
+
+    def primitive_literal(type, value, token)
+        case type
+        when [:string]
+            return LiteralExpression.new(token, escape_string(value.to_s), type)
+        when [:int]
+            return LiteralExpression.new(token, value.to_i, type)
+        when [:real]
+            return LiteralExpression.new(token, value.to_f, type)
+        when [:rational]
+            return LiteralExpression.new(token, value.to_r, type)
+        when [:bool]
+            return LiteralExpression.new(token, !!value, type)
+        when [:optional, nil]
+            return LiteralExpression.new(token, value, type)
+        else
+            raise "What kind of literal is this?"
+        end
     end
 
     def subroutine_body(token, params, return_type)
