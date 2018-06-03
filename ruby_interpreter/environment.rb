@@ -2,7 +2,14 @@ require_relative 'fault'
 
 class Environment
 
-    def initialize(parent_environment=nil)
+    attr_reader :name
+
+    def enclosing
+        return @parent_environment
+    end
+
+    def initialize(name, parent_environment=nil)
+        @name = name
         @parent_environment = parent_environment
         @mappings = {}
         @types = {}
@@ -32,11 +39,7 @@ class Environment
     end
 
     def mapped?(token)
-        if @mappings.has_key?(token.lexeme)
-            return true
-        end
-
-        return false
+        return @mappings.has_key?(token.lexeme)
     end
 
     def type(token)
