@@ -60,4 +60,12 @@ module SystemFunctions
         return [:array, [:func]]     if array.all? { |value| value.is_a?(Proc) }
     end
 
+    def self.debug_scope(interpreter)
+        scopes = [interpreter.environment]
+        while !scopes.last.enclosing.nil?
+            scopes.push(scopes.last.enclosing)
+        end
+        scopes.reverse.each_with_index { |s, i| puts ("  " * i) + s.name }
+    end
+
 end
