@@ -5,7 +5,7 @@ require_relative 'system_functions'
 class GlobalEnvironment < Environment
 
     def initialize
-        super
+        super("system")
         define(Token.system("p"), 
             lambda { |interpreter, args| p args[0] }, 
             [:func, [ [[:any]], [] ]])
@@ -15,6 +15,9 @@ class GlobalEnvironment < Environment
         define(Token.system("typeof"), 
             lambda { |interpreter, args| return SystemFunctions.type_of(args[0]) }, 
             [:func, [ [[:any]], [:type] ]])
+        define(Token.system("debug_scope"),
+            lambda { |interpreter, args| SystemFunctions.debug_scope(interpreter) },
+            [:func, [ [], [] ]])
     end
 
 end
