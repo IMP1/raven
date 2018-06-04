@@ -76,10 +76,10 @@ def handle_input(string input) {
     if (input ^= "vcr ") {
 
     } else {
-        system(input)    
+        system(input)
     }
 }
 
 for (int i = 0; i < input_size; i = i + 1) {
-    
+    handle_input(inputs[i])
 }
