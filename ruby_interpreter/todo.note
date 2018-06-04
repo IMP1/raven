@@ -2,6 +2,10 @@ up to [here](http://craftinginterpreters.com/functions.html)
 
 # Future Plans
 
+*Numerics*:
+
+    Ignore underscores in numeric literals, so can have 1_000_000 without it erroring.
+
 *Strings*:
 
     Ruby has 'single quoted strings' and "double quoted strings". C# has $"" and @"" and "".
@@ -30,3 +34,7 @@ up to [here](http://craftinginterpreters.com/functions.html)
 *Classes*:
 
     Add classes. Think a bit more about what they are, and how they should be structured.
+
+*Units*:
+
+    Add units. Think a bit more about what they are, and how they should be structured.
