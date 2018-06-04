@@ -11,7 +11,11 @@ def triangle (int x) int {
 
 int x = 4
 test x == 4
+debug_scope()
 print(triangle(x))
+debug_scope()
+print("\n")
+print(x)
 print("\n")
 test x == 4
 
