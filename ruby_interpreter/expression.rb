@@ -74,6 +74,19 @@ class ArrayExpression < Expression
 
 end
 
+class IndexExpression < Expression
+
+    attr_reader :collection
+    attr_reader :key
+
+    def initialize(token, collection, key)
+        super(token, collection.type)
+        @collection = collection
+        @key = key
+    end
+
+end
+
 class ShortCircuitExpression < Expression
 
     attr_reader :left

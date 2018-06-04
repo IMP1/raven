@@ -312,5 +312,11 @@ class Interpreter < Visitor
         func.call(self, args)
     end
 
+    def visit_IndexExpression(expr)
+        collection = evaluate(expr.collection)
+        key = evaluate(expr.key)
+        return collection[key]
+    end
+
 end
 

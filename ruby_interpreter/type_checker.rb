@@ -262,6 +262,10 @@ class TypeChecker < Visitor
         return get_expression_type(expr.expression)
     end
 
+    def visit_IndexExpression(expr)
+        return expr.type
+    end
+
     def visit_ArrayExpression(expr)
         if expr.elements.any? {|e| get_expression_type(e) != get_expression_type(expr.elements[0]) }
             Compiler.compile_fault(TypeFault.new(expr.token, "This array contains elements with differing types."))
