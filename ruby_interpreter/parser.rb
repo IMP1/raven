@@ -103,14 +103,14 @@ class Parser
         return statements
     end
 
-    def infer_type(expression)
-        if expression.is_a?(FunctionExpression)
+    def infer_type(expr)
+        if expr.is_a?(FunctionExpression)
             @log.trace("Inferring type of function expresion")
-            @log.trace("FunctionExpression param types are #{expression.parameter_types.inspect}")
-            @log.trace("FunctionExpression return type is #{expression.return_type.inspect}")
-            return [ :func, [expression.parameter_types, expression.return_type] ]
+            @log.trace("FunctionExpression param types are #{expr.parameter_types.inspect}")
+            @log.trace("FunctionExpression return type is #{expr.return_type.inspect}")
+            return [ :func, [expr.parameter_types, expr.return_type] ]
         end
-        return expression.type
+        return expr.type
     end
 
     def try_coerce_type(obj_type, type)
@@ -354,16 +354,12 @@ class Parser
     end
 
     def expression_statement
-        expr = expression
+        expr = assignment
         return ExpressionStatement.new(previous, expr)
     end
 
-    def expression
-        return assignment
-    end
-
     def assignment
-        expr = or_shortcircuit
+        expr = expression
 
         if (match_token(:ASSIGNMENT))
             equals = previous
@@ -378,6 +374,10 @@ class Parser
         end
 
         return expr
+    end
+
+    def expression
+        return or_shortcircuit
     end
 
     def or_shortcircuit
@@ -469,6 +469,9 @@ class Parser
         loop do
             if match_token(:LEFT_PAREN)
                 expr = finish_call(expr)
+            elsif match_token(:LEFT_SQUARE)
+                key = or_shortcircuit
+                expr = index_of(expr, key)
             else
                 break
             end
@@ -487,6 +490,11 @@ class Parser
         end
         paren = consume_token(:RIGHT_PAREN, "Expecting ')' after arguments.")
         return CallExpression.new(callee, paren, args)
+    end
+
+    def index_of(expr, key)
+        paren = consume_token(:RIGHT_SQUARE, "Expecting ']' after index.")
+        return IndexExpression.new(previous, expr, key)
     end
 
     def primary
