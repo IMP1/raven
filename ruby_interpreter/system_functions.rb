@@ -58,6 +58,7 @@ module SystemFunctions
         return [:array, [:bool]]     if array.all? { |value| (value == true || value == false) }
         return [:array, [:rational]] if array.all? { |value| value.is_a?(Rational) }
         return [:array, [:func]]     if array.all? { |value| value.is_a?(Proc) }
+        raise "Could not get array's type."
     end
 
     def self.debug_scope(interpreter)
