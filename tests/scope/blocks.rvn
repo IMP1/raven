@@ -1,3 +1,5 @@
+debug_scope()
+
 int i = 1
 {
     int i = 2
@@ -9,6 +11,7 @@ int i = 1
 }
 test i == 1
 
+debug_scope()
 
 int x = 0
 {
@@ -20,3 +23,5 @@ int x = 0
     test typeof(x) == string
 }
 test typeof(x) == int
+
+debug_scope()
