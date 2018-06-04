@@ -64,6 +64,7 @@ def print_results(results)
         print ConsoleStyle::RESET
         print "\n"
     end
+    puts
 end
 
 def result_colour(result)
