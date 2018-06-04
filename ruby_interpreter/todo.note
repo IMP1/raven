@@ -19,6 +19,10 @@ up to [here](http://craftinginterpreters.com/functions.html)
 
     Environment should have constants? They cannot be assigned to?
 
+*Params/Args*:
+
+    Add a splat operator. And/or A way to have var-args.
+
 *Defer*:
 
     Read up on [how Go handles defer statements](https://blog.golang.org/defer-panic-and-recover). They are different. 
