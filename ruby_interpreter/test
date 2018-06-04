@@ -1,0 +1,1 @@
+ruby ruby_interpreter/test.rb -a | less +G -R -X
