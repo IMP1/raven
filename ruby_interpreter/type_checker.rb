@@ -64,6 +64,7 @@ class TypeChecker < Visitor
     end
 
     def check_function(statements, env)
+        previous_env = @environment
         previous_func_env = @function_environment
         begin
             @function_environment = @environment
@@ -71,7 +72,6 @@ class TypeChecker < Visitor
         rescue Return => r
             return r.type
         end
-        previous_env = @environment
         @function_environment.pop_deferred do |stmt, env|
             @environment = env
             execute(stmt.statement)
