@@ -10,11 +10,15 @@ class Lexer
         'defer'     => :DEFER,
         'else'      => :ELSE,
         'with'      => :WITH,
-        'as'        => :AS,
         'while'     => :WHILE,
         'for'       => :FOR,
         'def'       => :DEFINITION,
         'return'    => :RETURN,
+        # Unit definitions
+        'unit'      => :UNIT,
+        'dimension' => :DIMENSION,
+        'base'      => :BASE_UNIT,
+        # Testing procedures
         'test'      => :DEBUG_TEST,
     }
 
@@ -22,9 +26,9 @@ class Lexer
         # Types
         'int'      => [:TYPE_LITERAL, :int],
         'real'     => [:TYPE_LITERAL, :real],
-        'string'   => [:TYPE_LITERAL, :string],
-        'bool'     => [:TYPE_LITERAL, :bool],
         'rational' => [:TYPE_LITERAL, :rational],
+        'bool'     => [:TYPE_LITERAL, :bool],
+        'string'   => [:TYPE_LITERAL, :string],
         'func'     => [:TYPE_LITERAL, :func],
         'type'     => [:TYPE_LITERAL, :type],
         'any'      => [:TYPE_LITERAL, :any],
