@@ -270,7 +270,7 @@ class Parser
         end
 
         if !check(:SEMICOLON)
-            condition = expression
+            condition = or_shortcircuit
         else
             condition = LiteralExpression.new(previous, true, :bool)
         end
@@ -330,7 +330,7 @@ class Parser
 
     def while_statement
         consume_token(:LEFT_PAREN, "Expecting '(' before while loop condition.")
-        condition = expression
+        condition = or_shortcircuit
         consume_token(:RIGHT_PAREN, "Expecting ')' after while loop condition.")
         body = statement
 
