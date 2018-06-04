@@ -55,7 +55,7 @@ class Interpreter < Visitor
         # Function Execution
         begin
             execute_block(statements, env)
-            return_value = nil
+            return_value = []
         rescue Return => r
             return_value = r.value
         end
