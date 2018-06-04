@@ -8,24 +8,26 @@ def test_file(filename, root="")
         return nil
     end
     local_name = filename[root.length..-1]
-    puts "running test '#{local_name}'"
+    puts ConsoleStyle::BOLD_ON + "Running test #{ConsoleStyle::FG_CYAN}#{local_name}" + ConsoleStyle::RESET
     success = true
     begin
         Compiler.run_file(filename, $log)
     rescue SystemExit => e
         success = false if e.status > 0
     end
-    puts "test #{success ? "succeeded" : "failed"}"
-    puts
-    return {
+    result = {
         test: local_name,
         success: success,
     }
+    puts
+    puts ConsoleStyle::BOLD_ON + "Completed test #{ConsoleStyle::FG_CYAN}#{local_name}#{ConsoleStyle::RESET} \nResult: " + result_colour(result) + (success ? "success" : "failure") + ConsoleStyle::RESET
+    puts
+    return result
 end
 
 def test_folder(dirname, root=nil)
     results = []
-    puts "running all tests in '#{dirname}'"
+    puts ConsoleStyle::BOLD_ON + "running all tests in #{ConsoleStyle::FG_CYAN}#{dirname}" + ConsoleStyle::RESET
     puts
     Dir[File.join(dirname, '*')].each do |f|
         if File.directory?(f)
@@ -106,7 +108,7 @@ elsif ARGV.length > 0
     results = []
     ARGV.each do |fn| 
         if File.directory?(fn)
-            results += test_folder(fn)
+            results += test_folder(fn, fn)
         elsif File.file?(fn)
             results.push(test_file(fn))
         else
