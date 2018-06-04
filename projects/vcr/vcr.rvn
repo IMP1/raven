@@ -6,13 +6,12 @@
 
 ''}
 
-'' TODO: Use user input when that's a feature. For now, use these strings and pretend they've come from the user.
-string[] inputs = ["vcr --help", "vcr init", "touch .vcr_ignore", "vcr add .vcr_ignore", "vcr commit -m \"initial commit\""]
-
-def handle_input(string command) {
-    if (command == "init") {
+def handle_command(string command) {
+    if (command ^= "init ") {
         init()
-    } else if (command == "add") {
+    } else if (command ^= "add ") {
+
+    } else if (command ^= "commit ") {
 
     } else {
         print("Invalid command '")
@@ -34,12 +33,12 @@ def init(string? directory) {
     }
     path = path + "/.vcr"
 
-    print("!mkdir " + path)               '' vcr directory
-    print("!mkdir " + path + "/frames")   '' all snapshots
-    print("!mkdir " + path + "/branches") '' all branches
-    print("!mkdir " + path + "/tags")     '' all tags
-    print("!\"\" > " + path + "/config")  '' config file
-    print("!\"\" > " + path + "/HEAD")    '' current head
+    system("mkdir " + path)               '' vcr directory
+    system("mkdir " + path + "/frames")   '' all snapshots
+    system("mkdir " + path + "/branches") '' all branches
+    system("mkdir " + path + "/tags")     '' all tags
+    system("\"\" > " + path + "/config")  '' config file
+    system("\"\" > " + path + "/HEAD")    '' current head
 }
 
 def ensure_vcr() {
@@ -58,4 +57,29 @@ def commit(string message, string author) {
     string hash = "" '' date, message, parent_frame, author
     print("!mkdir frames/" + hash)
     print("!mkdir frames/" + hash + "/.frame")
+}
+
+
+
+'' TODO: Use user input when that's a feature. For now, use these strings and pretend they've come from the user.
+string[] inputs = [
+    "vcr help", 
+    "vcr init", 
+    "touch .vcr_ignore", 
+    "vcr add .vcr_ignore", 
+    "vcr commit -m \"initial commit\""
+]
+int input_size = 5
+
+'' This method is needed until command line args / input is working
+def handle_input(string input) {
+    if (input ^= "vcr ") {
+
+    } else {
+        system(input)    
+    }
+}
+
+for (int i = 0; i < input_size; i = i + 1) {
+    
 }
