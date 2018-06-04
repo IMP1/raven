@@ -17,7 +17,7 @@ class Interpreter < Visitor
 
     def initialize(statements)
         @statements = statements
-        @environment = Environment.new(GLOBAL_ENV)
+        @environment = Environment.new("user", GLOBAL_ENV)
         @function_environment = nil
     end
 

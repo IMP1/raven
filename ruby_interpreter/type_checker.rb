@@ -38,7 +38,7 @@ class TypeChecker < Visitor
     def initialize(statements, log=nil)
         @log = log || Log.new("TypeChecker")
         @statements = statements
-        @environment = Environment.new(GLOBAL_ENV)
+        @environment = Environment.new("user", GLOBAL_ENV)
         @function_environment = nil
     end
 
