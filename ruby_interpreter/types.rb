@@ -91,7 +91,7 @@ class Raven_Function
         return "func<#{sig_string.join(" ")}>"
     end
     def call(interpreter, args)
-        
+
     end
 end
 
@@ -110,7 +110,6 @@ class Raven_Array
 end
 
 class Raven_Optional
-    NULL = Raven_Optional.new(nil, nil)
     attr_reader :element
     def initialize(element, inner_type)
         @element = element
