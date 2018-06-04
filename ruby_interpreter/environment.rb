@@ -42,6 +42,10 @@ class Environment
         return @mappings.has_key?(token.lexeme)
     end
 
+    def names
+        return @mappings.keys
+    end
+
     def type(token)
         if mapped?(token)
             return @types[token.lexeme]
