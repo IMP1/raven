@@ -27,9 +27,9 @@ require_relative 'global_env'
 class TypeChecker < Visitor
 
     class Return < RuntimeError
-        attr_reader :value
-        def initialize(value)
-            @value = value
+        attr_reader :type
+        def initialize(type)
+            @type = type
         end
     end
 
@@ -65,21 +65,22 @@ class TypeChecker < Visitor
     end
 
     def check_function(statements, env)
+
         previous_env = @environment
         previous_func_env = @function_environment
         begin
             @function_environment = @environment
             check_block(statements, env)
         rescue Return => r
-            return r.type
+            return r.type || []
         end
         @function_environment.pop_deferred do |stmt, env|
             @environment = env
-            execute(stmt.statement)
+            check_stmt(stmt.statement)
         end
         @environment = previous_env
         @function_environment = previous_func_env
-        return nil
+        return []
     end
 
     def get_expression_type(expr)
@@ -278,6 +279,12 @@ class TypeChecker < Visitor
     end
 
     def visit_FunctionExpression(expr)
+        previous_env = @environment
+        @environment = Environment.new("function", @environment)
+        expr.parameter_names.each_with_index { |param, i| @environment.define(param, nil, expr.parameter_types[i]) }
+        return_type = check_function(expr.body, Environment.new("closure", @environment))
+        @environment= previous_env
+        assert_type(expr.token, return_type, expr.return_type)
         return [:func, [ expr.parameter_types, expr.return_type ]]
     end
 
