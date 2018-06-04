@@ -22,6 +22,9 @@ class GlobalEnvironment < Environment
         define(Token.system("exit"),
             lambda { |interpreter, args| raise Compiler::Exit.new(args[0]) },
             [:func, [ [[:int]], [] ]])
+        define(Token.system("system"),
+            lambda { |interpreter, args| return system(args[0]) },
+            [:func, [ [[:string]], [:optional, [:any]] ]])
     end
 
 end
