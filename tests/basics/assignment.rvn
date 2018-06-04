@@ -1,0 +1,14 @@
+int a = 3
+
+print(a)
+print("\n")
+
+a = 4
+
+print(a)
+print("\n")
+
+a = 4
+
+print(a)
+print("\n")
