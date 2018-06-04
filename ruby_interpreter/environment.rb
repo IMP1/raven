@@ -8,7 +8,7 @@ class Environment
         return @parent_environment
     end
 
-    def initialize(name, parent_environment=nil)
+    def initialize(name, parent_environment)
         @name = name
         @parent_environment = parent_environment
         @mappings = {}
