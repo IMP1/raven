@@ -262,10 +262,6 @@ class TypeChecker < Visitor
         return get_expression_type(expr.expression)
     end
 
-    def visit_IndexExpression(expr)
-        return expr.type
-    end
-
     def visit_ArrayExpression(expr)
         if expr.elements.any? {|e| get_expression_type(e) != get_expression_type(expr.elements[0]) }
             Compiler.compile_fault(TypeFault.new(expr.token, "This array contains elements with differing types."))
@@ -305,6 +301,11 @@ class TypeChecker < Visitor
         return_type = func_sig[1][1]
         @log.trace("Return type #{return_type.inspect}")
         return return_type
+    end
+
+    def visit_IndexExpression(expr)
+        # TODO: collection key types must be the same as the key's type.
+        return expr.type
     end
 
 end
