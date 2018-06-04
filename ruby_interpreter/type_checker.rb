@@ -65,7 +65,6 @@ class TypeChecker < Visitor
     end
 
     def check_function(statements, env)
-
         previous_env = @environment
         previous_func_env = @function_environment
         begin
@@ -130,8 +129,8 @@ class TypeChecker < Visitor
     end
 
     def visit_VariableDeclarationStatement(stmt)
-        assert_type(stmt.token, get_expression_type(stmt.initialiser), stmt.type)
         @environment.define(stmt.name, nil, stmt.type)
+        assert_type(stmt.token, get_expression_type(stmt.initialiser), stmt.type)
     end
 
     def visit_AssignmentStatement(stmt)
