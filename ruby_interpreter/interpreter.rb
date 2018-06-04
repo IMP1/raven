@@ -297,9 +297,13 @@ class Interpreter < Visitor
         func = evaluate(expr.callee)
         args = expr.arguments.map { |a| evaluate(a) }
 
-        if args.size != func.arity
-            Compiler.runtime_fault(ArgumentFault.new(expr.token, "Expected #{func.arity} args but got #{args.size}."))
-        end
+        # TODO: check arg count.
+        #       func.arity will always be 2, because it's |environment, args|. Need the size of the args array, but that's just args. Not params.
+        #       :/
+
+        # if args.size != func.arity
+            # Compiler.runtime_fault(ArgumentFault.new(expr.token, "Expected #{func.arity} args but got #{args.size}."))
+        # end
 
         if !func.is_a?(Proc)
             Compiler.runtime_fault(SyntaxFault.new(expr.token, "This object is not callable."))
