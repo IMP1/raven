@@ -299,7 +299,7 @@ class Parser
     def if_statement
         token = previous
         consume_token(:LEFT_PAREN, "Expecting '(' before if statement condition.")
-        condition = expression
+        condition = or_shortcircuit
         consume_token(:RIGHT_PAREN, "Expecting ')' after if statement condition.")
 
         then_branch = statement
