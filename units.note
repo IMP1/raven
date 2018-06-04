@@ -1,0 +1,63 @@
+# units
+
+Units are special type of user-defined type in raven.
+Their values are of the `real` type, and essentially they are some meta-data associated with the numeric value.
+
+They are freely castable to the `real` type.
+
+They were inspired by game development, and the ability to do something like this:
+
+```
+
+speed x = 10 m/s
+time  y = 3 s
+
+distance z = x * y '' => 30 of distance:base_unit. Can be converted to m or inch or km, etc.
+
+
+distance<inch> a = 6
+distance<m>    b = 4
+
+distance<m>    c = a + b '' => 6.1016 m
+
+```
+
+Possibly with this setup:
+
+```
+dimension distance                  '' no assignment means base dimension
+dimension time                      '' no assignment means base dimension
+dimension speed = distance / time   '' assignment shows relationship of other units
+
+unit m    distance = base
+unit inch distance = base / 39.3700787
+unit km   distance = base * 1000
+
+
+```
+
+'Dimension' above refers to a physical dimension. See the [Dimensional Analysis Wikipedia page](https://en.wikipedia.org/wiki/Dimensional_analysis).
+However, you can have multi-dimensional units, where dimensions can be thought of as different dimensions in space. 
+
+
+``` 
+dimension displacement = distance[3]
+dimension velocity     = displacement / time
+
+displacement<m, s> my_position = [0, 0, 0] '' displacement => distance[3]
+velocity<m, s>     my_speed    = [3, 4, 5] '' displacement / time => distance[3] / time => (distance/time)[3]
+
+displacement<m, s> next_pos    = my_position + my_speed
+
+''---------------------------''
+dimension temperature
+
+unit K temperature = base
+unit C temperature = base - 273.15
+unit F temperature = (base - 273.15) * 9/5 + 32
+```
+
+# Ideas
+
+  * Somehow using unit compositions to dynamically create dimensions (not specifying speed dimension, but just using `m / s`)
+  * How to convert between units if there's a complicated conversion (like C and F)? Can go one way easily, but back? Need some general 'inverse' function for a mathematical equation,
