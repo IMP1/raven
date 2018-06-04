@@ -1,0 +1,60 @@
+''{
+
+
+    * http://tom.preston-werner.com/2009/05/19/the-git-parable.html
+    * http://ryanheathcote.com/git/build-your-own-vcs
+
+''}
+
+string[] inputs = ["vcr --help", "vcr init", "touch .vcr_ignore", "vcr add .vcr_ignore", "vcr commit -m \"initial commit\""]
+
+def handle_input(string command) {
+    if (command == "init") {
+        init()
+    } else if (command == "add") {
+
+    } else {
+        print("Invalid command '")
+        print(command)
+        print("'.\n")
+        exit(64)
+    }
+}
+
+def init(string? directory) {
+    if (FALSE) { '' TODO: Check for existence of existing repo
+        print("This is already a vcr folder.")
+        return
+    }
+
+    string path = ""
+    with (string dir = directory) {
+        path = path + dir
+    }
+    path = path + "/.vcr"
+
+    print("!mkdir " + path)               '' vcr directory
+    print("!mkdir " + path + "/frames")   '' all snapshots
+    print("!mkdir " + path + "/branches") '' all branches
+    print("!mkdir " + path + "/tags")     '' all tags
+    print("!\"\" > " + path + "/config")  '' config file
+    print("!\"\" > " + path + "/HEAD")    '' current head
+}
+
+def ensure_vcr() {
+    if (!TRUE) { '' TODO: check for the existing of existing repo
+        print("This isn't a vcr folder. Use `vcr init` to make it one.")
+        exit(0)
+    }
+}
+
+def add(string args) {
+    ensure_vcr()
+}
+
+def commit(string message, string author) {
+    ensure_vcr()
+    string hash = "" '' date, message, parent_frame, author
+    print("!mkdir frames/" + hash)
+    print("!mkdir frames/" + hash + "/.frame")
+}
