@@ -45,17 +45,20 @@ class Compiler
 
         @@log.trace(tokens.map {|t| "\t<#{t.to_s}>"}.join("\n"))
 
+        @@log.info("Parsing...")
         parser = Parser.new(tokens)
         statements = parser.parse
 
         @@log.trace(statements.map {|s| s.inspect}.join("\n"))
 
+        @@log.info("Type Checking...")
         log = Log.new("TypeChecker", @@log.get_level, @@log.get_output)
         checker = TypeChecker.new(statements, log)
         checker.check
 
         exit(65) if @@compile_faults.size > 0
 
+        @@log.info("Interpreting...")
         interpreter = Interpreter.new(statements)
         interpreter.interpret
 
