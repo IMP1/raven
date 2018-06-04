@@ -12,6 +12,8 @@ class Interpreter < Visitor
             @value = value
         end
     end
+
+    attr_reader :environment
     
     GLOBAL_ENV = GlobalEnvironment.new
 
@@ -49,6 +51,7 @@ class Interpreter < Visitor
 
     def execute_function(statements, env)
         return_value = nil
+        previous_env = @environment
         previous_func_env = @function_environment
         begin
             @function_environment = @environment
@@ -56,7 +59,6 @@ class Interpreter < Visitor
         rescue Return => r
             return_value = r.value
         end
-        previous_env = @environment
         @function_environment.pop_deferred do |stmt, env|
             @environment = env
             execute(stmt.statement)
@@ -132,7 +134,7 @@ class Interpreter < Visitor
     end
 
     def visit_BlockStatement(stmt)
-        execute_block(stmt.statements, Environment.new(@environment))
+        execute_block(stmt.statements, Environment.new("block", @environment))
     end
 
     def visit_DeferStatement(stmt)
@@ -141,7 +143,7 @@ class Interpreter < Visitor
             return
         end
         closure = @environment
-        @function_environment.defer(stmt, Environment.new(closure))
+        @function_environment.defer(stmt, Environment.new("closure", closure))
     end
 
     def visit_IfStatement(stmt)
@@ -155,7 +157,7 @@ class Interpreter < Visitor
 
     def visit_WithStatement(stmt)
         if is_valid?(stmt.declaration)
-            execute_block([stmt.declaration, stmt.then_branch], Environment.new(@environment))
+            execute_block([stmt.declaration, stmt.then_branch], Environment.new("with", @environment))
         elsif !stmt.else_branch.nil?
             execute(stmt.else_branch)
         end
@@ -265,7 +267,7 @@ class Interpreter < Visitor
     def visit_FunctionExpression(expr)
         func = lambda do |interpreter, args|
             closure = @environment
-            env = Environment.new(closure)
+            env = Environment.new("closure", closure)
             expr.parameter_names.each_with_index { |param, i| env.define(param, args[i], expr.parameter_types[i]) }
             return interpreter.execute_function(expr.body, env)
         end
