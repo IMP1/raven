@@ -143,6 +143,12 @@ class Parser
     def declaration
         @type_hint = nil
         begin
+            if match_token(:DIMENSION)
+                return dimension_definiton
+            end
+            if match_token(:UNIT)
+                return unit_definiton
+            end
             if match_token(:DEFINITION)
                 return variable_definiton
             end
@@ -154,6 +160,19 @@ class Parser
             synchronise
             return nil
         end
+    end
+
+    def dimension_definiton
+        var_name = consume_token(:IDENTIFIER, "Expecting dimension name.")
+        relationship = nil
+        if match_token(:ASSIGNMENT)
+            relationship = nil
+        end
+        return DimensionDeclarationStatement(var_name, relationship)
+    end
+
+    def unit_definiton
+
     end
 
     def variable_definiton
