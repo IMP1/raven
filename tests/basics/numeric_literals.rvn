@@ -6,3 +6,13 @@ test (3/2)     == 3/2
 test (2 * 3/2) == 3
 
 test (3 // 2) == 1
+
+print(τ)
+print("\n")
+print(π)
+print("\n")
+
+print(τ - π*2)
+print("\n")
+
+test (τ - π*2) < 0.001
