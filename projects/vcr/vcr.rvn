@@ -6,6 +6,7 @@
 
 ''}
 
+'' TODO: Use user input when that's a feature. For now, use these strings and pretend they've come from the user.
 string[] inputs = ["vcr --help", "vcr init", "touch .vcr_ignore", "vcr add .vcr_ignore", "vcr commit -m \"initial commit\""]
 
 def handle_input(string command) {
