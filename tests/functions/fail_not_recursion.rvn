@@ -1,0 +1,8 @@
+def down_from(int n) {
+    print(n)
+    if (n > 0) down_from(n-1)
+}
+
+down_from(5)
+
+func up_from = up_from

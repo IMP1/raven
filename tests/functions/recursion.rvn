@@ -1,8 +1,12 @@
+debug_scope()
+
 def down_from(int n) {
+    debug_scope()
     print(n)
     if (n > 0) down_from(n-1)
 }
 
+debug_scope()
 down_from(5)
 
 print("\n\n")
