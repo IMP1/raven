@@ -48,6 +48,7 @@ class TypeChecker < Visitor
                 check_stmt(stmt)
             end
         rescue StandardError => e
+            raise e
             @log.warn(e)
         end
     end
@@ -142,7 +143,7 @@ class TypeChecker < Visitor
     end
 
     def visit_BlockStatement(stmt)
-        check_block(stmt.statements, Environment.new(@environment))
+        check_block(stmt.statements, Environment.new("block", @environment))
     end
 
     def visit_IfStatement(stmt)
@@ -162,7 +163,7 @@ class TypeChecker < Visitor
         # int? a = NULL
         # with (string b = a) { ... } should fail right? Nahhhhh, not at compile time... ¬_¬
         previous_env = @environment
-        @environment = Environment.new(@environment)
+        @environment = Environment.new("with", @environment)
         @environment.define(stmt.declaration.name, nil, stmt.declaration.type)
         check_stmt(stmt.then_branch)
         if !stmt.else_branch.nil?
