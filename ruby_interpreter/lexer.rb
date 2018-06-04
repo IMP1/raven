@@ -221,11 +221,10 @@ class Lexer
         when '"'
             string
 
-        # TODO: Convenience symbols?
-        # when 'π'
-        #     add_token(:REAL_LITERAL, Math::PI)
-        # when 'τ'
-        #     add_token(:REAL_LITERAL, 2 * Math::PI)
+        when 'π'
+            add_token(:REAL_LITERAL, Math::PI)
+        when 'τ'
+            add_token(:REAL_LITERAL, 2 * Math::PI)
 
         when /\d/
             number
