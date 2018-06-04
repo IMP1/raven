@@ -66,7 +66,7 @@ module SystemFunctions
         while !scopes.last.enclosing.nil?
             scopes.push(scopes.last.enclosing)
         end
-        scopes.reverse.each_with_index { |s, i| puts ("  " * i) + s.name }
+        scopes.reverse.each_with_index { |s, i| puts ("  " * i) + s.name + ": " + s.names.join(" ") }
     end
 
 end
