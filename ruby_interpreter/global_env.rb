@@ -1,3 +1,4 @@
+require_relative 'compiler'
 require_relative 'token'
 require_relative 'environment'
 require_relative 'system_functions'
@@ -18,6 +19,9 @@ class GlobalEnvironment < Environment
         define(Token.system("debug_scope"),
             lambda { |interpreter, args| SystemFunctions.debug_scope(interpreter) },
             [:func, [ [], [] ]])
+        define(Token.system("exit"),
+            lambda { |interpreter, args| raise Compiler::Exit.new(args[0]) },
+            [:func, [ [[:int]], [] ]])
     end
 
 end

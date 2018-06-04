@@ -6,6 +6,13 @@ require_relative 'type_checker'
 
 class Compiler
 
+    class Exit < RuntimeError
+        attr_reader :code
+        def initialize(code)
+            @code = code
+        end
+    end
+
     def self.syntax_fault(fault)
         @@compile_faults.push(fault)
         report(fault)
@@ -58,9 +65,13 @@ class Compiler
 
         exit(65) if @@compile_faults.size > 0
 
-        @@log.info("Interpreting...")
-        interpreter = Interpreter.new(statements)
-        interpreter.interpret
+        begin
+            @@log.info("Interpreting...")
+            interpreter = Interpreter.new(statements)
+            interpreter.interpret
+        rescue Exit => e
+            exit(e.code)
+        end
 
         exit(70) if @@runtime_faults.size > 0
     end
