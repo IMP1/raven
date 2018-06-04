@@ -39,26 +39,28 @@ class Interpreter < Visitor
 
     def execute_block(statements, env)
         previous_env = @environment
+        @environment = env
         begin
-            @environment = env
             statements.each { |stmt| execute(stmt) }
         rescue RuntimeFault => f
-            puts "RuntimeFault in block."
-            p f
+            Compiler.runtime_fault(f)
+        ensure
+            @environment = previous_env
         end
-        @environment = previous_env
     end
 
     def execute_function(statements, env)
-        return_value = nil
-        previous_env = @environment
         previous_func_env = @function_environment
+        @function_environment = @environment
+        # Function Execution
         begin
-            @function_environment = @environment
             execute_block(statements, env)
+            return_value = nil
         rescue Return => r
             return_value = r.value
         end
+        previous_env = @environment
+        # Deferred Execution
         @function_environment.pop_deferred do |stmt, env|
             @environment = env
             execute(stmt.statement)
@@ -143,7 +145,7 @@ class Interpreter < Visitor
             return
         end
         closure = @environment
-        @function_environment.defer(stmt, Environment.new("closure", closure))
+        @function_environment.defer(stmt, Environment.new("defer closure", closure))
     end
 
     def visit_IfStatement(stmt)
@@ -265,8 +267,8 @@ class Interpreter < Visitor
     end
 
     def visit_FunctionExpression(expr)
+        closure = @environment
         func = lambda do |interpreter, args|
-            closure = @environment
             env = Environment.new("closure", closure)
             expr.parameter_names.each_with_index { |param, i| env.define(param, args[i], expr.parameter_types[i]) }
             return interpreter.execute_function(expr.body, env)
