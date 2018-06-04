@@ -12,8 +12,8 @@ def test_file(filename, root="")
     success = true
     begin
         Compiler.run_file(filename, $log)
-    rescue SystemExit
-        success = false
+    rescue SystemExit => e
+        success = false if e.status > 0
     end
     puts "test #{success ? "succeeded" : "failed"}"
     puts
