@@ -5,7 +5,7 @@ require_relative 'system_functions'
 class GlobalEnvironment < Environment
 
     def initialize
-        super("system")
+        super("system", nil)
         define(Token.system("p"), 
             lambda { |interpreter, args| p args[0] }, 
             [:func, [ [[:any]], [] ]])
