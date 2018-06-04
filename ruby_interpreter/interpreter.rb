@@ -296,9 +296,8 @@ class Interpreter < Visitor
     def visit_CallExpression(expr)
         func = evaluate(expr.callee)
         args = expr.arguments.map { |a| evaluate(a) }
-        # GET TYPES OF ARGS
 
-        if args.size != expr.arguments.size
+        if args.size != func.arity
             Compiler.runtime_fault(ArgumentFault.new(expr.token, "Expected #{func.arity} args but got #{args.size}."))
         end
 
