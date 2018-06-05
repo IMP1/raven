@@ -121,6 +121,7 @@ class FunctionExpression < Expression
     attr_reader :body
 
     def initialize(token, parameters, return_type, body)
+        # TODO: ca we pass a type here? I think we can, right? We have all we need, no?
         super(token, nil)
         @parameter_names = parameters.map {|param| param[:name] }
         @parameter_types = parameters.map {|param| param[:type] }
@@ -141,6 +142,32 @@ class CallExpression < Expression
         @callee = callee
         @token = token
         @arguments = arguments
+    end
+
+end
+
+class StructExpression < Expression
+
+    attr_reader :struct_name
+    attr_reader :initial_values
+
+    def initialize(token, type, initial_values)
+        super(token, [:struct, type])
+        @struct_name = type.to_s
+        @initial_values = initial_values
+    end
+
+end
+
+class PropertyExpression < Expression
+
+    attr_reader :object
+    attr_reader :field
+
+    def initialize(object, field)
+        super(field, nil)
+        @object = object
+        @field = field
     end
 
 end

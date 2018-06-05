@@ -1,0 +1,16 @@
+struct Foo {
+    
+    int a = 1
+    int b = 3
+
+}
+
+Foo x = Foo
+
+print(x.a)
+print(", ")
+print(x.b)
+print("\n")
+
+test x.a == 1
+test x.b == 3

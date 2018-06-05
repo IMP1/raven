@@ -135,8 +135,15 @@ class Interpreter < Visitor
     end
 
     def visit_StructDeclarationStatement(stmt)
-        # TODO: evaluate/execute a struct's body.
-        # TODO: add user types to environments?
+        @environment.define(stmt.token, nil, [:type])
+        struct_type_obj = {}
+        # TODO: make sure the following works with `def x 4 stuff` inside a struct definition.
+        stmt.fields.each do |f|
+            type = f.type
+            default = evaluate(f.initialiser)
+            struct_type_obj[f.name.lexeme] = { type: type, default: default }
+        end
+        @environment.assign(stmt.token, struct_type_obj)
     end
 
     def visit_WhileStatement(stmt)
@@ -326,6 +333,30 @@ class Interpreter < Visitor
         collection = evaluate(expr.collection)
         key = evaluate(expr.key)
         return collection[key]
+    end
+
+    def visit_StructExpression(expr)
+        struct_type_obj = @environment[expr.token]
+        if struct_type_obj.nil?
+            # TODO: error
+        end
+        struct_obj = {}
+        expr.initial_values.each do |key, value|
+            # TODO: make sure key is a valid key (not a token or a symbol or an expression or something.)
+            p key
+            p value
+            struct_obj[key] = value
+        end
+        struct_type_obj.each do |key, field|
+            if !struct_obj.has_key?(key)
+                struct_obj[key] = field[:default]
+            end
+        end
+        return struct_obj
+    end
+
+    def visit_PropertyExpression(expr)
+        return evaluate(expr.object)[expr.field.lexeme]
     end
 
 end

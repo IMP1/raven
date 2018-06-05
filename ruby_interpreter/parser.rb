@@ -8,11 +8,12 @@ require_relative 'types'
 class Parser
 
     def initialize(tokens)
-        @user_types = []
         @log = Log.new("Parser")
         @tokens = tokens
         @current = 0
         @type_hint = nil
+        @allow_no_initialiser = false
+        @user_types = {}
     end
 
     def eof?
@@ -79,17 +80,17 @@ class Parser
         return escaped
     end
 
-    def add_user_type(type_name)
-        @user_types.push(type_name)
+    def add_user_type(type_name, type_type)
+        @user_types[type_name] = [type_type, [type_name.to_sym]]
     end
 
     def user_type?(type_name)
-        return @user_types.include?(type_name)
+        return @user_types.has_key?(type_name)
     end
 
     def user_type(type_name)
         if user_type?(type_name)
-            return [type_name.to_sym]
+            return @user_types[type_name]
         else
             return nil
         end
@@ -191,24 +192,25 @@ class Parser
     end
 
     def struct_definition
-        puts "Found a struct keyword"
         struct_name = consume_token(:IDENTIFIER, "Expecting class name.")
-        puts "struct is called '#{struct_name}'. A great name for a struct."
-        add_user_type(struct_name.lexeme)
+        add_user_type(struct_name.lexeme, :struct)
         # TOOD: handle inheritence and generic here
         consume_token(:LEFT_BRACE, "Expecting '{' before class body.")
-        puts "We're inside the struct now..."
 
         fields = []
 
+        uninitialised_allowed = @allow_no_initialiser
+        @allow_no_initialiser = true
         while !eof? && !check(:RIGHT_BRACE)
             fields.push(declaration)
         end
+        @allow_no_initialiser = uninitialised_allowed
 
-        # TODO: Class body...
-        #       What /is/ a class body?
+        # TODO:
+        # Check the fields for initialisers, and pass a map of field to initial
+        # value as another parameter of StructDeclarationStatement.new to be used
+        # when instances of the struct are created.
 
-        puts "We're at the end of the struct now..."
         consume_token(:RIGHT_BRACE, "Expecting '}' after class body.")
         return StructDeclarationStatement.new(struct_name, fields)
     end
@@ -236,9 +238,17 @@ class Parser
     def variable_declaration
         var_type = variable_type
         var_name = consume_token(:IDENTIFIER, "Expect variable name.")
-        consume_token(:ASSIGNMENT, "Expecting an initial value for '#{var_name.lexeme}'.")
-        initial_value = expression
-        if var_type == [:func] # Allow for function objects to be declared with just func ident = {}
+        if  @allow_no_initialiser
+            if match_token(:ASSIGNMENT)
+                initial_value = expression
+            else
+                initial_value = nil
+            end
+        else
+            consume_token(:ASSIGNMENT, "Expecting an initial value for '#{var_name.lexeme}'.")
+            initial_value = expression
+        end
+        if var_type == [:func] && !initial_value.nil?
             var_type = infer_type(initial_value)
         end
         return VariableDeclarationStatement.new(var_name, var_type, initial_value)
@@ -407,9 +417,12 @@ class Parser
     def block
         statements = []
 
+        uninitialised_allowed = @allow_no_initialiser
+        @allow_no_initialiser = false
         while !check(:RIGHT_BRACE) && !eof?
             statements.push(declaration)
         end
+        @allow_no_initialiser = uninitialised_allowed
 
         consume_token(:RIGHT_BRACE, "Expect '}' after block.")
         return statements
@@ -546,6 +559,9 @@ class Parser
             elsif match_token(:LEFT_SQUARE)
                 key = or_shortcircuit
                 expr = index_of(expr, key)
+            elsif match_token(:DOT)
+                field = consume_token(:IDENTIFIER, "Expecting property name after '.'.")
+                expr = PropertyExpression.new(expr, field)
             else
                 break
             end
@@ -665,6 +681,28 @@ class Parser
         end        
 
         if match_token(:IDENTIFIER)
+            if user_type?(previous.lexeme)
+                token = previous
+                type = user_type(previous.lexeme)
+                puts "Wild user type detected!"
+                p type
+                case type[0]
+                when :struct
+                    initialiser = {}
+                    puts "A struct called #{type[1]}."
+                    if match_token(:LEFT_BRACE)
+                        while !eof? && !check(:RIGHT_BRACE)
+                            # TODO: Get values for fields
+                            field = assignment
+                            p field
+                            # initialiser.push(assignment)
+                        end
+                        consume_token(:RIGHT_BRACE, "Expecting '}' after struct initialiser.")
+                    end
+                    return StructExpression.new(token, type[1], initialiser)
+                end
+            end
+
             return VariableExpression.new(previous)
         end
 

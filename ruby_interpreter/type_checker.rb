@@ -130,7 +130,9 @@ class TypeChecker < Visitor
 
     def visit_VariableDeclarationStatement(stmt)
         @environment.define(stmt.name, nil, stmt.type)
-        assert_type(stmt.token, get_expression_type(stmt.initialiser), stmt.type)
+        if !stmt.initialiser.nil?
+            assert_type(stmt.token, get_expression_type(stmt.initialiser), stmt.type)
+        end
     end
 
     def visit_AssignmentStatement(stmt)
@@ -310,6 +312,16 @@ class TypeChecker < Visitor
     def visit_IndexExpression(expr)
         # TODO: collection key types must be the same as the key's type.
         return expr.type
+    end
+
+    def visit_StructExpression(expr)
+        return expr.type
+    end
+
+    def visit_PropertyExpression(expr)
+        puts "Accessing Proper Tea"
+        puts "Object is #{expr.object.inspect}"
+        puts "Property is #{expr.field.inspect}"
     end
 
 end
