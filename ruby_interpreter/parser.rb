@@ -121,8 +121,12 @@ class Parser
 
         # Handle numeric hierarchies
         if type == [:real] && obj_type == [:int]
-            @log.trace("Returning #{[:real].inspect}")
+            @log.trace("Returning #{[:real].inspect} from #{[:int].inspect}")
             return [:real]
+        end
+        if type == [:rational] && obj_type == [:int]
+            @log.trace("Returning #{[:rational].inspect} from #{[:int].inspect}")
+            return [:rational]
         end
 
         # Handle optionals
@@ -143,6 +147,9 @@ class Parser
     def declaration
         @type_hint = nil
         begin
+            if match_token(:CLASS)
+                return class_definition
+            end
             if match_token(:DIMENSION)
                 return dimension_definiton
             end
@@ -160,6 +167,17 @@ class Parser
             synchronise
             return nil
         end
+    end
+
+    def class_definition
+        class_name = consume_token(:IDENTIFIER, "Expecting class name.")
+        # TOOD: handle inheritence and generic here
+        consume(LEFT_BRACE, "Expecting '{' before class body.");
+
+
+
+        consume(RIGHT_BRACE, "Expecting '}' after class body.");
+        return ClassDeclarationStatement(class_name, )
     end
 
     def dimension_definiton

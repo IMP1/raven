@@ -11,3 +11,11 @@ print("\n")
 
 test b == 0.5
 test typeof(b) == real
+
+
+rational c = 2
+print(c)
+print("\n")
+
+test c == 2/1
+test typeof(c) == rational
