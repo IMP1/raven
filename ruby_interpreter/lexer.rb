@@ -42,10 +42,11 @@ class Lexer
         'null'   => [:NULL_LITERAL,    nil],
     }
 
-    def initialize(source)
-        @source = source
-        @tokens = []
+    def initialize(source, filename="")
+        @filename = filename
+        @source   = source
 
+        @tokens  = []
         @start   = 0
         @current = 0
         @line    = 1
@@ -68,7 +69,7 @@ class Lexer
             @start = @current
             scan_token
         end
-        @tokens.push(Token.new(:EOF, "", @line, @column))
+        @tokens.push(Token.new(:EOF, "", @line, @column, @filename))
         return @tokens
     end
 
@@ -80,7 +81,7 @@ class Lexer
 
     def add_token(token_type, literal_value=nil)
         lexeme = @source[@start...@current]
-        @tokens.push(Token.new(token_type, lexeme, @line, @column, literal_value))
+        @tokens.push(Token.new(token_type, lexeme, @line, @column, @filename, literal_value))
     end
 
     def advance_if(expected)
@@ -108,7 +109,7 @@ class Lexer
     end
 
     def fault(message)
-        t = Token.new(:FAULT, @source[@start...@current], @line, @column)
+        t = Token.new(:FAULT, @source[@start...@current], @line, @column, @filename)
         f = SyntaxFault.new(t, message)
         Compiler.syntax_fault(f)
         return f
