@@ -8,6 +8,7 @@ require_relative 'types'
 class Parser
 
     def initialize(tokens)
+        @user_types = []
         @log = Log.new("Parser")
         @tokens = tokens
         @current = 0
@@ -76,6 +77,22 @@ class Parser
         escaped = escaped.gsub('\\n', "\n")
         escaped = escaped.gsub('\\t', "\t")
         return escaped
+    end
+
+    def add_user_type(type_name)
+        @user_types.push(type_name)
+    end
+
+    def user_type?(type_name)
+        return @user_types.include?(type_name)
+    end
+
+    def user_type(type_name)
+        if user_type?(type_name)
+            return [type_name.to_sym]
+        else
+            return nil
+        end
     end
 
     def synchronise
@@ -147,8 +164,8 @@ class Parser
     def declaration
         @type_hint = nil
         begin
-            if match_token(:CLASS)
-                return class_definition
+            if match_token(:STRUCT)
+                return struct_definition
             end
             if match_token(:DIMENSION)
                 return dimension_definiton
@@ -169,15 +186,19 @@ class Parser
         end
     end
 
-    def class_definition
-        class_name = consume_token(:IDENTIFIER, "Expecting class name.")
+    def struct_definition
+        struct_name = consume_token(:IDENTIFIER, "Expecting class name.")
+        add_user_type(struct_name)
         # TOOD: handle inheritence and generic here
-        consume(LEFT_BRACE, "Expecting '{' before class body.");
+        consume_token(:LEFT_BRACE, "Expecting '{' before class body.")
 
+        fields = []
 
+        # TODO: Class body...
+        #       What /is/ a class body?
 
-        consume(RIGHT_BRACE, "Expecting '}' after class body.");
-        return ClassDeclarationStatement(class_name, )
+        consume_token(:RIGHT_BRACE, "Expecting '}' after class body.")
+        return ClassDeclarationStatement(class_name, fields)
     end
 
     def dimension_definiton
@@ -212,7 +233,19 @@ class Parser
     end
 
     def variable_type
-        var_type = [consume_token(:TYPE_LITERAL, "Expecting variable type.").literal]
+        if match_token(:TYPE_LITERAL)
+            var_type = [previous.literal]
+        elsif check(:IDENTIFIER)
+            if user_type?(peek.lexeme)
+                var_type = user_type(peek.lexeme)
+            else
+                raise fault(peek, "Expecting a variable type.")
+            end
+        else
+            raise fault(peek, "Expecting a variable type.")
+        end
+            
+        # var_type = [consume_token(:TYPE_LITERAL, "Expecting variable type.").literal]
         if var_type[0] == :func && !check(:LESS)
             # Add nil values for func inferrence later:
             var_type += [[nil, nil]]
