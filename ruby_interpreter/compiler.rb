@@ -42,12 +42,12 @@ class Compiler
         @@log.error("     location: #{fault.location}")
     end
 
-    def self.run(source, log=nil)
+    def self.run(source, filename="", log=nil)
         @@log = log || Log.new("Compiler")
         @@runtime_faults = []
         @@compile_faults = []
 
-        scanner = Lexer.new(source);
+        scanner = Lexer.new(source, filename);
         tokens = scanner.scan_tokens
 
         @@log.trace(tokens.map {|t| "\t<#{t.to_s}>"}.join("\n"))
@@ -77,7 +77,7 @@ class Compiler
     end
 
     def self.run_file(filename, log=nil)
-        run(File.open(filename, 'r').read, log);
+        run(File.open(filename, 'r').read, filename, log);
     end
 
     def self.run_repl
@@ -95,7 +95,7 @@ class Compiler
                         puts "Could not find the file '#{filename}'."
                     end
                 else
-                    run(input)
+                    run(input, "REPL")
                 end
                 print "> "
                 input = gets.chomp
