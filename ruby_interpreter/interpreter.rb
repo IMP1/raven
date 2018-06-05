@@ -63,7 +63,12 @@ class Interpreter < Visitor
         # Deferred Execution
         @function_environment.pop_deferred do |stmt, env|
             @environment = env
-            execute(stmt.statement)
+            begin
+                execute(stmt.statement)
+            rescue Return => r
+
+                Compiler.runtime_fault(ScopeFault.new(stmt.token, "Cannot return from within a deferred statement."))
+            end
         end
         @environment = previous_env
         @function_environment = previous_func_env

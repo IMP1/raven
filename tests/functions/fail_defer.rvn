@@ -1,0 +1,15 @@
+def foo int {
+    defer return 4
+    return 2
+}
+
+foo()
+
+
+def bar {
+    defer return
+    print("foo")
+    return
+    print("bar")
+}
+
