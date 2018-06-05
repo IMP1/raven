@@ -19,6 +19,9 @@ class GlobalEnvironment < Environment
         define(Token.system("debug_scope"),
             lambda { |interpreter, args| SystemFunctions.debug_scope(interpreter) },
             [:func, [ [], [] ]])
+        define(Token.system("tostring"),
+            lambda { |interpreter, args| return SystemFunctions.to_string(args[0]) },
+            [:func, [ [[:any]], [:string] ]])
         define(Token.system("exit"),
             lambda { |interpreter, args| raise Compiler::Exit.new(args[0]) },
             [:func, [ [[:int]], [] ]])
