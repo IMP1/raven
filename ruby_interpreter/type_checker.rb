@@ -137,6 +137,10 @@ class TypeChecker < Visitor
         assert_type(stmt.token, get_expression_type(stmt.expression), @environment.type(stmt.name))
     end
 
+    def visit_StructDeclarationStatement(stmt)
+        check_block(stmt.fields, Environment.new("struct", @environment))
+    end
+
     def visit_WhileStatement(stmt)
         get_expression_type(stmt.condition)
         check_stmt(stmt.body)

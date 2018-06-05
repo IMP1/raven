@@ -134,6 +134,11 @@ class Interpreter < Visitor
         @environment.assign(stmt.name, value)
     end
 
+    def visit_StructDeclarationStatement(stmt)
+        # TODO: evaluate/execute a struct's body.
+        # TODO: add user types to environments?
+    end
+
     def visit_WhileStatement(stmt)
         while truthy?(evaluate(stmt.condition))
             execute(stmt.body)

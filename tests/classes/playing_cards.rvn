@@ -1,0 +1,36 @@
+'' enum Suit [SPADES, DIAMONDS, CLUBS, HEARTS]
+
+struct Card {
+    '' Suit suit  = SPADES
+    int  value = 1
+
+    def name string {
+        string v = ""
+        if (value == 1) {
+            v = "Ace"
+        } else if (value == 11) {
+            v = "Jack"
+        } else if (value == 12) {
+            v = "Queen"
+        } else if (value == 13) {
+            v = "King"
+        } else {
+            v = tostring(value)
+        }
+        return v + tostring(suit)
+    }
+}
+
+struct Deck {
+    
+    Card[] cards = []
+
+    def draw (int? n) Card? {
+        return NULL
+    }
+
+}
+
+'' Deck d = Deck.new()
+'' Card? c = d.draw()
+'' print(c.value)
