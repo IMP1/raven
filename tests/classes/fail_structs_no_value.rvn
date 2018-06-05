@@ -1,0 +1,13 @@
+struct Foo {
+    
+    int a
+    int b
+
+}
+
+Foo x = Foo
+
+print(x.a)
+print(", ")
+print(x.b)
+print("\n")
