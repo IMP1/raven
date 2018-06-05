@@ -95,6 +95,10 @@ class Parser
         end
     end
 
+    def match_user_type?
+        return user_type?(peek.lexeme)
+    end
+
     def synchronise
         # TODO: trace/debug that sychronisation has taken place
         advance
@@ -177,7 +181,7 @@ class Parser
                 return variable_definiton
             end
             if check(:TYPE_LITERAL)
-                return variable_initialisation
+                return variable_declaration
             end
             return statement
         rescue ParseFault => e
@@ -187,18 +191,26 @@ class Parser
     end
 
     def struct_definition
+        puts "Found a struct keyword"
         struct_name = consume_token(:IDENTIFIER, "Expecting class name.")
-        add_user_type(struct_name)
+        puts "struct is called '#{struct_name}'. A great name for a struct."
+        add_user_type(struct_name.lexeme)
         # TOOD: handle inheritence and generic here
         consume_token(:LEFT_BRACE, "Expecting '{' before class body.")
+        puts "We're inside the struct now..."
 
         fields = []
+
+        while !eof? && !check(:RIGHT_BRACE)
+            fields.push(declaration)
+        end
 
         # TODO: Class body...
         #       What /is/ a class body?
 
+        puts "We're at the end of the struct now..."
         consume_token(:RIGHT_BRACE, "Expecting '}' after class body.")
-        return ClassDeclarationStatement(class_name, fields)
+        return StructDeclarationStatement.new(struct_name, fields)
     end
 
     def dimension_definiton
@@ -207,7 +219,7 @@ class Parser
         if match_token(:ASSIGNMENT)
             relationship = nil
         end
-        return DimensionDeclarationStatement(var_name, relationship)
+        return DimensionDeclarationStatement.new(var_name, relationship)
     end
 
     def unit_definiton
@@ -221,7 +233,7 @@ class Parser
         return VariableDeclarationStatement.new(var_name, var_type, value)
     end
 
-    def variable_initialisation
+    def variable_declaration
         var_type = variable_type
         var_name = consume_token(:IDENTIFIER, "Expect variable name.")
         consume_token(:ASSIGNMENT, "Expecting an initial value for '#{var_name.lexeme}'.")
@@ -229,7 +241,7 @@ class Parser
         if var_type == [:func] # Allow for function objects to be declared with just func ident = {}
             var_type = infer_type(initial_value)
         end
-        return VariableDeclarationStatement.new(var_name, var_type, initial_value);
+        return VariableDeclarationStatement.new(var_name, var_type, initial_value)
     end
 
     def variable_type
@@ -237,7 +249,8 @@ class Parser
             var_type = [previous.literal]
         elsif check(:IDENTIFIER)
             if user_type?(peek.lexeme)
-                var_type = user_type(peek.lexeme)
+                consume_token(:IDENTIFIER, "Expecting a variable type")
+                var_type = user_type(previous.lexeme)
             else
                 raise fault(peek, "Expecting a variable type.")
             end
@@ -292,7 +305,10 @@ class Parser
         if match_token(:LEFT_BRACE)
             return BlockStatement.new(previous, block)
         end
-        return expression_statement
+        if match_user_type?
+            return user_type_declaration
+        end
+        return assignment
     end
 
     def return_statement
@@ -316,7 +332,7 @@ class Parser
         if match_token(:SEMICOLON)
             initialiser = nil
         else
-            initialiser = variable_initialisation
+            initialiser = variable_declaration
             consume_token(:SEMICOLON, "Expect ';' after for loop initialiser.");
         end
 
@@ -366,7 +382,7 @@ class Parser
     def with_statement
         token = previous
         consume_token(:LEFT_PAREN, "Expecting '(' before with statement declaration.")
-        declaration = variable_initialisation
+        declaration = variable_declaration
         consume_token(:RIGHT_PAREN, "Expecting ')' after with statement declaration.")
 
         then_branch = statement
@@ -404,9 +420,16 @@ class Parser
         return TestAssertStatement.new(previous, value)
     end
 
-    def expression_statement
-        expr = assignment
-        return ExpressionStatement.new(previous, expr)
+    def user_type_declaration
+        puts "User type assignment."
+        var_type = variable_type
+        var_name = consume_token(:IDENTIFIER, "Expect variable name.")
+        consume_token(:ASSIGNMENT, "Expecting an initial value for '#{var_name.lexeme}'.")
+        initial_value = expression
+        if var_type == [:func] # Allow for function objects to be declared with just func ident = {}
+            var_type = infer_type(initial_value)
+        end
+        return VariableDeclarationStatement.new(var_name, var_type, initial_value)
     end
 
     def assignment
