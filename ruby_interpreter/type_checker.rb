@@ -218,6 +218,9 @@ class TypeChecker < Visitor
             assert_type(expr.token, right, [:int], [:real], [:rational])
             return left
 
+        # TODO: allow addition of strings (or should this be a separate operator. It makes sens to use +).
+        #       concatenation /is/ what string addition is, really, innit?
+
         when :LESS_EQUAL, :LESS, :GREATER_EQUAL, :GREATER
             assert_type(expr.token, left, right)
             return [:bool]
