@@ -4,7 +4,7 @@ a class has properties and behaviour
 (implementation-wise: given functions are first class, they are basically just more attributes, but not quite)
 these class-instance-functions, or 'methods', are functions that are *called on an object*. 
 this object is passed as the 'self' value (which is constant but not immutable) 
-this is the object's value at /runtime/, which means it's type is the type at runtime, 
+this is the object's value at /runtime/, which means its type is the type at runtime, 
 so potentially a childclass, rather than the class in which the method is defined.
 this object can be cast into child objects to enable polymorphism in a parent class. This is probably not great though,
 and overridden methods should probably be used instead.
