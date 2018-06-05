@@ -36,6 +36,19 @@ class VariableDeclarationStatement < Statement
 
 end
 
+class StructDeclarationStatement < Statement
+
+    attr_reader :name
+    attr_reader :fields
+
+    def initialize(token, fields)
+        super(token)
+        @name = token.lexeme
+        @fields = fields
+    end
+
+end
+
 class AssignmentStatement < Statement
 
     attr_reader :name
