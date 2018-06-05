@@ -322,9 +322,11 @@ class TypeChecker < Visitor
     end
 
     def visit_PropertyExpression(expr)
-        puts "Accessing Proper Tea"
-        puts "Object is #{expr.object.inspect}"
-        puts "Property is #{expr.field.inspect}"
+        puts "Accessing Property:\n\n"
+        puts "Object is #{expr.object.inspect}\n\n"
+        puts "This dereferences to #{@environment.type(expr.object.token).inspect}\n\n"
+        puts "Property is #{expr.field.inspect}\n\n"
+        puts "What should the type be here?:\n\n"
     end
 
 end
