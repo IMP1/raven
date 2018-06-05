@@ -29,11 +29,19 @@ up to [here](http://craftinginterpreters.com/functions.html)
     This should mean I need to think carefully about how defer will work.
     What are the edge cases? How do I want defer to handle them?
     They're currently not lexically scoped. Which is a shame. They should be.
+    !!! They are /lexically scoped/, but they're dynamically evaluated. Is this different to Go?
+    Should you be able to `return` from within a defer statement? What should that do? Override the returned value? What if two defer statements return? Warn?
 
 *Metaprogramming*:
 
     Use the `#` symbol and have things like class invariants. And preconditions for function paramters. 
     And postconditions for function return values.
+
+*Builtints*:
+
+    (Needs classes/namespaces/modules)
+
+    Add methods for strings and arrays (slice, length)
 
 *Classes*:
 
