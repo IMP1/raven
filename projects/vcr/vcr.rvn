@@ -6,13 +6,17 @@
 
 ''}
 
+def existing_repo bool {
+    return TRUE
+}
+
 def handle_command(string command) {
     if (command ^= "init ") {
         init()
     } else if (command ^= "add ") {
-
+        add("")
     } else if (command ^= "commit ") {
-
+        commit("", "")
     } else {
         print("Invalid command '")
         print(command)
@@ -22,7 +26,7 @@ def handle_command(string command) {
 }
 
 def init(string? directory) {
-    if (FALSE) { '' TODO: Check for existence of existing repo
+    if (existing_repo()) { '' TODO: Check for existence of existing repo
         print("This is already a vcr folder.")
         return
     }
@@ -42,21 +46,21 @@ def init(string? directory) {
 }
 
 def ensure_vcr() {
-    if (!TRUE) { '' TODO: check for the existing of existing repo
+    if (!existing_repo()) { '' TODO: check for the existing of existing repo
         print("This isn't a vcr folder. Use `vcr init` to make it one.")
         exit(0)
     }
 }
 
-def add(string args) {
+def add(string[] args) {
     ensure_vcr()
 }
 
 def commit(string message, string author) {
     ensure_vcr()
     string hash = "" '' date, message, parent_frame, author
-    print("!mkdir frames/" + hash)
-    print("!mkdir frames/" + hash + "/.frame")
+    system("mkdir frames/" + hash)
+    system("mkdir frames/" + hash + "/.frame")
 }
 
 
@@ -74,7 +78,7 @@ int input_size = 5
 '' This method is needed until command line args / input is working
 def handle_input(string input) {
     if (input ^= "vcr ") {
-
+        handle_command(input.substring(4))
     } else {
         system(input)
     }
