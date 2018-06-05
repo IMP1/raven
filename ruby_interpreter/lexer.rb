@@ -14,6 +14,7 @@ class Lexer
         'for'       => :FOR,
         'def'       => :DEFINITION,
         'return'    => :RETURN,
+        'class'     => :CLASS,
         # Unit definitions
         'unit'      => :UNIT,
         'dimension' => :DIMENSION,
