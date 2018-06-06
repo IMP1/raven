@@ -240,7 +240,7 @@ class Lexer
     end
 
     def string
-        while !eof? && peek != '"'
+        while !eof? && !(peek == '"' && previous != "\\")
             newline if peek == '\n'
             advance
         end
