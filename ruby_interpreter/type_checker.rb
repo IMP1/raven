@@ -310,13 +310,17 @@ class TypeChecker < Visitor
         return @environment.type(expr.name)
     end
 
-    def visit_CallExpression(expr)
+    def visit_CallExpression(expr) 
         func_sig = get_expression_type(expr.callee)
-        @log.trace("Function Call Expression. '#{expr.callee.token.inspect}' Function signiture is #{func_sig.inspect}")
+        puts "Calling '#{expr.callee.token.lexeme}':"
+        puts "func sig for '#{expr.callee.token.lexeme}': " + func_sig.inspect
+        param_types = func_sig[1][0]
+        puts "param types:" + param_types.inspect
+        @log.trace("Function Call Expression. '#{expr.callee.token.inspect}' Function signature is #{func_sig.inspect}")
         expr.arguments.each_with_index do |arg, i|
             arg_type = get_expression_type(arg)
-            param_type = func_sig[1][0][i]
-            assert_type(expr.token, arg_type, [param_type])
+            param_type = param_types.nil? ? nil : [param_types[i]]
+            # assert_type(expr.token, arg_type, param_type) # TODO: uncomment this, and make sure it works.
         end
         return_type = func_sig[1][1]
         @log.trace("Return type #{return_type.inspect}")
@@ -331,7 +335,7 @@ class TypeChecker < Visitor
             assert_type(expr.key.token, key_type, [[:int]], "array index")
 
         # TODO: add other collections and check their key types against key_type.
-        
+
         end
         return collection_type[1]
     end
