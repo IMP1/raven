@@ -2,10 +2,6 @@ up to [here](http://craftinginterpreters.com/functions.html)
 
 # Future Plans
 
-*Numerics*:
-
-    Ignore underscores in numeric literals, so can have 1_000_000 without it erroring.
-
 *Strings*:
 
     Ruby has 'single quoted strings' and "double quoted strings". C# has $"" and @"" and "".
@@ -29,7 +25,7 @@ up to [here](http://craftinginterpreters.com/functions.html)
     This should mean I need to think carefully about how defer will work.
     What are the edge cases? How do I want defer to handle them?
     They're currently not lexically scoped. Which is a shame. They should be.
-    !!! They are /lexically scoped/, but they're dynamically evaluated. Is this different to Go?
+    !!! They are lexically /scoped/, but they're dynamically evaluated. Is this different to Go? (yep - everything is referenced by value in Go)
     Should you be able to `return` from within a defer statement? What should that do? Override the returned value? What if two defer statements return? Warn?
 
 *Metaprogramming*:
