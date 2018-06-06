@@ -120,9 +120,8 @@ class FunctionExpression < Expression
     attr_reader :return_type
     attr_reader :body
 
-    def initialize(token, parameters, return_type, body)
-        # TODO: ca we pass a type here? I think we can, right? We have all we need, no?
-        super(token, nil)
+    def initialize(token, parameters, return_type, body)        
+        super(token, [ :func, [parameters.map {|param| param[:type] }, return_type] ])
         @parameter_names = parameters.map {|param| param[:name] }
         @parameter_types = parameters.map {|param| param[:type] }
         @return_type = return_type
