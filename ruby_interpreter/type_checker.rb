@@ -321,15 +321,18 @@ class TypeChecker < Visitor
     end
 
     def visit_StructExpression(expr)
+        p expr.type
         return expr.type
     end
 
     def visit_PropertyExpression(expr)
-        puts "Accessing Property:\n\n"
-        puts "Object is #{expr.object.inspect}\n\n"
-        puts "This dereferences to #{@environment.type(expr.object.token).inspect}\n\n"
-        puts "Property is #{expr.field.inspect}\n\n"
-        puts "What should the type be here?:\n\n"
+        obj_type = expr.object.type
+        obj_type = @environment.type(expr.object.token) if obj_type.nil?
+
+        field = obj_type.find { |f| f[0] == expr.field.lexeme }
+        field_type = field[1]
+
+        return field_type
     end
 
 end
