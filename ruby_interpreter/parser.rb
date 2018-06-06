@@ -81,8 +81,8 @@ class Parser
         return escaped
     end
 
-    def add_user_type(type_name, type_type)
-        @user_types[type_name] = [type_type, [type_name.to_sym]]
+    def add_user_type(type_name, type_type, type_fields)
+        @user_types[type_name] = [type_type, [type_name.to_sym], *type_fields]
     end
 
     def user_type?(type_name)
@@ -194,7 +194,6 @@ class Parser
 
     def struct_definition
         struct_name = consume_token(:IDENTIFIER, "Expecting class name.")
-        add_user_type(struct_name.lexeme, :struct)
         # TOOD: handle inheritence and generic here
         consume_token(:LEFT_BRACE, "Expecting '{' before class body.")
 
@@ -204,10 +203,19 @@ class Parser
         @allow_no_initialiser = true
         while !eof? && !check(:RIGHT_BRACE)
             fields.push(declaration)
+            if fields.last.nil?
+                puts caller
+            end
         end
         @allow_no_initialiser = uninitialised_allowed
 
         consume_token(:RIGHT_BRACE, "Expecting '}' after class body.")
+        type_fields = {}
+        fields.each do |f| 
+            puts "Field of struct #{struct_name.lexeme} is #{f.inspect}\n\n"
+            type_fields[f.name.lexeme] = f.type 
+        end
+        add_user_type(struct_name.lexeme, :struct, type_fields)
         return StructDeclarationStatement.new(struct_name, fields)
     end
 
@@ -652,7 +660,7 @@ class Parser
                     end
                     consume_token(:RIGHT_PAREN, "Expecting ')' after parameter list.")
                     return_type = []
-                    if check(:TYPE_LITERAL)
+                    if check(:TYPE_LITERAL) || (check(:IDENTIFIER) && match_user_type?)
                         return_type = variable_type
                     end
                     func_token = consume_token(:LEFT_BRACE, "Expecting '{' before function body.")
@@ -691,7 +699,7 @@ class Parser
                         end
                         consume_token(:RIGHT_BRACE, "Expecting '}' after struct initialiser.")
                     end
-                    return StructExpression.new(token, type[1], initialiser)
+                    return StructExpression.new(token, type, initialiser)
                 end
             end
 
