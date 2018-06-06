@@ -78,6 +78,7 @@ end
 verbose  = ARGV.delete("--verbose") || ARGV.delete("-v")
 silent   = ARGV.delete("--silent") || ARGV.delete("-s")
 all_tests = ARGV.delete("--all") || ARGV.delete("-a")
+$debugging = !!(ARGV.delete("--debug") || ARGV.delete("-d"))
 output = $stdout
 
 if ARGV.include?("--output")
