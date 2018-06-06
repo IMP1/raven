@@ -147,7 +147,6 @@ class Interpreter < Visitor
             end
             struct_type_obj[f.name.lexeme] = { type: type, default: default }
         end
-        puts "Struct Defined: #{struct_type_obj.inspect}"
         @environment.assign(stmt.token, struct_type_obj)
     end
 

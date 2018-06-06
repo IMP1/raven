@@ -212,7 +212,6 @@ class Parser
         consume_token(:RIGHT_BRACE, "Expecting '}' after class body.")
         type_fields = {}
         fields.each do |f| 
-            puts "Field of struct #{struct_name.lexeme} is #{f.inspect}\n\n"
             type_fields[f.name.lexeme] = f.type 
         end
         add_user_type(struct_name.lexeme, :struct, type_fields)
