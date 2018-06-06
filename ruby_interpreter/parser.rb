@@ -206,16 +206,6 @@ class Parser
         end
         @allow_no_initialiser = uninitialised_allowed
 
-        puts "StructDeclarationStatement Fields: ["
-        puts fields.map { |f| f.inspect + "\n\n" }
-        puts "]"
-
-        # TODO:
-        # Check the fields for initialisers, and pass a map of field to initial
-        # value as another parameter of StructDeclarationStatement.new to be used
-        # when instances of the struct are created.
-        # !!! I this this is no longer necessary... might still be nice. might not.
-
         consume_token(:RIGHT_BRACE, "Expecting '}' after class body.")
         return StructDeclarationStatement.new(struct_name, fields)
     end

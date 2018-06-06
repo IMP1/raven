@@ -294,7 +294,7 @@ class TypeChecker < Visitor
         expr.parameter_names.each_with_index { |param, i| @environment.define(param, nil, expr.parameter_types[i]) }
         return_type = check_function(expr.body, Environment.new("closure", @environment))
         @environment= previous_env
-        p expr
+        # p expr
         assert_type(expr.token, return_type, [expr.return_type], "function definition")
         return [:func, [ expr.parameter_types, expr.return_type ]]
     end
