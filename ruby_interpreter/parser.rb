@@ -81,6 +81,10 @@ class Parser
         return escaped
     end
 
+    def declare_user_type(type_name, type_type)
+        @user_types[type_name] = [type_type, [type_name.to_sym]]
+    end
+
     def add_user_type(type_name, type_type, type_fields)
         @user_types[type_name] = [type_type, [type_name.to_sym], *type_fields]
     end
@@ -182,7 +186,7 @@ class Parser
             if match_token(:DEFINITION)
                 return variable_definiton
             end
-            if check(:TYPE_LITERAL)
+            if check(:TYPE_LITERAL) || match_user_type?
                 return variable_declaration
             end
             return statement
@@ -193,23 +197,22 @@ class Parser
     end
 
     def struct_definition
-        struct_name = consume_token(:IDENTIFIER, "Expecting class name.")
+        struct_name = consume_token(:IDENTIFIER, "Expecting struct name.")
         # TOOD: handle inheritence and generic here
-        consume_token(:LEFT_BRACE, "Expecting '{' before class body.")
+        consume_token(:LEFT_BRACE, "Expecting '{' before struct body.")
 
         fields = []
+
+        declare_user_type(struct_name.lexeme, :struct)
 
         uninitialised_allowed = @allow_no_initialiser
         @allow_no_initialiser = true
         while !eof? && !check(:RIGHT_BRACE)
             fields.push(declaration)
-            if fields.last.nil?
-                puts caller
-            end
         end
         @allow_no_initialiser = uninitialised_allowed
 
-        consume_token(:RIGHT_BRACE, "Expecting '}' after class body.")
+        consume_token(:RIGHT_BRACE, "Expecting '}' after struct body.")
         type_fields = {}
         fields.each do |f| 
             type_fields[f.name.lexeme] = f.type 
@@ -241,15 +244,12 @@ class Parser
     def variable_declaration
         var_type = variable_type
         var_name = consume_token(:IDENTIFIER, "Expect variable name.")
-        if  @allow_no_initialiser
-            if match_token(:ASSIGNMENT)
-                initial_value = expression
-            else
-                initial_value = nil
-            end
-        else
-            consume_token(:ASSIGNMENT, "Expecting an initial value for '#{var_name.lexeme}'.")
+        if match_token(:ASSIGNMENT)
             initial_value = expression
+        elsif @allow_no_initialiser
+            initial_value = nil
+        else
+            fault("Expecting an initial value for '#{var_name.lexeme}'.")
         end
         if var_type == [:func] && !initial_value.nil?
             var_type = infer_type(initial_value)
@@ -260,13 +260,9 @@ class Parser
     def variable_type
         if match_token(:TYPE_LITERAL)
             var_type = [previous.literal]
-        elsif check(:IDENTIFIER)
-            if user_type?(peek.lexeme)
-                consume_token(:IDENTIFIER, "Expecting a variable type")
-                var_type = user_type(previous.lexeme)
-            else
-                raise fault(peek, "Expecting a variable type.")
-            end
+        elsif match_user_type?
+            consume_token(:IDENTIFIER, "Expecting a variable type")
+            var_type = user_type(previous.lexeme)
         else
             raise fault(peek, "Expecting a variable type.")
         end
@@ -333,9 +329,6 @@ class Parser
         end
         if match_token(:LEFT_BRACE)
             return BlockStatement.new(previous, block)
-        end
-        if match_user_type?
-            return user_type_declaration
         end
         return assignment
     end
@@ -425,12 +418,13 @@ class Parser
     end
 
     def while_statement
+        token = previous
         consume_token(:LEFT_PAREN, "Expecting '(' before while loop condition.")
         condition = or_shortcircuit
         consume_token(:RIGHT_PAREN, "Expecting ')' after while loop condition.")
         body = statement
 
-        return WhileStatement.new(condition, body)
+        return WhileStatement.new(token, condition, body)
     end
 
     def block
@@ -452,29 +446,36 @@ class Parser
         return TestAssertStatement.new(previous, value)
     end
 
-    def user_type_declaration
-        puts "User type assignment."
-        var_type = variable_type
-        var_name = consume_token(:IDENTIFIER, "Expect variable name.")
-        consume_token(:ASSIGNMENT, "Expecting an initial value for '#{var_name.lexeme}'.")
-        initial_value = expression
-        if var_type == [:func] # Allow for function objects to be declared with just func ident = {}
-            var_type = infer_type(initial_value)
-        end
-        return VariableDeclarationStatement.new(var_name, var_type, initial_value)
-    end
+    # def user_type_declaration
+    #     puts "User type assignment."
+    #     var_type = variable_type
+    #     var_name = consume_token(:IDENTIFIER, "Expect variable name.")
+    #     consume_token(:ASSIGNMENT, "Expecting an initial value for '#{var_name.lexeme}'.")
+    #     initial_value = expression
+    #     if var_type == [:func] # Allow for function objects to be declared with just func ident = {}
+    #         var_type = infer_type(initial_value)
+    #     end
+    #     return VariableDeclarationStatement.new(var_name, var_type, initial_value)
+    # end
 
     def assignment
         expr = expression
 
         if (match_token(:ASSIGNMENT))
             equals = previous
-            value = assignment
+            value = expression # Set to Assignment if you want to chain assignments (yuk)
 
             if expr.is_a?(VariableExpression)
                 token_name = expr.name;
                 return AssignmentStatement.new(token_name, value);
             end
+
+            # TODO: Need to handle statements like a.b = foo
+            #       (a PropertyExpression as the LHS)
+            #       http://craftinginterpreters.com/classes.html#set-expressions
+
+            puts "Invalid assignment LHS: " + expr.inspect
+            puts "Invalid assignment RHS: " + value.inspect
 
             fault(equals, "Invalid assignment target.");
         end
@@ -537,7 +538,7 @@ class Parser
             right = multiplication
             expr = BinaryExpression.new(expr, operator, right)
         end
-        return expr;
+        return expr
     end
 
     def multiplication
@@ -547,7 +548,7 @@ class Parser
             right = exponent
             expr = BinaryExpression.new(expr, operator, right)
         end
-        return expr;
+        return expr
     end
 
     def exponent
@@ -557,7 +558,7 @@ class Parser
             right = unary
             expr = BinaryExpression.new(expr, operator, right)
         end
-        return expr;
+        return expr
     end
 
     def unary
@@ -660,7 +661,7 @@ class Parser
 
         # Function Literals
         if match_token(:LEFT_PAREN)
-            if check(:TYPE_LITERAL)
+            if check(:TYPE_LITERAL) || match_user_type?
                 type = variable_type
                 if check(:IDENTIFIER)
                     params = []
@@ -697,7 +698,7 @@ class Parser
 
         if match_token(:LEFT_BRACE)
             return subroutine_body(previous, [], [])
-        end        
+        end
 
         if match_token(:IDENTIFIER)
             if user_type?(previous.lexeme)

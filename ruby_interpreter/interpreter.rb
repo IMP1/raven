@@ -352,7 +352,7 @@ class Interpreter < Visitor
         undefined_fields = []
         struct_type_obj.each do |key, field|
             if !struct_obj.has_key?(key)
-                if field[:default].nil?
+                if field[:default].nil? && field[:type][0] != :optional
                     undefined_fields.push(key)
                 end
                 struct_obj[key] = field[:default]

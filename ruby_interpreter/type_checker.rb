@@ -142,7 +142,15 @@ class TypeChecker < Visitor
     end
 
     def visit_StructDeclarationStatement(stmt)
+        puts "Declaring struct: #{stmt.name}"
         check_block(stmt.fields, Environment.new("struct", @environment))
+        type_fields = {}
+        stmt.fields.each do |f| 
+            type_fields[f.name.lexeme] = f.type 
+        end
+        struct_type = [:struct, [stmt.name.to_sym], *type_fields]
+        puts "Struct declared: #{stmt.name}.\nType is " + struct_type.inspect
+        @environment.define(stmt.token, nil, struct_type)
     end
 
     def visit_WhileStatement(stmt)
@@ -341,13 +349,15 @@ class TypeChecker < Visitor
     end
 
     def visit_StructExpression(expr)
-        p expr.type
+        # p expr.type
         return expr.type
     end
 
     def visit_PropertyExpression(expr)
         obj_type = expr.object.type
         obj_type = @environment.type(expr.object.token) if obj_type.nil?
+
+        puts "Object type is " + obj_type.inspect
 
         field = obj_type.find { |f| f[0] == expr.field.lexeme }
         field_type = field[1]
