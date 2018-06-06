@@ -1,3 +1,5 @@
+require_relative 'console_style'
+
 require_relative 'log'
 require_relative 'lexer'
 require_relative 'parser'
@@ -38,8 +40,21 @@ class Compiler
     end
 
     def self.report(fault)
-        @@log.error("#{fault.type}: #{fault.message}")
-        @@log.error("     location: #{fault.location}")
+        message =  "#{fault.type}: #{fault.message}\n"
+        message += "      location: #{fault.location}\n\n"
+        if File.exists?(fault.token.filename)
+            message += ConsoleStyle::ITALICS_ON
+            source = File.read(fault.token.filename)
+            lines = source.split(/\n/)
+            from_line = [fault.token.line-4, 0].max
+            to_line   = [fault.token.line+4, lines.size-1].min
+            (from_line...to_line).each do |i|
+                message += lines[i] + "\n"
+            end
+            message += ConsoleStyle::RESET + "\n"
+            # message += "-" * ([0, fault.token.column-2].max) + "^\n"
+        end
+        @@log.error(message)
     end
 
     def self.run(source, filename="", log=nil)
