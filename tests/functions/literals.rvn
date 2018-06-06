@@ -29,13 +29,6 @@ print(double(4))
 print("\n")
 
 
-
-def do_twice (func f) {
-    f()
-    f()
-}
-
-
-def map (int[] list, func f) {
+def map (int[] list, func<(int) int> f) {
     
 }

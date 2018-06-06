@@ -1,6 +1,6 @@
 debug_scope()
 
-def make_point(int x, int y) func {
+def make_point(int x, int y) func<(string) int> {
     debug_scope()
     return (string method) int {
         debug_scope()
