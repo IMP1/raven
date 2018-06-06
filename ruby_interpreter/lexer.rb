@@ -258,18 +258,18 @@ class Lexer
     end
 
     def number
-        advance while peek =~ /\d/
+        advance while peek =~ /[\d_]/
 
         if peek == '.' && peek_next =~ /\d/
             advance
             advance while peek =~ /\d/
-            add_token(:REAL_LITERAL, @source[@start...@current].to_f)
+            add_token(:REAL_LITERAL, @source[@start...@current].gsub("_", "").to_f)
         elsif peek == '/' && peek_next =~ /\d/
             advance
             advance while peek =~ /\d/
-            add_token(:RATIONAL_LITERAL, @source[@start...@current].to_r)
+            add_token(:RATIONAL_LITERAL, @source[@start...@current].gsub("_", "").to_r)
         else
-            add_token(:INTEGER_LITERAL, @source[@start...@current].to_i)
+            add_token(:INTEGER_LITERAL, @source[@start...@current].gsub("_", "").to_i)
         end
     end
 

@@ -15,4 +15,14 @@ print("\n")
 print(τ - π*2)
 print("\n")
 
-test (τ - π*2) < 0.001
+real epsilon = τ - π*2
+if (epsilon < 0.0) {
+    test epsilon > -0.001
+} else if (epsilon > 0.0) {
+    test epsilon < 0.001
+} else {
+    test epsilon == 0.0
+}
+
+int big_num = 1_000_000
+test big_num == 1000000
