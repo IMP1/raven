@@ -689,18 +689,14 @@ class Parser
             if user_type?(previous.lexeme)
                 token = previous
                 type = user_type(previous.lexeme)
-                puts "Wild user type detected!"
-                p type
                 case type[0]
                 when :struct
                     initialiser = {}
-                    puts "A struct called #{type[1]}."
                     if match_token(:LEFT_BRACE)
                         while !eof? && !check(:RIGHT_BRACE)
-                            # TODO: Get values for fields
+                            # TODO: Get default values for fields
                             field = assignment
-                            p field
-                            # initialiser.push(assignment)
+                            initialiser[field.name.lexeme] = field.expression
                         end
                         consume_token(:RIGHT_BRACE, "Expecting '}' after struct initialiser.")
                     end

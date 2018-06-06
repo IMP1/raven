@@ -140,9 +140,14 @@ class Interpreter < Visitor
         # TODO: make sure the following works with `def x 4 stuff` inside a struct definition.
         stmt.fields.each do |f|
             type = f.type
-            default = evaluate(f.initialiser)
+            if f.initialiser.nil?
+                default = nil
+            else
+                default = evaluate(f.initialiser)
+            end
             struct_type_obj[f.name.lexeme] = { type: type, default: default }
         end
+        puts "Struct Defined: #{struct_type_obj.inspect}"
         @environment.assign(stmt.token, struct_type_obj)
     end
 
@@ -343,14 +348,21 @@ class Interpreter < Visitor
         struct_obj = {}
         expr.initial_values.each do |key, value|
             # TODO: make sure key is a valid key (not a token or a symbol or an expression or something.)
-            p key
-            p value
-            struct_obj[key] = value
+            struct_obj[key] = evaluate(value)
         end
+        undefined_fields = []
         struct_type_obj.each do |key, field|
             if !struct_obj.has_key?(key)
+                if field[:default].nil?
+                    undefined_fields.push(key)
+                end
                 struct_obj[key] = field[:default]
             end
+        end
+        if !undefined_fields.empty?
+            message  = "You must supply a value for the following field(s):\n"
+            undefined_fields.each { |f| message += "    #{expr.token.lexeme}.#{f}\n" }
+            Compiler.runtime_fault(ArgumentFault.new(expr.token, message))
         end
         return struct_obj
     end
