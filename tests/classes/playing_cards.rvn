@@ -17,7 +17,7 @@ struct Card {
         } else {
             v = tostring(value)
         }
-        return v + tostring(suit)
+        return v'' + tostring(suit)
     }
 }
 
