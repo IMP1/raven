@@ -84,3 +84,11 @@ what's the name for a constructor? is it a method of the class? a static method 
 If it's a non-static method, then can reuse self. If it's a static method, then self refers to class object, and could use `instance` keyword? or something like that.
 A static method could take an instance parameter? Which wouldn't be passed as an argument obvs, but would be created when the method is called? 
 A constructor seems to be a strange grey area between an instance method and a class method.
+
+
+# Types
+
+What is the type of a struct instance? Is is the struct, or is it `struct`? Or is it both? `[:struct, [:foo]]`
+What is the type of a struct type? Is it type? or is it struct? Or is it both? `[:type, [:struct]]`
+
+ditto with classes.
