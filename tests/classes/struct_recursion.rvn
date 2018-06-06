@@ -1,0 +1,16 @@
+struct Node {
+
+    int value
+    Node? parent
+
+}
+
+Node root = Node {
+    value = 1
+    parent = NULL
+}
+
+Node child = Node {
+    value = 2
+    parent = root
+}

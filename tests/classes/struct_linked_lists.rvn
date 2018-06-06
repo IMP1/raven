@@ -1,0 +1,51 @@
+struct Node {
+
+    int value
+    Node? child = NULL
+
+}
+
+struct LinkedList {
+
+    Node? head = NULL
+
+    '' # Type recursion!!
+    '' TODO: The real problem here is that LinkedList has a function that returns LinkedList.
+    ''       so the full type of linked list includes the function, and the full type of the 
+    ''       function contains the full type of LinkedList. 
+    ''       HRRRM. Need references somehow. So need to expand the internal type definition.
+
+    def is_empty (Node? head) bool {
+        return (head == NULL)
+    }
+
+    def add (Node new) {
+        with (Node last = head) {
+            bool carry_on = last.child != NULL
+            while (carry_on) {
+                with (Node next = last.child) {
+                    last = next
+                }
+                carry_on = last.child != NULL
+            }
+            last.child = new
+        } else {
+            head = new
+        }
+    }
+
+}
+
+LinkedList list_1 = LinkedList {}
+
+test list_1.is_empty(list_1.head)
+
+
+LinkedList list_2 = LinkedList {
+    head = Node {
+        value  = 1
+    }
+}
+
+test !list_2.is_empty(list_2.head)
+

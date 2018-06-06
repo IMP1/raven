@@ -1,0 +1,9 @@
+struct Foo {
+    int a = 1
+}
+
+type bar = int
+
+type lol = Foo
+
+test typeof(Foo) == type
