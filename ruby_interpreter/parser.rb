@@ -271,7 +271,6 @@ class Parser
             raise fault(peek, "Expecting a variable type.")
         end
             
-        # var_type = [consume_token(:TYPE_LITERAL, "Expecting variable type.").literal]
         if var_type[0] == :func && !check(:LESS)
             # Add nil values for func inferrence later:
             var_type += [[nil, nil]]
@@ -283,8 +282,25 @@ class Parser
             elsif match_token(:QUESTION)
                 var_type = [:optional, var_type]
             elsif match_token(:LESS)
-                # TODO: add function signitures
-                # TODO: add generics?
+                if var_type[0] == :func
+                    func_param_types = []
+                    if match_token(:LEFT_PAREN)
+                        while !eof? && !check(:RIGHT_PAREN)
+                            func_param_types.push(variable_type)
+                            break if !check(:COMMA)
+                        end
+                        consume_token(:RIGHT_PAREN, "Expecting ')' after function parameter types.")
+                    end
+                    if check(:TYPE_LITERAL) || match_user_type?
+                        func_return_type = variable_type
+                    else
+                        func_return_type = []
+                    end
+                    var_type += [[func_param_types, func_return_type]]
+                    consume_token(:GREATER, "Expecting '>' after function signature")
+                else
+                    # TODO: add generics
+                end
             else
                 break
             end
