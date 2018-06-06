@@ -46,7 +46,7 @@ module SystemFunctions
     end
 
     def self.func_type(func)
-        # TODO: return the function signiture
+        # TODO: return the function signature
         return [:func, [nil, nil]]
     end
 
