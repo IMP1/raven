@@ -215,13 +215,16 @@ class TypeChecker < Visitor
             assert_type(expr.token, right, [[:int], [:real], [:rational]])
             return [:int]
 
-        when :MINUS, :PLUS, :ASTERISK, :CARET
+        when :MINUS, :ASTERISK, :CARET
             assert_type(expr.token, left, [[:int], [:real], [:rational]])
             assert_type(expr.token, right, [[:int], [:real], [:rational]])
             return left
 
-        # TODO: allow addition of strings (or should this be a separate operator. It makes sens to use +).
-        #       concatenation /is/ what string addition is, really, innit?
+        when :PLUS
+            assert_type(expr.token, left, [[:int], [:real], [:rational], [:string]])
+            assert_type(expr.token, right, [[:int], [:real], [:rational], [:string]])
+            # TODO: ensure both types are same
+            return left
 
         when :LESS_EQUAL, :LESS, :GREATER_EQUAL, :GREATER
             assert_type(expr.token, left, [right])
