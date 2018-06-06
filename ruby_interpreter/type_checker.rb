@@ -71,7 +71,8 @@ class TypeChecker < Visitor
             @function_environment = @environment
             check_block(statements, env)
         rescue Return => r
-            return r.type || []
+            return_type = r.type || []
+            return return_type
         end
         @function_environment.pop_deferred do |stmt, env|
             @environment = env
@@ -90,15 +91,16 @@ class TypeChecker < Visitor
         return obj_type.each_with_index.map { |el, i| el.nil? ? type[i] : el }
     end
 
-    def assert_type(token, obj_type, *types)
+    def assert_type(token, obj_type, types, message="")
         if obj_type.nil?
             @log.trace("obj_type is nil")
-            @log.trace(caller )
+            @log.trace(caller)
             return
         end
         @log.trace("Checking that #{token.lexeme.inspect} #{obj_type.inspect} is one of #{types.inspect}")
         if types.all? { |t| !is_type?(obj_type, t) }
-            Compiler.runtime_fault(TypeFault.new(token, "Invalid type for #{token.lexeme}. Was expecting one of the following:\n#{types.map {|t| "\t" + t.inspect.to_s }.join("\n")}\nGot \n\t#{obj_type.inspect}"))
+            message = token.lexeme if message.empty?
+            Compiler.runtime_fault(TypeFault.new(token, "Invalid type for #{message}. Was expecting one of the following:\n#{types.map {|t| "\t" + t.inspect.to_s }.join("\n")}\nGot \n\t#{obj_type.inspect}"))
         else
             @log.trace("It is!")
         end
@@ -131,12 +133,12 @@ class TypeChecker < Visitor
     def visit_VariableDeclarationStatement(stmt)
         @environment.define(stmt.name, nil, stmt.type)
         if !stmt.initialiser.nil?
-            assert_type(stmt.token, get_expression_type(stmt.initialiser), stmt.type)
+            assert_type(stmt.token, get_expression_type(stmt.initialiser), [stmt.type])
         end
     end
 
     def visit_AssignmentStatement(stmt)
-        assert_type(stmt.token, get_expression_type(stmt.expression), @environment.type(stmt.name))
+        assert_type(stmt.token, get_expression_type(stmt.expression), [@environment.type(stmt.name)])
     end
 
     def visit_StructDeclarationStatement(stmt)
@@ -153,7 +155,7 @@ class TypeChecker < Visitor
     end
 
     def visit_IfStatement(stmt)
-        assert_type(stmt.token, get_expression_type(stmt.condition), [:bool])
+        assert_type(stmt.token, get_expression_type(stmt.condition), [[:bool]])
         check_stmt(stmt.then_branch)
         if !stmt.else_branch.nil?
             check_stmt(stmt.else_branch)
@@ -185,7 +187,7 @@ class TypeChecker < Visitor
     end
 
     def visit_TestAssertStatement(stmt)
-        assert_type(stmt.token, get_expression_type(stmt.expression), [:bool])
+        assert_type(stmt.token, get_expression_type(stmt.expression), [[:bool]])
     end
 
     #--------------------------
@@ -200,8 +202,8 @@ class TypeChecker < Visitor
 
         case expr.operator.name
         when :STROKE
-            assert_type(expr.token, left, [:int], [:real], [:rational])
-            assert_type(expr.token, right, [:int], [:real], [:rational])
+            assert_type(expr.token, left, [[:int], [:real], [:rational]])
+            assert_type(expr.token, right, [[:int], [:real], [:rational]])
             if left == [:real] || right == [:real]
                 return [:real]
             else
@@ -209,34 +211,34 @@ class TypeChecker < Visitor
             end
 
         when :DOUBLE_STROKE
-            assert_type(expr.token, left, [:int], [:real], [:rational])
-            assert_type(expr.token, right, [:int], [:real], [:rational])
+            assert_type(expr.token, left, [[:int], [:real], [:rational]])
+            assert_type(expr.token, right, [[:int], [:real], [:rational]])
             return [:int]
 
         when :MINUS, :PLUS, :ASTERISK, :CARET
-            assert_type(expr.token, left, [:int], [:real], [:rational])
-            assert_type(expr.token, right, [:int], [:real], [:rational])
+            assert_type(expr.token, left, [[:int], [:real], [:rational]])
+            assert_type(expr.token, right, [[:int], [:real], [:rational]])
             return left
 
         # TODO: allow addition of strings (or should this be a separate operator. It makes sens to use +).
         #       concatenation /is/ what string addition is, really, innit?
 
         when :LESS_EQUAL, :LESS, :GREATER_EQUAL, :GREATER
-            assert_type(expr.token, left, right)
+            assert_type(expr.token, left, [right])
             return [:bool]
 
         when :DOUBLE_AMPERSAND, :DOUBLE_PIPE
-            assert_type(expr.token, left, [:bool])
-            assert_type(expr.token, right, [:bool])
+            assert_type(expr.token, left, [[:bool]])
+            assert_type(expr.token, right, [[:bool]])
             return left
 
         when :AMPERSAND, :PIPE, :TILDE, :DOUBLE_LEFT, :DOUBLE_RIGHT
-            assert_type(expr.token, left, [:int]) # TODO: Bitwise operators operate on integers, right?
+            assert_type(expr.token, left, [[:int]]) # TODO: Bitwise operators operate on integers, right?
             return left
 
         when :BEGINS_WITH, :ENDS_WITH, :CONTAINS
-            assert_type(expr.token, left, [:string])
-            assert_type(expr.token, right, [:string])
+            assert_type(expr.token, left, [[:string]])
+            assert_type(expr.token, right, [[:string]])
             return [:bool]
 
         when :EQUAL, :NOT_EQUAL
@@ -254,13 +256,13 @@ class TypeChecker < Visitor
 
         case expr.operator.name
         when :MINUS
-            assert_type(expr.token, right, [:int], [:real], [:rational])
+            assert_type(expr.token, right, [[:int], [:real], [:rational]])
             return right
         when :NOT
-            assert_type(expr.token, right, [:int]) # TODO: Bitwise operators operate on integers, right?
+            assert_type(expr.token, right, [[:int]]) # TODO: Bitwise operators operate on integers, right?
             return right
         when :EXCLAMATION
-            assert_type(expr.token, right, [:bool])
+            assert_type(expr.token, right, [[:bool]])
             return right
         end
 
@@ -292,7 +294,8 @@ class TypeChecker < Visitor
         expr.parameter_names.each_with_index { |param, i| @environment.define(param, nil, expr.parameter_types[i]) }
         return_type = check_function(expr.body, Environment.new("closure", @environment))
         @environment= previous_env
-        assert_type(expr.token, return_type, expr.return_type)
+        p expr
+        assert_type(expr.token, return_type, [expr.return_type], "function definition")
         return [:func, [ expr.parameter_types, expr.return_type ]]
     end
 
