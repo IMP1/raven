@@ -313,14 +313,27 @@ class TypeChecker < Visitor
     def visit_CallExpression(expr)
         func_sig = get_expression_type(expr.callee)
         @log.trace("Function Call Expression. '#{expr.callee.token.inspect}' Function signiture is #{func_sig.inspect}")
+        expr.arguments.each_with_index do |arg, i|
+            arg_type = get_expression_type(arg)
+            param_type = func_sig[1][0][i]
+            assert_type(expr.token, arg_type, [param_type])
+        end
         return_type = func_sig[1][1]
         @log.trace("Return type #{return_type.inspect}")
         return return_type
     end
 
     def visit_IndexExpression(expr)
-        # TODO: collection key types must be the same as the key's type.
-        return expr.type
+        collection_type = get_expression_type(expr.collection)
+        key_type = get_expression_type(expr.key)
+        case collection_type[0]
+        when :array
+            assert_type(expr.key.token, key_type, [[:int]], "array index")
+
+        # TODO: add other collections and check their key types against key_type.
+        
+        end
+        return collection_type[1]
     end
 
     def visit_StructExpression(expr)
