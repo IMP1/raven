@@ -312,15 +312,15 @@ class TypeChecker < Visitor
 
     def visit_CallExpression(expr) 
         func_sig = get_expression_type(expr.callee)
-        puts "Calling '#{expr.callee.token.lexeme}':"
-        puts "func sig for '#{expr.callee.token.lexeme}': " + func_sig.inspect
         param_types = func_sig[1][0]
-        puts "param types:" + param_types.inspect
         @log.trace("Function Call Expression. '#{expr.callee.token.inspect}' Function signature is #{func_sig.inspect}")
         expr.arguments.each_with_index do |arg, i|
             arg_type = get_expression_type(arg)
-            param_type = param_types.nil? ? nil : [param_types[i]]
-            # assert_type(expr.token, arg_type, param_type) # TODO: uncomment this, and make sure it works.
+            # TODO: Look into when paramtypes is nil. Can it be made non-nil? 
+            #       Is there something that should happen if it's nil?
+            if !param_types.nil?
+                assert_type(expr.token, arg_type, [param_types[i]])
+            end
         end
         return_type = func_sig[1][1]
         @log.trace("Return type #{return_type.inspect}")
