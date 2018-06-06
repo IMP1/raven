@@ -77,6 +77,7 @@ class Parser
         escaped = str
         escaped = escaped.gsub('\\n', "\n")
         escaped = escaped.gsub('\\t', "\t")
+        escaped = escaped.gsub('\\"', "\"")
         return escaped
     end
 
