@@ -52,7 +52,6 @@ class Compiler
                 message += lines[i] + "\n"
             end
             message += ConsoleStyle::RESET + "\n"
-            # message += "-" * ([0, fault.token.column-2].max) + "^\n"
         end
         @@log.error(message)
     end
@@ -89,6 +88,7 @@ class Compiler
         end
 
         exit(70) if @@runtime_faults.size > 0
+        exit(0)
     end
 
     def self.run_file(filename, log=nil)
