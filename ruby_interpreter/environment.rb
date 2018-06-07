@@ -1,4 +1,5 @@
 require_relative 'fault'
+require_relative 'token'
 
 class Environment
 
@@ -17,6 +18,9 @@ class Environment
     end
 
     def define(token, value, type)
+        if type[0] == :struct && type.size > 2
+            puts caller
+        end
         if mapped?(token)
             Compiler.runtime_fault(SyntaxFault.new(token, "Duplicate variable '#{token.lexeme}'."))
         end
@@ -39,7 +43,11 @@ class Environment
     end
 
     def mapped?(token)
-        return @mappings.has_key?(token.lexeme)
+        var_name = token
+        if token.is_a?(Token)
+            var_name = token.lexeme
+        end
+        return @mappings.has_key?(var_name)
     end
 
     def names
@@ -47,23 +55,27 @@ class Environment
     end
 
     def type(token)
+        var_name = token if token.is_a?(String)
+        var_name = token.lexeme if token.is_a?(Token)
         if mapped?(token)
-            return @types[token.lexeme]
+            return @types[var_name]
         end
         if !@parent_environment.nil?
             return @parent_environment.type(token)
         end
-        Compiler.runtime_fault(SyntaxFault.new(token, "Undefined variable '#{token.lexeme}'."))
+        Compiler.runtime_fault(SyntaxFault.new(token, "Undefined variable '#{var_name}'."))
     end
 
     def [](token)
+        var_name = token if token.is_a?(String)
+        var_name = token.lexeme if token.is_a?(Token)
         if mapped?(token)
-            return @mappings[token.lexeme]
+            return @mappings[var_name]
         end
         if !@parent_environment.nil?
             return @parent_environment[token]
         end
-        Compiler.runtime_fault(SyntaxFault.new(token, "Undefined variable '#{token.lexeme}'."))
+        Compiler.runtime_fault(SyntaxFault.new(token, "Undefined variable '#{var_name}'."))
     end
 
     def defer(stmt, env)

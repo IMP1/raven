@@ -370,5 +370,13 @@ class Interpreter < Visitor
         return evaluate(expr.object)[expr.field.lexeme]
     end
 
+    def visit_PropertyAssignmentStatement(stmt)
+        object = evaluate(stmt.object)
+
+        field = stmt.object
+        value = evaluate(stmt.value)
+        object[field] = value
+    end
+
 end
 

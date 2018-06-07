@@ -131,7 +131,6 @@ end
 
 class ReturnStatement < Statement
 
-    attr_reader :token
     attr_reader :value
 
     def initialize(token, value)
@@ -140,6 +139,7 @@ class ReturnStatement < Statement
     end
 
 end
+
 
 # TODO: remove this when the language is working as intended.
 class TestAssertStatement < Statement
@@ -150,6 +150,21 @@ class TestAssertStatement < Statement
     def initialize(token, expression)
         super(token)
         @expression = expression
+    end
+
+end
+
+class PropertyAssignmentStatement < Statement
+
+    attr_reader :object
+    attr_reader :field
+    attr_reader :value
+
+    def initialize(token, object, field, value)
+        super(token)
+        @object = object
+        @field = field
+        @value = value
     end
 
 end

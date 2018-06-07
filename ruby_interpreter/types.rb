@@ -65,15 +65,6 @@ class Raven_String < Raven_Primitive
     end
 end
 
-class Raven_Type < Raven_Primitive
-    def initialize(type_tree)
-        super(type_tree)
-    end
-    def type
-        return "type"
-    end
-end
-
 class Raven_Function
     attr_reader :parameters
     attr_reader :return_type
@@ -118,4 +109,50 @@ class Raven_Optional
     def type
         return "optional<#{@inner_type}>"
     end
+end
+
+class Raven_Type < Raven_Primitive
+    def initialize(type_name, sub_type=nil)
+        super(self)
+    end
+    def type
+        return "type"
+    end
+end
+
+=begin
+    
+int a = 4
+typeof(a) => int
+
+string[] b = [""]
+typeof(b) => array<string>
+
+bool? c = FALSE
+typeof(c) => optional<bool>
+
+typeof(typeof) => func<(any) type>
+
+typeof(typeof(int)) => typeof(int) => type
+
+--------------
+
+struct Foo {}
+
+typeof(Foo) => struct
+typeof(Foo) => type
+
+(Internally it is a struct, but to the user, it's a type)
+
+Foo f = Foo {}
+
+typeof(f) => Foo
+typeof(f) => struct<Foo>
+   
+(Internally it is a struct<Foo>, but to the user, it's a Foo)
+
+=end
+
+class Raven_UserType < Raven_Type
+
 end

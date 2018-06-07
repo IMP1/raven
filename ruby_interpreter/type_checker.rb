@@ -64,6 +64,20 @@ class TypeChecker < Visitor
         @environment = previous_env
     end
 
+    def check_fields(decls, env, field_list)
+        previous_env = @environment
+        @environment = env
+        decls.each do |d| 
+            field_list[d.name.lexeme] = d.type
+        end
+        decls.each do |d|
+            puts "Checking declaration"
+            p d
+            check_stmt(d)
+        end
+        @environment = previous_env
+    end
+
     def check_function(statements, env)
         previous_env = @environment
         previous_func_env = @function_environment
@@ -100,6 +114,7 @@ class TypeChecker < Visitor
         @log.trace("Checking that #{token.lexeme.inspect} #{obj_type.inspect} is one of #{types.inspect}")
         if types.all? { |t| !is_type?(obj_type, t) }
             message = token.lexeme if message.empty?
+            # puts caller
             Compiler.runtime_fault(TypeFault.new(token, "Invalid type for #{message}. Was expecting one of the following:\n#{types.map {|t| "\t" + t.inspect.to_s }.join("\n")}\nGot \n\t#{obj_type.inspect}"))
         else
             @log.trace("It is!")
@@ -131,6 +146,12 @@ class TypeChecker < Visitor
     end
 
     def visit_VariableDeclarationStatement(stmt)
+        # puts "Defining var. Type = " + stmt.type.inspect
+        if stmt.type[0] == :optional && stmt.type[1][0] == :struct
+            # puts "\n------------------------------\n"
+            # puts caller
+            # puts "\n------------------------------\n"
+        end
         @environment.define(stmt.name, nil, stmt.type)
         if !stmt.initialiser.nil?
             assert_type(stmt.token, get_expression_type(stmt.initialiser), [stmt.type])
@@ -142,15 +163,11 @@ class TypeChecker < Visitor
     end
 
     def visit_StructDeclarationStatement(stmt)
-        puts "Declaring struct: #{stmt.name}"
-        check_block(stmt.fields, Environment.new("struct", @environment))
         type_fields = {}
-        stmt.fields.each do |f| 
-            type_fields[f.name.lexeme] = f.type 
-        end
-        struct_type = [:struct, [stmt.name.to_sym], *type_fields]
-        puts "Struct declared: #{stmt.name}.\nType is " + struct_type.inspect
-        @environment.define(stmt.token, nil, struct_type)
+        puts "Struct fields' types: " + type_fields.inspect
+        @environment.define(stmt.token, type_fields, [:struct, [stmt.name.to_sym]])
+        check_fields(stmt.fields, Environment.new("struct", @environment), type_fields)
+        puts "Struct fields' types: " + type_fields.inspect
     end
 
     def visit_WhileStatement(stmt)
@@ -315,6 +332,7 @@ class TypeChecker < Visitor
     end
 
     def visit_VariableExpression(expr)
+        # p @environment.type(expr.name)
         return @environment.type(expr.name)
     end
 
@@ -323,7 +341,9 @@ class TypeChecker < Visitor
         param_types = func_sig[1][0]
         @log.trace("Function Call Expression. '#{expr.callee.token.inspect}' Function signature is #{func_sig.inspect}")
         expr.arguments.each_with_index do |arg, i|
+            puts arg.class.to_s + "{"
             arg_type = get_expression_type(arg)
+            puts "}" + arg.class.to_s
             # TODO: Look into when paramtypes is nil. Can it be made non-nil? 
             #       Is there something that should happen if it's nil?
             if !param_types.nil?
@@ -349,20 +369,50 @@ class TypeChecker < Visitor
     end
 
     def visit_StructExpression(expr)
-        # p expr.type
+        puts "Struct type: " + expr.type.inspect
         return expr.type
     end
 
     def visit_PropertyExpression(expr)
         obj_type = expr.object.type
         obj_type = @environment.type(expr.object.token) if obj_type.nil?
+        obj_fields = @environment[expr.object.name]
 
-        puts "Object type is " + obj_type.inspect
+        # p expr.object
+        # puts "Object type is " + obj_type.inspect
 
-        field = obj_type.find { |f| f[0] == expr.field.lexeme }
-        field_type = field[1]
+        # p obj_type
+
+        # env = @environment
+        # while !env.enclosing.nil?
+        #     p env.names
+        #     env = env.enclosing
+        # end
+
+        user_type = @environment.type(expr.object.name)
+        obj_fields = @environment[user_type[1][0].to_s]
+
+        puts "==================\n\n"
+
+        puts "Getting #{expr.field.lexeme} from #{expr.object.name.lexeme}"
+        p @environment[expr.object.name]
+        p obj_fields
+
+        field_type = obj_fields[expr.field.lexeme]
 
         return field_type
+    end
+
+    def visit_PropertyAssignmentStatement(stmt)
+        puts "Assigning a property."
+        p stmt.object
+        p stmt.field
+
+        puts "\n\n"
+        obj_type = stmt.object.type
+
+        obj_field = stmt.field
+        return obj_field
     end
 
 end

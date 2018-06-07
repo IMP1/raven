@@ -3,49 +3,47 @@ struct Node {
     int value
     Node? child = NULL
 
+    def add (Node self, Node new) {
+        self.child = new '' Type checker here doesn't know what fields `self` has, 
+                         '' and so can't evaluate the `child` property. :/
+    }
+
 }
 
 struct LinkedList {
 
     Node? head = NULL
 
-    '' # Type recursion!!
-    '' TODO: The real problem here is that LinkedList has a function that returns LinkedList.
-    ''       so the full type of linked list includes the function, and the full type of the 
-    ''       function contains the full type of LinkedList. 
-    ''       HRRRM. Need references somehow. So need to expand the internal type definition.
-
-    def is_empty (Node? head) bool {
-        return (head == NULL)
+    def is_empty (LinkedList list) bool {
+        return (list.head == NULL)
     }
 
-    def add (Node new) {
-        with (Node last = head) {
-            bool carry_on = last.child != NULL
-            while (carry_on) {
-                with (Node next = last.child) {
-                    last = next
-                }
-                carry_on = last.child != NULL
-            }
-            last.child = new
+    def add (LinkedList self, Node new) {
+        with (Node node = self.head) {
+            print("Adding new node.\n")
+            node.add(node, new)
         } else {
-            head = new
+            print("Setting head to new node.\n")
+            self.head = new
         }
     }
+
+    '' def foreach (LinkedList self, func<(Node)> f) {
+        '' 
+    '' }
 
 }
 
 LinkedList list_1 = LinkedList {}
 
-test list_1.is_empty(list_1.head)
+test list_1.is_empty(list_1)
 
-
-LinkedList list_2 = LinkedList {
-    head = Node {
-        value  = 1
-    }
+Node n = Node {
+    value = 3
 }
 
-test !list_2.is_empty(list_2.head)
+print(list_1)
+list_1.add(list_1, n)
+print(list_1)
 
+test !list_1.is_empty(list_1)

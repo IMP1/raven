@@ -86,7 +86,7 @@ class Parser
     end
 
     def add_user_type(type_name, type_type, type_fields)
-        @user_types[type_name] = [type_type, [type_name.to_sym], *type_fields]
+        @user_types[type_name] = [type_type, [type_name.to_sym]]
     end
 
     def user_type?(type_name)
@@ -263,6 +263,9 @@ class Parser
         elsif match_user_type?
             consume_token(:IDENTIFIER, "Expecting a variable type")
             var_type = user_type(previous.lexeme)
+            if var_type[0] == :struct
+                var_type = var_type[0..1]
+            end
         else
             raise fault(peek, "Expecting a variable type.")
         end
@@ -466,8 +469,10 @@ class Parser
             value = expression # Set to Assignment if you want to chain assignments (yuk)
 
             if expr.is_a?(VariableExpression)
-                token_name = expr.name;
-                return AssignmentStatement.new(token_name, value);
+                token_name = expr.name
+                return AssignmentStatement.new(token_name, value)
+            elsif expr.is_a?(PropertyExpression)
+                return PropertyAssignmentStatement.new(expr.token, expr.object, expr.field, value)
             end
 
             # TODO: Need to handle statements like a.b = foo
@@ -715,6 +720,7 @@ class Parser
                         end
                         consume_token(:RIGHT_BRACE, "Expecting '}' after struct initialiser.")
                     end
+                    puts "New Struct Initialiser" + type.inspect
                     return StructExpression.new(token, type, initialiser)
                 end
             end
