@@ -214,7 +214,7 @@ class TypeChecker < Visitor
         field_type = object_fields[field_name]
         value_type = get_expression_type(stmt.value)
 
-        assert_type(stmt.token, value_type, field_type)
+        assert_type(stmt.token, value_type, [field_type])
     end
 
     def visit_TestAssertStatement(stmt)
@@ -377,15 +377,22 @@ class TypeChecker < Visitor
     end
 
     def visit_PropertyExpression(expr)
-        obj_type = expr.object.type
 
-        obj_type = @environment.type(expr.object.token) if obj_type.nil?
-        obj_fields = @environment[expr.object.name]
+        if expr.object.is_a?(CallExpression)
+            callee_type = get_expression_type(expr.object.callee)
+            callee_return_type = callee_type[1][1]
 
-        user_type = @environment.type(expr.object.name)
-        obj_token = @user_type_tokens[user_type[1][0].to_s]
-        obj_fields = @environment[obj_token]
-        field_type = obj_fields[expr.field.lexeme]
+            user_type = callee_return_type
+        else
+            object_token = expr.object.name
+            user_type = @environment.type(object_token)
+        end
+
+        field_name = expr.field.lexeme
+        
+        user_type_token = @user_type_tokens[user_type[1][0].to_s]
+        obj_fields = @environment[user_type_token]
+        field_type = obj_fields[field_name]
 
         return field_type
     end

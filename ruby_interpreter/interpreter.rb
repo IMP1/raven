@@ -147,6 +147,8 @@ class Interpreter < Visitor
             end
             struct_type_obj[f.name.lexeme] = { type: type, default: default }
         end
+        struct_type_obj[:__name] = stmt.token.lexeme
+        struct_type_obj[:__type] = [:type, [:struct]]
         @environment.assign(stmt.token, struct_type_obj)
     end
 
@@ -349,12 +351,14 @@ class Interpreter < Visitor
 
     def visit_StructExpression(expr)
         struct_type_obj = @environment[expr.token]
-        if struct_type_obj.nil?
-            # TODO: error
-        end
+
         struct_obj = {}
+        # Struct Metadata:
+        struct_obj[:__name] = expr.name
+        struct_obj[:__type] = expr.type
+
+        # Struct fields:
         expr.initial_values.each do |key, value|
-            # TODO: make sure key is a valid key (not a token or a symbol or an expression or something.)
             struct_obj[key] = evaluate(value)
         end
         undefined_fields = []
