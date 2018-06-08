@@ -147,12 +147,12 @@ end
 
 class StructExpression < Expression
 
-    attr_reader :struct_name
+    attr_reader :name
     attr_reader :initial_values
 
     def initialize(token, type, initial_values)
         super(token, type)
-        @struct_name = type.to_s
+        @name = type[1][0].to_s
         @initial_values = initial_values
     end
 
