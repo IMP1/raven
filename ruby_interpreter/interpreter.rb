@@ -191,6 +191,14 @@ class Interpreter < Visitor
         raise Return.new(value)
     end
 
+    def visit_PropertyAssignmentStatement(stmt)
+        object = evaluate(stmt.object)
+
+        field = stmt.field.lexeme
+        value = evaluate(stmt.value)
+        object[field] = value
+    end
+
     def visit_TestAssertStatement(stmt)
         assertion = evaluate(stmt.expression)
         if !truthy?(assertion)
@@ -368,14 +376,6 @@ class Interpreter < Visitor
 
     def visit_PropertyExpression(expr)
         return evaluate(expr.object)[expr.field.lexeme]
-    end
-
-    def visit_PropertyAssignmentStatement(stmt)
-        object = evaluate(stmt.object)
-
-        field = stmt.field.lexeme
-        value = evaluate(stmt.value)
-        object[field] = value
     end
 
 end
