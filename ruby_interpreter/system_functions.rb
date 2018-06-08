@@ -18,7 +18,7 @@ module SystemFunctions
             return type_to_string(obj)
         end
         if obj.is_a?(Hash)
-            return instance_to_string(obj)
+            return object_to_string(obj)
         end
         if obj.is_a?(Proc)
             return function_to_string(obj)
@@ -27,12 +27,16 @@ module SystemFunctions
     end
     
     def self.type_to_string(type_list)
-        return type_list.reverse.inject("") { |memo, t| t.to_s + (memo.empty? ? "" : "<#{memo}>") }
+        return type_list.reverse.inject("") { |memo, t| to_string(t) + (memo.empty? ? "" : "<#{memo}>") }
     end
 
-    def self.instance_to_string(obj)
+    def self.object_to_string(obj)
         str = "{"
-        obj.each { |field, value| str += "\n" + to_string(field) + " = " + to_string(value) }
+        obj.each do |field, value| 
+            if !field.is_a?(Symbol)
+                str += "\n" + to_string(field) + " = " + to_string(value) 
+            end
+        end
         str.gsub!("\n", "\n\t")
         return str + "\n}"
     end
@@ -53,6 +57,9 @@ module SystemFunctions
         if obj.is_a?(Array)
             return array_type(obj)
         end
+        if obj.is_a?(Hash)
+            return object_type(obj)
+        end
         if obj.nil?
             return [:optional, nil]
         end
@@ -60,6 +67,10 @@ module SystemFunctions
         p obj
         puts 
         return [:any]
+    end
+
+    def self.object_type(obj)
+        return obj[:__type]
     end
 
     def self.func_type(func)
