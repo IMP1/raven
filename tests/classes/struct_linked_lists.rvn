@@ -42,8 +42,12 @@ Node n = Node {
     value = 3
 }
 
+print("List 1 = ")
 print(list_1)
+print("\n")
 list_1.add(list_1, n)
+print("List 1 = ")
 print(list_1)
+print("\n")
 
 test !list_1.is_empty(list_1)
