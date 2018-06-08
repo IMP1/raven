@@ -1,0 +1,49 @@
+// ref: http://craftinginterpreters.com/appendix-i.html#syntax-grammar
+
+programme      -> declaration* EOF
+
+declaration    -> struct_decl
+                | module_decl
+                | var_decl
+                | var_def
+                | statement
+
+struct_decl    -> "struct" IDENTIFIER "{" declaration* "}"
+module_decl    -> "module" IDENTIFIER "{" declaration* "}"
+var_decl       -> var_type IDENTIFIER
+var_def        -> var_decl "=" expression
+                | "def" IDENTIFIER expression
+
+statement      -> expr_stmt  // func_call ??
+                | for_stmt
+                | if_stmt
+                | with_stmt
+                | while_stmt
+                | return_stmt
+                | block
+                | assignment
+expr_stmt      -> expression
+for_stmt       -> // TODO
+if_stmt        -> "if" "(" expression ")" statement ( "else" statement )?
+while_stmt     -> "while" "(" expression ")" statement
+return_stmt    -> "return" expression?
+block          -> "{" declaration* "}"
+assignment     -> ( call "." )? IDENTIFIER "=" expression
+
+
+expression     -> logic_or
+
+
+
+logic_or       → logic_and ( "or" logic_and )* ;
+logic_and      → equality ( "and" equality )* ;
+equality       → comparison ( ( "!=" | "==" ) comparison )* ;
+comparison     → addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
+addition       → multiplication ( ( "-" | "+" ) multiplication )* ;
+multiplication → unary ( ( "/" | "*" ) unary )* ;
+
+unary          → ( "!" | "-" ) unary | call ;
+call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
+primary        → "true" | "false" | "nil" | "this"
+               | NUMBER | STRING | IDENTIFIER | "(" expression ")"
+               | "super" "." IDENTIFIER ;
