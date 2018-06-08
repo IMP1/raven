@@ -17,11 +17,28 @@ module SystemFunctions
         if obj.is_a?(Array) && obj.all? { |t| t.is_a?(Symbol) || t.is_a?(Array) || t.nil? }
             return type_to_string(obj)
         end
+        if obj.is_a?(Hash)
+            return instance_to_string(obj)
+        end
+        if obj.is_a?(Proc)
+            return function_to_string(obj)
+        end
         return obj.to_s
     end
     
     def self.type_to_string(type_list)
         return type_list.reverse.inject("") { |memo, t| t.to_s + (memo.empty? ? "" : "<#{memo}>") }
+    end
+
+    def self.instance_to_string(obj)
+        str = "{"
+        obj.each { |field, value| str += "\n" + to_string(field) + " = " + to_string(value) }
+        str.gsub!("\n", "\n\t")
+        return str + "\n}"
+    end
+
+    def self.function_to_string(func)
+        return "func<()>"
     end
 
     def self.type_of(obj)
