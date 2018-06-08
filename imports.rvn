@@ -1,0 +1,62 @@
+'' # import / include / require
+
+'' A global array of strings for imported files.
+'' Used so files are not imported twice (to stop circular dependencies).
+'' Some library functions for removing them, so they can be reimported? (Why would you want to do this?)
+
+'' system module
+module io {
+    module file {
+        def exists(string filename) bool {
+            return FALSE
+        }
+    }
+}
+
+import io.file
+
+print(file.exists("/dev/null"))
+
+
+'' external file (lib_tlo.rvn)
+module tlo {
+    struct translation {
+        string original
+        def localise(string language) string {
+            return original
+        }
+    }
+}
+
+require "lib_tlo"
+
+tlo.translation foo = tlo.translation { original = "Hello" }
+print(foo.localise("en-US"))
+
+
+'' external file (sql_bindings.rvn)
+struct Table {
+    '' db table properties...
+}
+
+'' external file (furniture_defs.rvn)
+struct Table {
+    string material
+    real height
+}
+
+import "sql_bindings"
+import "furniture_defs"
+
+'' clash!
+
+
+'' Maybe import is a function that expects a file (or system module) to return a namespace.
+'' That way they can be renamed quite easily
+
+module sql = import "sql_bindings"
+module furniture = import "furniture_defs"
+
+'' Are namespaces now first-class objects? They're just ruby modules, right? 
+'' Structs that can't be initialised, where all fields are static.
+'' Let's just call them modules then, I guess.

@@ -1,0 +1,3 @@
+import "io.console"
+
+console.write("foobar\n")

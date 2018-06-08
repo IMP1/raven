@@ -1,0 +1,8 @@
+module faux_system {
+
+    struct File {
+        string name
+        bool open
+    }
+    
+}

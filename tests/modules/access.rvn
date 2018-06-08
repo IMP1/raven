@@ -1,0 +1,12 @@
+module system_io {
+
+    struct File {
+        string name
+        bool open = FALSE
+    }
+    
+}
+
+def f system_io.File {
+    name = "test"
+}
