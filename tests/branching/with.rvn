@@ -24,7 +24,6 @@ with(int x = b) {
     test TRUE
 }
 
-
 with (int x = "3") {
     test FALSE
     print("Does /this/ happen?\n")
@@ -32,5 +31,16 @@ with (int x = "3") {
     print("\n")
 } else {
     test TRUE
-    print("Or not?\n")
+    print("\"3\" is not a number.\n")
+}
+
+
+with (string x = 4) {
+    test FALSE
+    print("Does /this/ happen?\n")
+    print(x)
+    print("\n")
+} else {
+    test TRUE
+    print("4 is not a string.\n")
 }

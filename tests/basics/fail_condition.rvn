@@ -1,6 +1,6 @@
 int a = 3
 
 if (a = 4) {
-    '' Note the condition is an assignment, *not* an equality check/
+    '' Note the condition is an assignment, *not* an equality check
     a = 5
 }

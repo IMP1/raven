@@ -1,6 +1,6 @@
-test "foobar" ^= "foo"
-test "foobar" $= "bar"
-test "foobar" ~= "oba"
+test "foobar" ^= "foo" '' Starts with
+test "foobar" $= "bar" '' Ends with
+test "foobar" ~= "oba" '' Contains
 test "foo" == "foo"
 test "foo" != "bar"
 test !("foo" == "bar")
