@@ -661,6 +661,7 @@ class Parser
 
         # Function Literals
         if match_token(:LEFT_PAREN)
+            # TODO: allow for empty parameter lists in function definitions
             if check(:TYPE_LITERAL) || match_user_type?
                 type = variable_type
                 if check(:IDENTIFIER)
