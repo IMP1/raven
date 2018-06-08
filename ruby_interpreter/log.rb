@@ -58,7 +58,7 @@ class Log
         return if importance > @importance_level
         prefix = "[#{source}] "
         message = obj.to_s.gsub("\n", "\n" + (" " * prefix.length))
-        @output.puts prefix + message
+        @output.puts "\n" + prefix + message
     end
 
 end
