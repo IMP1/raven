@@ -170,6 +170,9 @@ class Parser
     def declaration
         @type_hint = nil
         begin
+            if match_token(:MODULE)
+                return module_definition
+            end
             if match_token(:STRUCT)
                 return struct_definition
             end
@@ -190,6 +193,21 @@ class Parser
             synchronise
             return nil
         end
+    end
+
+    def module_definition
+        module_name = consume_token(:IDENTIFIER, "Expecting module name.")
+        consume_token(:LEFT_BRACE, "Expecting '{' before module body.")
+
+        fields = []
+
+        while !eof? && !check(:RIGHT_BRACE)
+            fields.push(declaration)
+        end
+
+        consume_token(:RIGHT_BRACE, "Expecting '}' after module body.")
+        mod = ModuleExpression.new(module_name, fields)
+        return ModuleStatement.new(mod)
     end
 
     def struct_definition
@@ -304,6 +322,9 @@ class Parser
     end
 
     def statement
+        if match_token(:IMPORT)
+            return import_statement
+        end
         if match_token(:RETURN)
             return return_statement
         end
@@ -329,6 +350,11 @@ class Parser
             return BlockStatement.new(previous, block)
         end
         return assignment
+    end
+
+    def import_statement
+        # TODO: import a module! (from a file, or from system stuff.)
+        #       a string arg = file, a identifier arg = system.
     end
 
     def return_statement

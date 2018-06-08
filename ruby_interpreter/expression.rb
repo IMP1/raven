@@ -170,3 +170,16 @@ class PropertyExpression < Expression
     end
 
 end
+
+class ModuleExpression < Expression
+
+    attr_reader :name
+    attr_reader :fields
+
+    def initialize(token, fields)
+        super(token, [:module])
+        @name = token.lexeme
+        @fields = fields
+    end
+
+end

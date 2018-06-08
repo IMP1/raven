@@ -168,3 +168,16 @@ class PropertyAssignmentStatement < Statement
     end
 
 end
+
+class ModuleStatement < Statement
+
+    attr_reader :name
+    attr_reader :fields
+
+    def initialize(module_object)
+        super(module_object.token)
+        @name = module_object.name
+        @fields = module_object.fields
+    end
+
+end
