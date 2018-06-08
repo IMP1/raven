@@ -40,6 +40,7 @@ class TypeChecker < Visitor
         @statements = statements
         @environment = Environment.new("user", GLOBAL_ENV)
         @function_environment = nil
+        @user_type_tokens = {}
     end
 
     def check
@@ -144,12 +145,6 @@ class TypeChecker < Visitor
     end
 
     def visit_VariableDeclarationStatement(stmt)
-        # puts "Defining var. Type = " + stmt.type.inspect
-        if stmt.type[0] == :optional && stmt.type[1][0] == :struct
-            # puts "\n------------------------------\n"
-            # puts caller
-            # puts "\n------------------------------\n"
-        end
         @environment.define(stmt.name, nil, stmt.type)
         if !stmt.initialiser.nil?
             assert_type(stmt.token, get_expression_type(stmt.initialiser), [stmt.type])
@@ -162,10 +157,9 @@ class TypeChecker < Visitor
 
     def visit_StructDeclarationStatement(stmt)
         type_fields = {}
-        puts "Struct fields' types: " + type_fields.inspect
+        @user_type_tokens[stmt.name.to_s] = stmt.token
         @environment.define(stmt.token, type_fields, [:struct, [stmt.name.to_sym]])
         check_fields(stmt.fields, Environment.new("struct", @environment), type_fields)
-        puts "Struct fields' types: " + type_fields.inspect
     end
 
     def visit_WhileStatement(stmt)
@@ -214,7 +208,8 @@ class TypeChecker < Visitor
         @log.trace(stmt.inspect)
 
         object_type = get_expression_type(stmt.object)
-        object_fields = @environment[object_type[1][0].to_s]
+        object_token = @user_type_tokens[object_type[1][0].to_s]
+        object_fields = @environment[object_token]
         field_name = stmt.field.lexeme
         field_type = object_fields[field_name]
         value_type = get_expression_type(stmt.value)
@@ -383,23 +378,13 @@ class TypeChecker < Visitor
 
     def visit_PropertyExpression(expr)
         obj_type = expr.object.type
+
         obj_type = @environment.type(expr.object.token) if obj_type.nil?
         obj_fields = @environment[expr.object.name]
 
-        # p expr.object
-        # puts "Object type is " + obj_type.inspect
-
-        # p obj_type
-
-        # env = @environment
-        # while !env.enclosing.nil?
-        #     p env.names
-        #     env = env.enclosing
-        # end
-
         user_type = @environment.type(expr.object.name)
-        obj_fields = @environment[user_type[1][0].to_s]
-
+        obj_token = @user_type_tokens[user_type[1][0].to_s]
+        obj_fields = @environment[obj_token]
         field_type = obj_fields[expr.field.lexeme]
 
         return field_type

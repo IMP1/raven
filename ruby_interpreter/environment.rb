@@ -55,8 +55,7 @@ class Environment
     end
 
     def type(token)
-        var_name = token if token.is_a?(String)
-        var_name = token.lexeme if token.is_a?(Token)
+        var_name = token.lexeme
         if mapped?(token)
             return @types[var_name]
         end
@@ -67,8 +66,7 @@ class Environment
     end
 
     def [](token)
-        var_name = token if token.is_a?(String)
-        var_name = token.lexeme if token.is_a?(Token)
+        var_name = token.lexeme
         if mapped?(token)
             return @mappings[var_name]
         end
