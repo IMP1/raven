@@ -714,12 +714,13 @@ class Parser
                             initialiser[field.name.lexeme] = field.expression
                         end
                         consume_token(:RIGHT_BRACE, "Expecting '}' after struct initialiser.")
+                        @log.trace("New Struct Initialiser" + type.inspect)
+                        return StructExpression.new(token, type, initialiser)
+                    else
+                        return LiteralExpression.new(token, type, [:type])
                     end
-                    @log.trace("New Struct Initialiser" + type.inspect)
-                    return StructExpression.new(token, type, initialiser)
                 end
             end
-
             return VariableExpression.new(previous)
         end
 
