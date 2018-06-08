@@ -71,8 +71,6 @@ class TypeChecker < Visitor
             field_list[d.name.lexeme] = d.type
         end
         decls.each do |d|
-            puts "Checking declaration"
-            p d
             check_stmt(d)
         end
         @environment = previous_env
@@ -211,6 +209,19 @@ class TypeChecker < Visitor
         raise Return.new(type)
     end
 
+    def visit_PropertyAssignmentStatement(stmt)
+        @log.trace("Assigning a property")
+        @log.trace(stmt.inspect)
+
+        object_type = get_expression_type(stmt.object)
+        object_fields = @environment[object_type[1][0].to_s]
+        field_name = stmt.field.lexeme
+        field_type = object_fields[field_name]
+        value_type = get_expression_type(stmt.value)
+
+        assert_type(stmt.token, value_type, field_type)
+    end
+
     def visit_TestAssertStatement(stmt)
         assert_type(stmt.token, get_expression_type(stmt.expression), [[:bool]])
     end
@@ -341,9 +352,7 @@ class TypeChecker < Visitor
         param_types = func_sig[1][0]
         @log.trace("Function Call Expression. '#{expr.callee.token.inspect}' Function signature is #{func_sig.inspect}")
         expr.arguments.each_with_index do |arg, i|
-            puts arg.class.to_s + "{"
             arg_type = get_expression_type(arg)
-            puts "}" + arg.class.to_s
             # TODO: Look into when paramtypes is nil. Can it be made non-nil? 
             #       Is there something that should happen if it's nil?
             if !param_types.nil?
@@ -369,7 +378,6 @@ class TypeChecker < Visitor
     end
 
     def visit_StructExpression(expr)
-        puts "Struct type: " + expr.type.inspect
         return expr.type
     end
 
@@ -392,27 +400,9 @@ class TypeChecker < Visitor
         user_type = @environment.type(expr.object.name)
         obj_fields = @environment[user_type[1][0].to_s]
 
-        puts "==================\n\n"
-
-        puts "Getting #{expr.field.lexeme} from #{expr.object.name.lexeme}"
-        p @environment[expr.object.name]
-        p obj_fields
-
         field_type = obj_fields[expr.field.lexeme]
 
         return field_type
-    end
-
-    def visit_PropertyAssignmentStatement(stmt)
-        puts "Assigning a property."
-        p stmt.object
-        p stmt.field
-
-        puts "\n\n"
-        obj_type = stmt.object.type
-
-        obj_field = stmt.field
-        return obj_field
     end
 
 end
