@@ -2,6 +2,8 @@ require_relative 'log'
 require_relative 'fault'
 require_relative 'visitor'
 require_relative 'compiler'
+require_relative 'expression'
+require_relative 'statement'
 require_relative 'environment'
 require_relative 'global_env'
 
@@ -45,9 +47,10 @@ class TypeChecker < Visitor
 
     def check
         begin
-            @statements.each do |stmt|
-                check_stmt(stmt)
-            end
+            check_block(@statements, @environment)
+            # @statements.each do |stmt|
+                # check_stmt(stmt)
+            # end
         rescue StandardError => e
             raise e
             @log.warn(e)
@@ -217,6 +220,12 @@ class TypeChecker < Visitor
         assert_type(stmt.token, value_type, [field_type])
     end
 
+    def visit_ModuleStatement(stmt)
+        env = Environment.new(stmt.name, @environment)
+        @environment.define(stmt.token, env, [:module])
+        check_block(stmt.fields, env)
+    end
+
     def visit_TestAssertStatement(stmt)
         assert_type(stmt.token, get_expression_type(stmt.expression), [[:bool]])
     end
@@ -377,6 +386,7 @@ class TypeChecker < Visitor
     end
 
     def visit_PropertyExpression(expr)
+        puts "Getting a property.."
 
         if expr.object.is_a?(CallExpression)
             callee_type = get_expression_type(expr.object.callee)
@@ -386,7 +396,30 @@ class TypeChecker < Visitor
         else
             object_token = expr.object.name
             user_type = @environment.type(object_token)
+
+            if user_type == [:module]
+                puts "It's in a module..."
+                @environment = @environment[object_token]
+                p expr
+                previous_env = @environment
+                t = get_expression_type(VariableExpression.new(expr.field))
+                puts "Type = " + t.inspect
+                @environment = previous_env
+                return t
+            end
         end
+
+        # if user_type == [:module]
+        #     puts "It's a module!"
+        #     # p expr
+        #     obj_fields = @environment[object_token]
+        #     # p obj_fields
+        #     # p expr.field.lexeme
+        #     decl = obj_fields[expr.field.lexeme]
+
+        #     p decl
+        #     return check_stmt(decl)
+        # end
 
         field_name = expr.field.lexeme
         

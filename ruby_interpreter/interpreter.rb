@@ -201,6 +201,10 @@ class Interpreter < Visitor
         object[field] = value
     end
 
+    def visit_ModuleStatement(stmt)
+        execute_block(stmt.fields, Environment.new(stmt.name, @environment))
+    end
+
     def visit_TestAssertStatement(stmt)
         assertion = evaluate(stmt.expression)
         if !truthy?(assertion)

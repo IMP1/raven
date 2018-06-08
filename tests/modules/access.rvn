@@ -7,6 +7,6 @@ module system_io {
     
 }
 
-def f system_io.File {
+system_io.File f = system_io.File {
     name = "test"
 }
