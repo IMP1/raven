@@ -85,10 +85,6 @@ class Parser
         @user_types[type_name] = [type_type, [type_name.to_sym]]
     end
 
-    def add_user_type(type_name, type_type, type_fields)
-        @user_types[type_name] = [type_type, [type_name.to_sym]]
-    end
-
     def user_type?(type_name)
         return @user_types.has_key?(type_name)
     end
@@ -217,7 +213,6 @@ class Parser
         fields.each do |f| 
             type_fields[f.name.lexeme] = f.type 
         end
-        add_user_type(struct_name.lexeme, :struct, type_fields)
         return StructDeclarationStatement.new(struct_name, fields)
     end
 
@@ -479,8 +474,8 @@ class Parser
             #       (a PropertyExpression as the LHS)
             #       http://craftinginterpreters.com/classes.html#set-expressions
 
-            puts "Invalid assignment LHS: " + expr.inspect
-            puts "Invalid assignment RHS: " + value.inspect
+            @log.error("Invalid assignment LHS: " + expr.inspect)
+            @log.error("Invalid assignment RHS: " + value.inspect)
 
             fault(equals, "Invalid assignment target.");
         end
@@ -720,7 +715,7 @@ class Parser
                         end
                         consume_token(:RIGHT_BRACE, "Expecting '}' after struct initialiser.")
                     end
-                    puts "New Struct Initialiser" + type.inspect
+                    @log.trace("New Struct Initialiser" + type.inspect)
                     return StructExpression.new(token, type, initialiser)
                 end
             end
