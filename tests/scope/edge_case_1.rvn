@@ -1,0 +1,12 @@
+string a = "global"
+{
+    def print_a {
+        print(a)
+        print("\n")
+        test a == "global"
+    }
+
+    print_a()
+    string a = "block"
+    print_a()
+}
