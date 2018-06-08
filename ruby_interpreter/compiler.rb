@@ -51,6 +51,7 @@ class Compiler
             (from_line...to_line).each do |i|
                 message += lines[i] + "\n"
             end
+            message += ConsoleStyle::BOLD_ON + lines[to_line] + ConsoleStyle::BOLD_OFF + "\n"
             message += ConsoleStyle::RESET + "\n"
         end
         @@log.error(message)
