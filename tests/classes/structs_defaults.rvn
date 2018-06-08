@@ -5,7 +5,7 @@ struct Foo {
 
 }
 
-Foo x = Foo
+Foo x = Foo {}
 
 print(x.a)
 print(", ")

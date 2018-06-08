@@ -1,0 +1,18 @@
+struct Foo {
+
+    string name = ""
+    
+    def set_name (Foo self, string new_name) Foo {
+        self.name = new_name
+        return self
+    }
+
+    def get_name (Foo self) string {
+        return self.name
+    }
+
+}
+
+Foo a = Foo {}
+
+print(a.set_name(a, "fred").get_name(a))

@@ -28,26 +28,56 @@ struct LinkedList {
         }
     }
 
-    '' def foreach (LinkedList self, func<(Node)> f) {
-        '' 
-    '' }
+    def foreach (LinkedList self, func<(Node)> f) {
+        with (Node last = self.head) {
+            f(last)
+            while (last.child != NULL) {
+                with (Node next = last.child) {
+                    last = next
+                    f(last)
+                }
+            }
+        }
+    }
 
 }
 
 LinkedList list_1 = LinkedList {}
 
+print(typeof(LinkedList))
+print("\n")
+print(typeof(list_1))
+print("\n")
+
 test list_1.is_empty(list_1)
 
-Node n = Node {
+Node n1 = Node {
     value = 3
+}
+
+Node n2 = Node {
+    value = 5
 }
 
 print("List 1 = ")
 print(list_1)
 print("\n")
-list_1.add(list_1, n)
+
+list_1.add(list_1, n1)
+
+print("List 1 = ")
+print(list_1)
+print("\n")
+
+list_1.add(list_1, n2)
+
 print("List 1 = ")
 print(list_1)
 print("\n")
 
 test !list_1.is_empty(list_1)
+
+list_1.foreach(list_1, (Node n) {
+    print(n.value)
+    print(",\n")
+})
