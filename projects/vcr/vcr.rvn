@@ -6,8 +6,10 @@
 
 ''}
 
+import "io.file"
+
 def existing_repo bool {
-    return TRUE
+    return file.exists("vcr")
 }
 
 def handle_command(string command) {
